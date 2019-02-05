@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 using System.Text;
 
 public abstract class Parser : Constants
@@ -18,7 +19,7 @@ public abstract class Parser : Constants
 	internal abstract List get();
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public abstract List compile(InputStream is, PrintStream ps) throws ParseException, IOException;
-	public abstract List compile(InputStream @is, PrintStream ps);
+	public abstract List compile( Stream instream, PrintStream ps);
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public abstract List compile(String s) throws ParseException;
 	public abstract List compile(string s);
@@ -92,16 +93,22 @@ public abstract class Parser : Constants
 		{
 			return null;
 		}
-		List s = compile_command_args(expr.subList(1,expr.Count));
-		s.Add(new int?(s.Count));
+
+	    var s = compile_command_args( expr.subList( 1, expr.Count ) );
+
+	    s.Add( new int?( s.Count ) );
+
 		try
 		{
-			string command = (string)expr[0];
-			Type c = Type.GetType("Lambda" + command.ToUpper());
-			s.Add((Lambda)c.newInstance());
+			var command = ( string ) expr[0];
+
+			var c = Type.GetType( "Lambda" + command.ToUpper() );
+
+			s.Add( ( Lambda ) Activator.CreateInstance(c) );
+
 			return s;
 		}
-		catch (Exception)
+		catch
 		{
 			return null;
 		}
@@ -123,7 +130,7 @@ public abstract class Parser : Constants
 	{
 		return c is string && ((string)c).Length > 0 && oneof(((string)c)[0], s);
 	}
-	internal static bool oneof(object c, object[] d)
+	internal bool oneof(object c, object[] d)
 	{
 		for (int i = 0; i < d.Length; i++)
 		{
@@ -169,9 +176,14 @@ public abstract class Parser : Constants
 		{
 			kmax++;
 		}
-		char[] substring = new char[kmax];
-		s.getChars(0,kmax,substring,0);
-		string sub = new string(substring);
+		//char[] substring = new char[kmax];
+        //
+		//s.getChars(0,kmax,substring,0);
+        //
+		//string sub = new string(substring);
+
+        string sub = s.ToString().Substring( 0, kmax );
+
 		for (int k = kmax; k > 0; k--)
 		{
 			try
@@ -241,7 +253,7 @@ public abstract class Parser : Constants
 	}
 	internal static string[] listsep = new string[] {",", ";"};
 	internal static string[] stringops = new string[] {"=", ","};
-	internal static bool stringopq(object x)
+	internal bool stringopq(object x)
 	{
 		return oneof(x, stringops);
 	}
@@ -251,13 +263,14 @@ public abstract class Parser : Constants
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: static String readLine(InputStream is) throws IOException
-	internal static string readLine(InputStream @is)
+	internal static string readLine( Stream stream )
 	{
-		StringBuilder sb = new StringBuilder();
-		int c;
-		while ((c = @is.read()) != -1)
+		var sb = new StringBuilder();
+		char c;
+		while ((c = ( char ) stream.ReadByte()) != -1)
 		{
-			sb.Append((char)c);
+			sb.Append(c);
+
 			if (c == '\n' || c == '\r')
 			{
 				return sb.ToString();

@@ -16,19 +16,19 @@ public class Operator : Constants
 	}
 	public virtual bool binary()
 	{
-		return (type & BINARY) != 0;
+        return ( type & Constants_Fields.BINARY ) != 0;
 	}
 	public virtual bool ternary()
 	{
-		return (type & TERNARY) != 0;
+        return ( type & Constants_Fields.TERNARY ) != 0;
 	}
 	public virtual bool lvalue()
 	{
-		return (type & LVALUE) != 0;
+        return ( type & Constants_Fields.LVALUE ) != 0;
 	}
 	public virtual bool list()
 	{
-		return (type & LIST) != 0;
+        return ( type & Constants_Fields.LIST ) != 0;
 	}
 	public virtual bool left_right()
 	{
@@ -83,13 +83,13 @@ public class Operator : Constants
 							return op;
 						}
 						continue;
-					case END:
+                    case Constants_Fields.END:
 						if (op.unary() && !op.left_right())
 						{
 							return op;
 						}
 						continue;
-					case MID:
+                    case Constants_Fields.MID:
 						if (op.binary() || op.ternary())
 						{
 							return op;
@@ -109,7 +109,7 @@ public class Operator : Constants
 				try
 				{
 					Type c = Type.GetType(mnemonic);
-					func = (Lambda)c.newInstance();
+					func = (Lambda) Activator.CreateInstance(c);
 				}
 				catch (Exception)
 				{

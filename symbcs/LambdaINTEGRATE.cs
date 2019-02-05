@@ -22,11 +22,11 @@ internal class LambdaINTEGRATE : Lambda
 		{
 			if (f is Polynomial)
 			{
-				v = ((Polynomial)f).@var;
+				v = ((Polynomial)f).v;
 			}
 			else if (f is Rational)
 			{
-				v = ((Rational)f).den.@var;
+				v = ((Rational)f).den.v;
 			}
 			else
 			{
@@ -56,17 +56,17 @@ internal class LambdaINTEGRATE : Lambda
 		catch (JasymcaException)
 		{
 		}
-		p("Second Attempt: " + expr);
+		debug("Second Attempt: " + expr);
 		expr = (new ExpandUser()).f_exakt(expr);
-		p("Expand User Functions: " + expr);
+		debug("Expand User Functions: " + expr);
 		expr = (new TrigExpand()).f_exakt(expr);
 		e = expr;
 		try
 		{
 			expr = (new NormExp()).f_exakt(expr);
-			p("Norm Functions: " + expr);
+			debug("Norm Functions: " + expr);
 			expr = expr.integrate(v);
-			p("Integrated: " + expr);
+			debug("Integrated: " + expr);
 			expr = remove_constant(expr, v);
 			expr = (new TrigInverseExpand()).f_exakt(expr);
 			return expr;
@@ -74,16 +74,16 @@ internal class LambdaINTEGRATE : Lambda
 		catch (JasymcaException)
 		{
 		}
-		p("Third Attempt: " + expr);
+		debug("Third Attempt: " + expr);
 		expr = e;
 		SubstExp se = new SubstExp(v, expr);
 		expr = se.f_exakt(expr);
 		expr = se.rational(expr);
-		p("Rationalized: " + expr);
+		debug("Rationalized: " + expr);
 		expr = expr.integrate(se.t);
-		p("Integrated: " + expr);
+		debug("Integrated: " + expr);
 		expr = se.rat_reverse(expr);
-		p("Reverse subst.: " + expr);
+		debug("Reverse subst.: " + expr);
 		expr = remove_constant(expr, v);
 		expr = (new TrigInverseExpand()).f_exakt(expr);
 		expr = remove_constant(expr, v);
@@ -113,7 +113,7 @@ internal class LambdaINTEGRATE : Lambda
 			if (nom is Polynomial)
 			{
 				Algebraic[] a = new Algebraic[]{nom, den};
-				Poly.polydiv(a, den.@var);
+				Poly.polydiv(a, den.v);
 				if (!a[0].depends(x))
 				{
 					return a[1].div(den);

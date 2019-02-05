@@ -30,7 +30,7 @@ internal class LambdaALGSYS : Lambda
 			{
 				throw new ParseException("Wrong type of arguments to algsys.");
 			}
-			v.Add(((Polynomial)p).@var);
+			v.Add(((Polynomial)p).v);
 		}
 		st.Push(solvesys(((Vektor)expr).vector(), v));
 		return 0;

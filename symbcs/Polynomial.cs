@@ -4,20 +4,20 @@ using System.Collections;
 public class Polynomial : Algebraic
 {
 	public Algebraic[] a = null;
-	public Variable @var = null;
+	public Variable v = null;
 	public Polynomial()
 	{
 	}
-	public Polynomial(Variable @var, Algebraic[] a)
+	public Polynomial(Variable v, Algebraic[] a)
 	{
-		this.@var = @var;
+		this.v = v;
 		this.a = Poly.reduce(a);
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Polynomial(Variable var, Vektor v) throws JasymcaException
 	public Polynomial(Variable @var, Vektor v)
 	{
-		this.@var = @var;
+		this.v = @var;
 		this.a = new Algebraic[v.length()];
 		for (int i = 0; i < a.Length; i++)
 		{
@@ -28,13 +28,13 @@ public class Polynomial : Algebraic
 	public Polynomial(Variable @var)
 	{
 		a = new Zahl[] {Zahl.ZERO, Zahl.ONE};
-		this.@var = @var;
+		this.v = @var;
 	}
 	public virtual Variable Var
 	{
 		get
 		{
-			return @var;
+			return v;
 		}
 	}
 	public virtual Vektor coeff()
@@ -46,7 +46,7 @@ public class Polynomial : Algebraic
 //ORIGINAL LINE: public Algebraic coefficient(Variable var, int n)throws JasymcaException
 	public virtual Algebraic coefficient(Variable @var, int n)
 	{
-		if (@var.Equals(this.@var))
+		if (@var.Equals(this.v))
 		{
 			return coefficient(n);
 		}
@@ -56,11 +56,11 @@ public class Polynomial : Algebraic
 			Algebraic ci = a[i];
 			if (ci is Polynomial)
 			{
-				c = c.add(((Polynomial)ci).coefficient(@var,n).mult((new Polynomial(this.@var)).pow_n(i)));
+				c = c.add(((Polynomial)ci).coefficient(@var,n).mult((new Polynomial(this.v)).pow_n(i)));
 			}
 			else if (n == 0)
 			{
-				c = c.add(ci.mult((new Polynomial(this.@var)).pow_n(i)));
+				c = c.add(ci.mult((new Polynomial(this.v)).pow_n(i)));
 			}
 		}
 		return c;
@@ -77,7 +77,7 @@ public class Polynomial : Algebraic
 	}
 	public override bool ratfunc(Variable v)
 	{
-		if (@var is FunctionVariable && ((FunctionVariable)this.@var).arg.depends(v))
+		if (v is FunctionVariable && ((FunctionVariable)this.v).arg.depends(v))
 		{
 			return false;
 		}
@@ -96,7 +96,7 @@ public class Polynomial : Algebraic
 	}
 	public virtual int degree(Variable v)
 	{
-		if (v.Equals(@var))
+		if (v.Equals(v))
 		{
 			return a.Length - 1;
 		}
@@ -121,7 +121,7 @@ public class Polynomial : Algebraic
 		}
 		if (p is Polynomial)
 		{
-			if (@var.Equals(((Polynomial)p).@var))
+			if (v.Equals(((Polynomial)p).v))
 			{
 				int len = Math.Max(a.Length, ((Polynomial)p).a.Length);
 				Algebraic[] csum = new Algebraic[len];
@@ -129,16 +129,16 @@ public class Polynomial : Algebraic
 				{
 					csum[i] = coefficient(i).add(((Polynomial)p).coefficient(i));
 				}
-				return (new Polynomial(@var, csum)).reduce();
+				return (new Polynomial(v, csum)).reduce();
 			}
-			else if (@var.smaller(((Polynomial)p).@var))
+			else if (v.smaller(((Polynomial)p).v))
 			{
 				return p.add(this);
 			}
 		}
-		Algebraic[] csum = Poly.clone(a);
-		csum[0] = a[0].add(p);
-		return (new Polynomial(@var, csum)).reduce();
+		Algebraic[] _csum = Poly.clone(a);
+		_csum[0] = a[0].add(p);
+		return (new Polynomial(v, _csum)).reduce();
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Algebraic mult(Algebraic p) throws JasymcaException
@@ -150,7 +150,7 @@ public class Polynomial : Algebraic
 		}
 		if (p is Polynomial)
 		{
-			if (@var.Equals(((Polynomial)p).@var))
+			if (v.Equals(((Polynomial)p).v))
 			{
 				int len = a.Length + ((Polynomial)p).a.Length - 1;
 				Algebraic[] cprod = new Algebraic[len];
@@ -165,19 +165,19 @@ public class Polynomial : Algebraic
 						cprod[i + k] = cprod[i + k].add(a[i].mult(((Polynomial)p).a[k]));
 					}
 				}
-					return (new Polynomial(@var, cprod)).reduce();
+					return (new Polynomial(v, cprod)).reduce();
 			}
-			else if (@var.smaller(((Polynomial)p).@var))
+			else if (v.smaller(((Polynomial)p).v))
 			{
 				return p.mult(this);
 			}
 		}
-		Algebraic[] cprod = new Algebraic[a.Length];
+		Algebraic[] _cprod = new Algebraic[a.Length];
 		for (int i = 0; i < a.Length; i++)
 		{
-			cprod[i] = a[i].mult(p);
+			_cprod[i] = a[i].mult(p);
 		}
-		return (new Polynomial(@var, cprod)).reduce();
+		return (new Polynomial(v, _cprod)).reduce();
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Algebraic div(Algebraic q) throws JasymcaException
@@ -190,7 +190,7 @@ public class Polynomial : Algebraic
 			{
 				c[i] = a[i].div(q);
 			}
-			return new Polynomial(@var, c);
+			return new Polynomial(v, c);
 		}
 		return base.div(q);
 	}
@@ -226,7 +226,7 @@ public class Polynomial : Algebraic
 			{
 				s += a[i].ToString() + "*";
 			}
-			s += @var.ToString();
+			s += v.ToString();
 			if (i > 1)
 			{
 				s += "^" + i;
@@ -237,24 +237,24 @@ public class Polynomial : Algebraic
 		{
 			x.Add(a[0].ToString());
 		}
-		string s = "";
+		string _s = "";
 		if (x.Count > 1)
 		{
-			s += "(";
+			_s += "(";
 		}
 		for (int i = 0; i < x.Count; i++)
 		{
-			s += (string)x[i];
+			_s += (string)x[i];
 			if (i < x.Count - 1 && !(((string)x[i + 1])[0] == '-'))
 			{
-				s += "+";
+				_s += "+";
 			}
 		}
 		if (x.Count > 1)
 		{
-			s += ")";
+			_s += ")";
 		}
-		return s;
+		return _s;
 	}
 	public override bool Equals(object x)
 	{
@@ -262,7 +262,7 @@ public class Polynomial : Algebraic
 		{
 			return false;
 		}
-		if (!(@var.Equals(((Polynomial)x).@var)) || a.Length != ((Polynomial)x).a.Length)
+		if (!(v.Equals(((Polynomial)x).v)) || a.Length != ((Polynomial)x).a.Length)
 		{
 			return false;
 		}
@@ -280,7 +280,7 @@ public class Polynomial : Algebraic
 	public override Algebraic deriv(Variable @var)
 	{
 		Algebraic r1 = Zahl.ZERO, r2 = Zahl.ZERO;
-		Polynomial x = new Polynomial(this.@var);
+		Polynomial x = new Polynomial(this.v);
 		for (int i = a.Length - 1; i > 1; i--)
 		{
 			r1 = r1.add(a[i].mult(new Unexakt(i))).mult(x);
@@ -297,7 +297,7 @@ public class Polynomial : Algebraic
 		{
 			r2 = r2.add(a[0].deriv(@var));
 		}
-		return r1.mult(this.@var.deriv(@var)).add(r2).reduce();
+		return r1.mult(this.v.deriv(@var)).add(r2).reduce();
 	}
 	public override bool depends(Variable @var)
 	{
@@ -305,11 +305,11 @@ public class Polynomial : Algebraic
 		{
 			return false;
 		}
-		if (this.@var.Equals(@var))
+		if (this.v.Equals(@var))
 		{
 			return true;
 		}
-		if (this.@var is FunctionVariable && ((FunctionVariable)this.@var).arg.depends(@var))
+		if (this.v is FunctionVariable && ((FunctionVariable)this.v).arg.depends(@var))
 		{
 			return true;
 		}
@@ -325,22 +325,22 @@ public class Polynomial : Algebraic
 	internal static bool loopPartial = false;
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Algebraic integrate(Variable var) throws JasymcaException
-	public override Algebraic integrate(Variable @var)
+	public override Algebraic integrate(Variable item)
 	{
-		Algebraic @in = Zahl.ZERO;
+		Algebraic tmp = Zahl.ZERO;
 		for (int i = 1; i < a.Length; i++)
 		{
-			if (!a[i].depends(@var))
+			if (!a[i].depends(item))
 			{
-				if (@var.Equals(this.@var))
+				if (item.Equals(this.v))
 				{
-					@in = @in.add(a[i].mult((new Polynomial(@var)).pow_n(i + 1).div(new Unexakt(i + 1))));
+					tmp = tmp.add(a[i].mult((new Polynomial(item)).pow_n(i + 1).div(new Unexakt(i + 1))));
 				}
-				else if (this.@var is FunctionVariable && ((FunctionVariable)this.@var).arg.depends(@var))
+				else if (this.v is FunctionVariable && ((FunctionVariable)this.v).arg.depends(item))
 				{
 					if (i == 1)
 					{
-						@in = @in.add(((FunctionVariable)this.@var).integrate(@var).mult(a[1]));
+						tmp = tmp.add(((FunctionVariable)this.v).integrate(item).mult(a[1]));
 					}
 					else
 					{
@@ -349,39 +349,39 @@ public class Polynomial : Algebraic
 				}
 					else
 					{
-						@in = @in.add(a[i].mult((new Polynomial(@var)).mult((new Polynomial(this.@var)).pow_n(i))));
+						tmp = tmp.add(a[i].mult((new Polynomial(item)).mult((new Polynomial(this.v)).pow_n(i))));
 					}
 			}
-					else if (@var.Equals(this.@var))
+					else if (item.Equals(this.v))
 					{
 						throw new JasymcaException("Integral not supported.");
 					}
-					else if (this.@var is FunctionVariable && ((FunctionVariable)this.@var).arg.depends(@var))
+					else if (this.v is FunctionVariable && ((FunctionVariable)this.v).arg.depends(item))
 					{
-						if (i == 1 && a[i] is Polynomial && ((Polynomial)a[i]).@var.Equals(@var))
+						if (i == 1 && a[i] is Polynomial && ((Polynomial)a[i]).v.Equals(item))
 						{
-							p("Trying to isolate inner derivative " + this);
+							debug("Trying to isolate inner derivative " + this);
 							try
 							{
-								FunctionVariable f = (FunctionVariable)this.@var;
+								FunctionVariable f = (FunctionVariable)this.v;
 								Algebraic w = f.arg;
-								Algebraic q = a[i].div(w.deriv(@var));
-								if (q.deriv(@var).Equals(Zahl.ZERO))
+								Algebraic q = a[i].div(w.deriv(item));
+								if (q.deriv(item).Equals(Zahl.ZERO))
 								{
 									SimpleVariable v = new SimpleVariable("v");
 									Algebraic p = FunctionVariable.create(f.fname, new Polynomial(v));
 									Algebraic r = p.integrate(v).value(v,w).mult(q);
-									@in = @in.add(r);
+									tmp = tmp.add(r);
 									continue;
 								}
 							}
 							catch (JasymcaException)
 							{
 							}
-							p("Failed.");
+							debug("Failed.");
 							for (int k = 0;k < ((Polynomial)a[i]).a.Length;k++)
 							{
-								if (((Polynomial)a[i]).a[k].depends(@var))
+								if (((Polynomial)a[i]).a[k].depends(item))
 								{
 									throw new JasymcaException("Function not supported by this method");
 								}
@@ -389,46 +389,46 @@ public class Polynomial : Algebraic
 								if (loopPartial)
 								{
 									loopPartial = false;
-									p("Partial Integration Loop detected.");
+									debug("Partial Integration Loop detected.");
 									throw new JasymcaException("Partial Integration Loop: " + this);
 								}
-								p("Trying partial integration: x^n*f(x) , n-times diff " + this);
+								debug("Trying partial integration: x^n*f(x) , n-times diff " + this);
 								try
 								{
 									loopPartial = true;
-									Algebraic p = a[i];
-									Algebraic f = ((FunctionVariable)this.@var).integrate(@var);
-									Algebraic r = f.mult(p);
-									while (!(p = p.deriv(@var)).Equals(Zahl.ZERO))
+									Algebraic _p = a[i];
+									Algebraic f = ((FunctionVariable)this.v).integrate(item);
+									Algebraic r = f.mult(_p);
+									while (!(_p = _p.deriv(item)).Equals(Zahl.ZERO))
 									{
-										f = f.integrate(@var).mult(Zahl.MINUS);
-										r = r.add(f.mult(p));
+										f = f.integrate(item).mult(Zahl.MINUS);
+										r = r.add(f.mult(_p));
 									}
 									loopPartial = false;
-									@in = @in.add(r);
+									tmp = tmp.add(r);
 									continue;
 								}
 								catch (JasymcaException)
 								{
 									loopPartial = false;
 								}
-								p("Failed.");
-								p("Trying partial integration: x^n*f(x) , 1-times int " + this);
+								debug("Failed.");
+								debug("Trying partial integration: x^n*f(x) , 1-times int " + this);
 								try
 								{
 									loopPartial = true;
-									Algebraic p = a[i].integrate(@var);
-									Algebraic f = new Polynomial((FunctionVariable)this.@var);
-									Algebraic r = p.mult(f).sub(p.mult(f.deriv(@var)).integrate(@var));
+									Algebraic p1 = a[i].integrate(item);
+									Algebraic f = new Polynomial((FunctionVariable)this.v);
+									Algebraic r = p1.mult(f).sub(p1.mult(f.deriv(item)).integrate(item));
 									loopPartial = false;
-									@in = @in.add(r);
+									tmp = tmp.add(r);
 									continue;
 								}
 								catch (JasymcaException)
 								{
 									loopPartial = false;
 								}
-								p("Failed");
+								debug("Failed");
 								throw new JasymcaException("Function not supported by this method");
 						}
 						else
@@ -438,20 +438,20 @@ public class Polynomial : Algebraic
 					}
 					else
 					{
-						@in = @in.add(a[i].integrate(@var).mult((new Polynomial(this.@var)).pow_n(i)));
+						tmp = tmp.add(a[i].integrate(item).mult((new Polynomial(this.v)).pow_n(i)));
 					}
 		}
 		if (a.Length > 0)
 		{
-			@in = @in.add(a[0].integrate(@var));
+			tmp = tmp.add(a[0].integrate(item));
 		}
-		return @in;
+		return tmp;
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Algebraic cc() throws JasymcaException
 	public override Algebraic cc()
 	{
-		Polynomial xn = new Polynomial(@var.cc());
+		Polynomial xn = new Polynomial(v.cc());
 		Algebraic r = Zahl.ZERO;
 		for (int i = a.Length - 1; i > 0; i--)
 		{
@@ -468,7 +468,7 @@ public class Polynomial : Algebraic
 	public override Algebraic value(Variable @var, Algebraic x)
 	{
 		Algebraic r = Zahl.ZERO;
-		Algebraic v = this.@var.value(@var,x);
+		Algebraic v = this.v.value(@var,x);
 		for (int i = a.Length - 1; i > 0; i--)
 		{
 			r = r.add(a[i].value(@var,x)).mult(v);
@@ -483,7 +483,7 @@ public class Polynomial : Algebraic
 //ORIGINAL LINE: public Algebraic value(Algebraic x) throws JasymcaException
 	public virtual Algebraic value(Algebraic x)
 	{
-		return value(this.@var, x);
+		return value(this.v, x);
 	}
 	public override bool exaktq()
 	{
@@ -507,7 +507,7 @@ public class Polynomial : Algebraic
 //ORIGINAL LINE: public Algebraic map(LambdaAlgebraic f) throws JasymcaException
 	public override Algebraic map(LambdaAlgebraic f)
 	{
-		Algebraic x = @var is SimpleVariable ? new Polynomial(@var): FunctionVariable.create(((FunctionVariable)@var).fname, f.f_exakt(((FunctionVariable)@var).arg));
+		Algebraic x = v is SimpleVariable ? new Polynomial(v): FunctionVariable.create(((FunctionVariable)v).fname, f.f_exakt(((FunctionVariable)v).arg));
 		Algebraic r = Zahl.ZERO;
 		for (int i = a.Length - 1; i > 0; i--)
 		{
@@ -528,7 +528,7 @@ public class Polynomial : Algebraic
 		{
 			return this;
 		}
-		if (cm.Equals(Zahl.ZERO) || (cm.depends(@var)))
+		if (cm.Equals(Zahl.ZERO) || (cm.depends(v)))
 		{
 			throw new JasymcaException("Ill conditioned polynomial: main coefficient Zero or not number");
 		}
@@ -538,7 +538,7 @@ public class Polynomial : Algebraic
 		{
 			b[i] = a[i].div(cm);
 		}
-		return new Polynomial(@var, b);
+		return new Polynomial(v, b);
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Algebraic[] square_free_dec(Variable var) throws JasymcaException
@@ -607,7 +607,7 @@ public class Polynomial : Algebraic
 //ORIGINAL LINE: public Vektor solve(Variable var) throws JasymcaException
 	public virtual Vektor solve(Variable @var)
 	{
-		if (!@var.Equals(this.@var))
+		if (!@var.Equals(this.v))
 		{
 			return ((Polynomial)value(@var, Poly.top)).solve(SimpleVariable.top);
 		}
@@ -691,7 +691,7 @@ public class Polynomial : Algebraic
 					{
 						cn[i] = a[i * gcd];
 					}
-					Polynomial pr = new Polynomial(@var, cn);
+					Polynomial pr = new Polynomial(v, cn);
 					Vektor sn = pr.solvepoly();
 					if (gcd == 2)
 					{

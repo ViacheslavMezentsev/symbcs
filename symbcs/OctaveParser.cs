@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.IO;
 using System.Text;
 
 internal class OctaveParser : Parser
@@ -22,16 +23,52 @@ internal class OctaveParser : Parser
 	{
 		env.addPath(".");
 		env.addPath("m");
-		env.globals.put("pi", Zahl.PI);
-		env.globals.put("i", Zahl.IONE);
-		env.globals.put("j", Zahl.IONE);
-		env.globals.put("eps", new Unexakt(2.220446049250313E-16));
-		env.globals.put("ratepsilon", new Unexakt(2.0e-8));
-		env.globals.put("algepsilon", new Unexakt(1.0e-8));
-		env.globals.put("rombergit", new Unexakt(11));
-		env.globals.put("rombergtol", new Unexakt(1.0e-4));
+		env.globals.Add("pi", Zahl.PI);
+        env.globals.Add( "i", Zahl.IONE );
+        env.globals.Add( "j", Zahl.IONE );
+        env.globals.Add( "eps", new Unexakt( 2.220446049250313E-16 ) );
+        env.globals.Add( "ratepsilon", new Unexakt( 2.0e-8 ) );
+        env.globals.Add( "algepsilon", new Unexakt( 1.0e-8 ) );
+        env.globals.Add( "rombergit", new Unexakt( 11 ) );
+	    env.globals.Add( "rombergtol", new Unexakt( 1.0e-4 ) );
 		pst = new ParserState(null, 0);
-		Operator.OPS = new Operator[]{new Operator("POW", ".**", 1, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("PPR", "++", 1, RIGHT_LEFT, Constants_Fields.UNARY | LVALUE), new Operator("MMR", "--", 1, RIGHT_LEFT, Constants_Fields.UNARY | LVALUE), new Operator("PPL", "++", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | LVALUE), new Operator("MML", "--", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | LVALUE), new Operator("ADE", "+=",10, RIGHT_LEFT, BINARY | LVALUE), new Operator("SUE", "-=",10, RIGHT_LEFT, BINARY | LVALUE), new Operator("MUE", "*=",10, RIGHT_LEFT, BINARY | LVALUE), new Operator("DIE", "/=",10, RIGHT_LEFT, BINARY | LVALUE), new Operator("MPW", "**", 1, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("MUL", ".*", 3, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("DIV", "./", 3, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("POW", ".^", 1, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("EQU", "==", 6, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("NEQ", "~=", 6, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("GEQ", ">=", 6, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("LEQ", "<=", 6, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("TRN", ".'", 1, RIGHT_LEFT, Constants_Fields.UNARY), new Operator("GRE", ">", 6, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("LES", "<", 6, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("OR", "|", 9, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("NOT", "~", 8, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY), new Operator("AND", "&", 7, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("GRE", ">", 6, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("GRE", ">", 6, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("ASS", "=", 10, RIGHT_LEFT, BINARY | LVALUE), new Operator("CR1", ":", 5, Constants_Fields.LEFT_RIGHT, BINARY | TERNARY), new Operator("ADD", "+", 4, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | BINARY), new Operator("SUB", "-", 4, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | BINARY), new Operator("MMU", "*", 3, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("MDR", "/", 3, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("MDL", "\\", 3, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("MPW", "^", 1, Constants_Fields.LEFT_RIGHT, BINARY), new Operator("ADJ", "'", 1, RIGHT_LEFT, Constants_Fields.UNARY)};
+        Operator.OPS = new Operator[]
+        {
+            new Operator( "POW", ".**", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "PPR", "++", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY | Constants_Fields.LVALUE ), 
+            new Operator( "MMR", "--", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY | Constants_Fields.LVALUE ), 
+            new Operator( "PPL", "++", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.LVALUE ), 
+            new Operator( "MML", "--", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.LVALUE ), 
+            new Operator( "ADE", "+=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
+            new Operator( "SUE", "-=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
+            new Operator( "MUE", "*=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
+            new Operator( "DIE", "/=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
+            new Operator( "MPW", "**", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "MUL", ".*", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "DIV", "./", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "POW", ".^", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "EQU", "==", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "NEQ", "~=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "GEQ", ">=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "LEQ", "<=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "TRN", ".'", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY ), 
+            new Operator( "GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "LES", "<", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "OR", "|", 9, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "NOT", "~", 8, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY ), 
+            new Operator( "AND", "&", 7, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "ASS", "=", 10,Constants_Fields. RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
+            new Operator( "CR1", ":", 5, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY | Constants_Fields.TERNARY ), 
+            new Operator( "ADD", "+", 4, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.BINARY ), 
+            new Operator( "SUB", "-", 4, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.BINARY ), 
+            new Operator( "MMU", "*", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "MDR", "/", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "MDL", "\\", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "MPW", "^", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
+            new Operator( "ADJ", "'", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY )
+        };
 		for (int i = 0; i < Operator.OPS.Length; i++)
 		{
 			nonsymbols.Add(Operator.OPS[i].symbol);
@@ -63,11 +100,11 @@ internal class OctaveParser : Parser
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public List compile(InputStream is, PrintStream ps) throws ParseException, IOException
-	public override List compile(InputStream @is, PrintStream ps)
+	public override List compile( Stream istream, PrintStream ps)
 	{
 		string s , sp = null;
 		reset();
-		while ((s = readLine(@is)) != null)
+        while ( ( s = readLine( istream ) ) != null )
 		{
 			sp = s;
 			translate(s);
@@ -290,9 +327,11 @@ case '.':
 	internal virtual object readString(StringBuilder s)
 	{
 		int len = s.Length > 2?3:s.Length;
-		char[] substring = new char[len];
-		s.getChars(0,len,substring,0);
-		string st = new string(substring);
+		//char[] substring = new char[len];
+		//s.getChars(0,len,substring,0);
+		//string st = new string(substring);
+	    string st = s.ToString().Substring( 0, len );
+
 		Operator op = Operator.get(st);
 		if (op != null)
 		{
@@ -304,9 +343,12 @@ case '.':
 		{
 			k++;
 		}
-		substring = new char[k];
-		s.getChars(0,k,substring,0);
-		string t = new string(substring);
+		//substring = new char[k];
+		//s.getChars(0,k,substring,0);
+		//string t = new string(substring);
+
+	    string t = s.ToString().Substring( 0, k );
+
 		s.Remove(0, k);
 		if (t.Equals(IF) || t.Equals(FOR) || t.Equals(WHILE) || t.Equals(FUNCTION))
 		{
@@ -443,7 +485,7 @@ case '.':
 				{
 					k = n - i - 1;
 				}
-				Operator op = Operator.get(expr[k], k == 0 ? Operator.START : (k == n - 1 ?Operator.END : Operator.MID));
+                Operator op = Operator.get( expr[ k ], k == 0 ? Constants_Fields.START : ( k == n - 1 ? Constants_Fields.END : Constants_Fields.MID ) );
 				if (op == null || op.precedence != pred)
 				{
 					continue;
@@ -504,14 +546,14 @@ case '.':
 			nrow++;
 			ip = i + 1;
 		}
-		List x = expr.subList(ip, expr.Count);
-		List xs = compile_list(x);
-		if (xs == null)
+		List x1 = expr.subList(ip, expr.Count);
+		List xs1 = compile_list(x1);
+		if (xs1 == null)
 		{
 			return null;
 		}
-		xs.AddRange(r);
-		r = xs;
+		xs1.AddRange(r);
+		r = xs1;
 		r.Add(new int?(nrow));
 		r.Add(CRV);
 		return r;
@@ -544,14 +586,14 @@ case '.':
 			n++;
 			ip = i + 1;
 		}
-		List x = expr.subList(ip, expr.Count);
-		List xs = compile_expr(x);
-		if (xs == null)
+		List x1 = expr.subList(ip, expr.Count);
+		List xs1 = compile_expr(x1);
+		if (xs1 == null)
 		{
 			return null;
 		}
-		xs.AddRange(r);
-		r = xs;
+		xs1.AddRange(r);
+		r = xs1;
 		r.Add(new int?(n));
 		return r;
 	}
@@ -589,13 +631,13 @@ case '.':
 		while ((i = expr.IndexOf(",")) != -1)
 		{
 			List x = expr.subList(0, i);
-			List xs = compile_lval1(x);
-			if (xs == null)
+			List xs1 = compile_lval1(x);
+			if (xs1 == null)
 			{
 				return null;
 			}
-			xs.AddRange(r);
-			r = xs;
+			xs1.AddRange(r);
+			r = xs1;
 			expr = expr.subList(i + 1, expr.Count);
 			n++;
 		}
@@ -767,18 +809,18 @@ case '.':
 		if (commandq(first))
 		{
 			List expr_sub = expr;
-			int @is = expr.IndexOf(";");
-			if (@is > 0)
+			int indx = expr.IndexOf(";");
+			if (indx > 0)
 			{
-				expr_sub = expr.subList(0, @is + 1);
+				expr_sub = expr.subList(0, indx + 1);
 			}
 			List s = compile_command(expr_sub);
 			if (s != null)
 			{
-				if (@is > 0)
+				if (indx > 0)
 				{
 					s.Add("#;");
-					Comp.clear(expr, 0, @is + 1);
+					Comp.clear(expr, 0, indx + 1);
 					List t = compile_statement(expr);
 					if (t == null)
 					{
@@ -792,15 +834,15 @@ case '.':
 		}
 		string lend = null;
 		int ic = expr.IndexOf(",");
-		int @is = expr.IndexOf(";");
-		if (ic >= 0 && (ic < @is || @is == -1))
+		int indx1 = expr.IndexOf(";");
+		if (ic >= 0 && (ic < indx1 || indx1 == -1))
 		{
 			lend = "#,";
 		}
-		else if (@is >= 0 && (@is < ic || ic == -1))
+		else if (indx1 >= 0 && (indx1 < ic || ic == -1))
 		{
 			lend = "#;";
-			ic = @is;
+			ic = indx1;
 		}
 		if (ic == 0)
 		{

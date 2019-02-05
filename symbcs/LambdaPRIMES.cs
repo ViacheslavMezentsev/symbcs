@@ -28,7 +28,7 @@ public class LambdaPRIMES : Lambda
 			BigInteger xb = ((Exakt)x).real[0];
 			if (xb.compareTo(BigInteger.valueOf(long.MaxValue)) <= 0)
 			{
-				long xl = (long)xb;
+				long xl = (long)xb.longValue();
 				res = teiler(xl);
 			}
 			else
@@ -115,9 +115,9 @@ public class LambdaPRIMES : Lambda
 	{
 		sbyte[] stop_in = new sbyte[X.bitLength() / 2 + 1];
 		stop_in[0] = (sbyte)1;
-		for (int i = 1; i < stop_in.Length; i++)
+		for (int n = 1; n < stop_in.Length; n++)
 		{
-			stop_in[i] = (sbyte)0;
+			stop_in[n] = (sbyte)0;
 		}
 		BigInteger stop = new BigInteger(stop_in);
 		if (start.compareTo(stop) > 0)
@@ -127,7 +127,7 @@ public class LambdaPRIMES : Lambda
 		BigInteger b30 = BigInteger.valueOf(30L);
 		BigInteger b = start.divide(b30);
 		b = b.multiply(b30);
-		int m = (int)start.mod(b30);
+		int m = (int)start.mod(b30).intValue();
 		int i = 0;
 		while (m > mod[i])
 		{
@@ -154,38 +154,54 @@ public class LambdaPRIMES : Lambda
 		}
 		return X;
 	}
-	static Vektor teiler(BigInteger X) throws JasymcaException
+	static Vektor teiler(BigInteger X) 
 	{
-		ArrayList teiler = new ArrayList();
-		BigInteger b2 = BigInteger.valueOf(2L);
+		var teiler = new ArrayList();
+		var b2 = BigInteger.valueOf(2L);
+
 		while (X.mod(b2).Equals(BigInteger.ZERO))
 		{
 			teiler.Add(Zahl.TWO);
+
 			X = X.divide(b2);
 		}
-		BigInteger b3 = BigInteger.valueOf(3L);
+
+		var b3 = BigInteger.valueOf(3L);
+
 		while (X.mod(b3).Equals(BigInteger.ZERO))
 		{
 			teiler.Add(Zahl.THREE);
+
 			X = X.divide(b3);
 		}
-		BigInteger b5 = BigInteger.valueOf(5L);
+
+		var b5 = BigInteger.valueOf(5L);
+
 		while (X.mod(b5).Equals(BigInteger.ZERO))
 		{
 			teiler.Add(new Unexakt(5.0));
+
 			X = X.divide(b5);
 		}
-		BigInteger f = BigInteger.valueOf(7L);
+
+		var f = BigInteger.valueOf(7L);
+
 		while (!X.Equals(BigInteger.ONE))
 		{
 			f = kleinsterTeiler(X, f);
+
 			if (f == null)
 			{
 				return null;
 			}
+
 			teiler.Add(new Exakt(f));
+
 			X = X.divide(f);
 		}
+
 		return Vektor.create(teiler);
+
+	    //throws JasymcaException();
 	}
 }

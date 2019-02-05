@@ -3,7 +3,7 @@
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public abstract Algebraic deriv(Variable x) throws JasymcaException;
 	public abstract Algebraic deriv(Variable x);
-	public override abstract bool Equals(object x);
+	public abstract override bool Equals(object x);
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public abstract boolean smaller(Variable v) throws JasymcaException;
 	public abstract bool smaller(Variable v);

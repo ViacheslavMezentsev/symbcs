@@ -40,16 +40,16 @@ internal class LambdaSOLVE : Lambda
 //ORIGINAL LINE: public static Vektor solve(Algebraic expr, Variable var) throws JasymcaException
 	public static Vektor solve(Algebraic expr, Variable @var)
 	{
-		p("Solve: " + expr + " = 0, Variable: " + @var);
+		debug("Solve: " + expr + " = 0, Variable: " + @var);
 		expr = (new ExpandUser()).f_exakt(expr);
 		expr = (new TrigExpand()).f_exakt(expr);
-		p("TrigExpand: " + expr);
+		debug("TrigExpand: " + expr);
 		expr = (new NormExp()).f_exakt(expr);
-		p("Norm: " + expr);
+		debug("Norm: " + expr);
 		expr = (new CollectExp(expr)).f_exakt(expr);
-		p("Collect: " + expr);
+		debug("Collect: " + expr);
 		expr = (new SqrtExpand()).f_exakt(expr);
-		p("SqrtExpand: " + expr);
+		debug("SqrtExpand: " + expr);
 		if (expr is Rational)
 		{
 			expr = (new LambdaRAT()).f_exakt(expr);
@@ -58,7 +58,7 @@ internal class LambdaSOLVE : Lambda
 				expr = ((Rational)expr).nom;
 			}
 		}
-		p("Canonic Expression: " + expr);
+		debug("Canonic Expression: " + expr);
 		if (!(expr is Polynomial) || !((Polynomial)expr).depends(@var))
 		{
 			throw new JasymcaException("Expression does not depend of variable.");
@@ -73,19 +73,19 @@ internal class LambdaSOLVE : Lambda
 		if (dep.Count == 1)
 		{
 			Variable dvar = (Variable)dep[0];
-			p("Found one Variable: " + dvar);
+			debug("Found one Variable: " + dvar);
 			sol = p.solve(dvar);
-			p("Solution: " + dvar + " = " + sol);
+			debug("Solution: " + dvar + " = " + sol);
 			if (!dvar.Equals(@var))
 			{
 				ArrayList s = new ArrayList();
 				for (int i = 0; i < sol.length(); i++)
 				{
-					p("Invert: " + sol.get(i) + " = " + dvar);
+					debug("Invert: " + sol.get(i) + " = " + dvar);
 					Algebraic sl = finvert((FunctionVariable)dvar, sol.get(i));
-					p("Result: " + sl + " = 0");
+					debug("Result: " + sl + " = 0");
 					Vektor t = solve(sl, @var);
-					p("Solution: " + @var + " = " + t);
+					debug("Solution: " + @var + " = " + t);
 					for (int k = 0; k < t.length(); k++)
 					{
 						Algebraic tn = t.get(k);
@@ -100,26 +100,26 @@ internal class LambdaSOLVE : Lambda
 		}
 		else if (dep.Count == 2)
 		{
-			p("Found two Variables: " + dep[0] + ", " + dep[1]);
+			debug("Found two Variables: " + dep[0] + ", " + dep[1]);
 			if (dep.Contains(@var))
 			{
 				FunctionVariable f = (FunctionVariable)(dep[0].Equals(@var)? dep[1]:dep[0]);
 				if (f.fname.Equals("sqrt"))
 				{
-					p("Solving " + p + " for " + f);
+					debug("Solving " + p + " for " + f);
 					sol = p.solve(f);
-					p("Solution: " + f + " = " + sol);
+					debug("Solution: " + f + " = " + sol);
 					ArrayList s = new ArrayList();
 					for (int i = 0; i < sol.length(); i++)
 					{
-						p("Invert: " + sol.get(i) + " = " + f);
+						debug("Invert: " + sol.get(i) + " = " + f);
 						Algebraic sl = finvert((FunctionVariable)f, sol.get(i));
-						p("Result: " + sl + " = 0");
+						debug("Result: " + sl + " = 0");
 						if (sl is Polynomial && depvars(((Polynomial)sl),@var).Count == 1)
 						{
-							p("Solving " + sl + " for " + @var);
+							debug("Solving " + sl + " for " + @var);
 							Vektor t = solve(sl, @var);
-							p("Solution: " + @var + " = " + t);
+							debug("Solution: " + @var + " = " + t);
 							for (int k = 0; k < t.length(); k++)
 							{
 								Algebraic tn = t.get(k);
@@ -157,9 +157,9 @@ internal class LambdaSOLVE : Lambda
 	private static ArrayList depvars(Polynomial p, Variable @var)
 	{
 		ArrayList r = new ArrayList();
-		if (!p.@var.deriv(@var).Equals(Zahl.ZERO))
+		if (!p.v.deriv(@var).Equals(Zahl.ZERO))
 		{
-			r.Add(p.@var);
+			r.Add(p.v);
 		}
 		for (int i = 0; i < p.a.Length; i++)
 		{

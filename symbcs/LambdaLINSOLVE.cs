@@ -51,7 +51,7 @@ public class LambdaLINSOLVE : Lambda
 			Algebraic c1 = null, c0 ;
 			for (int k = 0; k < vars.length(); k++)
 			{
-				Variable va = ((Polynomial)vars.get(k)).@var;
+				Variable va = ((Polynomial)vars.get(k)).v;
 				c1 = p.coefficient(va,1);
 				if (!c1.Equals(Zahl.ZERO))
 				{
@@ -90,7 +90,7 @@ public class LambdaLINSOLVE : Lambda
 		Polynomial pm = null;
 		for (int i = 0; i < vars.length(); i++)
 		{
-			Variable v = ((Polynomial)vars.get(i)).@var;
+			Variable v = ((Polynomial)vars.get(i)).v;
 			for (int k = n; k < expr.length(); k++)
 			{
 				Algebraic pa = expr.get(k);
@@ -222,13 +222,15 @@ public class LambdaLINSOLVE : Lambda
 		{
 			for (int j = k;j < n;j++)
 			{
-				Algebraic dummy = a.get(pivot,j);
+				var dummy = a.get(pivot,j);
 				a.set(pivot,j,a.get(k,j));
 				a.set(k,j, dummy);
 			}
-			Algebraic dummy = c.get(pivot);
-			c.set(pivot, c.get(k));
-			c.set(k, dummy);
+		    {
+		        var dummy = c.get(pivot);
+		        c.set(pivot, c.get(k));
+		        c.set(k, dummy);
+		    }
 		}
 		return pivot;
 	}

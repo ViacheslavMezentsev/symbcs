@@ -10,17 +10,17 @@ internal class LambdaTRIGRAT : Lambda
 		int narg = getNarg(st);
 		Algebraic f = getAlgebraic(st);
 		f = f.rat();
-		p("Rational: " + f);
+		debug("Rational: " + f);
 		f = (new ExpandUser()).f_exakt((Algebraic) f);
-		p("User Function expand: " + f);
+		debug("User Function expand: " + f);
 		f = (new TrigExpand()).f_exakt((Algebraic) f);
-		p("Trigexpand: " + f);
+		debug("Trigexpand: " + f);
 		f = (new NormExp()).f_exakt((Algebraic) f);
-		p("Norm: " + f);
+		debug("Norm: " + f);
 		f = (new TrigInverseExpand()).f_exakt((Algebraic) f);
-		p("Triginverse: " + f);
+		debug("Triginverse: " + f);
 		f = (new SqrtExpand()).f_exakt((Algebraic) f);
-		p("Sqrtexpand: " + f);
+		debug("Sqrtexpand: " + f);
 		st.Push(f);
 		return 0;
 	}
@@ -34,11 +34,11 @@ internal class LambdaTRIGEXP : Lambda
 		int narg = getNarg(st);
 		Algebraic f = getAlgebraic(st);
 		f = f.rat();
-		p("Rational: " + f);
+		debug("Rational: " + f);
 		f = (new ExpandUser()).f_exakt((Algebraic) f);
-		p("User Function expand: " + f);
+		debug("User Function expand: " + f);
 		f = (new TrigExpand()).f_exakt((Algebraic) f);
-		p("Trigexpand: " + f);
+		debug("Trigexpand: " + f);
 		f = (new NormExp()).f_exakt((Algebraic) f);
 		f = (new SqrtExpand()).f_exakt((Algebraic) f);
 		st.Push(f);
@@ -51,10 +51,10 @@ internal class TrigExpand : LambdaAlgebraic
 //ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
-		if (x is Polynomial && ((Polynomial)x).@var is FunctionVariable)
+		if (x is Polynomial && ((Polynomial)x).v is FunctionVariable)
 		{
 			Polynomial xp = (Polynomial)x;
-			FunctionVariable f = (FunctionVariable)xp.@var;
+			FunctionVariable f = (FunctionVariable)xp.v;
 			object la = pc.env.getValue(f.fname);
 			if (la != null && la is LambdaAlgebraic && ((LambdaAlgebraic)la).trigrule != null)
 			{
@@ -93,7 +93,7 @@ internal class SqrtExpand : LambdaAlgebraic
 			return x.map(this);
 		}
 		Polynomial xp = (Polynomial)x;
-		Variable @var = xp.@var;
+		Variable @var = xp.v;
 		if (@var is Root)
 		{
 			Vektor cr = ((Root)@var).poly;
@@ -130,7 +130,7 @@ internal class SqrtExpand : LambdaAlgebraic
 		if (@var is FunctionVariable && ((FunctionVariable)@var).fname.Equals("sqrt") && ((FunctionVariable)@var).arg is Polynomial)
 		{
 			Polynomial arg = (Polynomial)((FunctionVariable)@var).arg;
-			Algebraic[] sqfr = arg.square_free_dec(arg.@var);
+			Algebraic[] sqfr = arg.square_free_dec(arg.v);
 			bool issquare = true;
 			if (sqfr.Length > 0 && !sqfr[0].Equals(arg.a[arg.a.Length - 1]))
 			{
@@ -222,9 +222,9 @@ internal class TrigInverseExpand : LambdaAlgebraic
 		if (x is Rational)
 		{
 			Rational xr = (Rational)x;
-			if (xr.den.@var is FunctionVariable && ((FunctionVariable)xr.den.@var).fname.Equals("exp") && ((FunctionVariable)xr.den.@var).arg.komplexq())
+			if (xr.den.v is FunctionVariable && ((FunctionVariable)xr.den.v).fname.Equals("exp") && ((FunctionVariable)xr.den.v).arg.komplexq())
 			{
-				FunctionVariable fv = (FunctionVariable)xr.den.@var;
+				FunctionVariable fv = (FunctionVariable)xr.den.v;
 				int maxdeg = Math.Max(Poly.degree(xr.nom,fv), Poly.degree(xr.den,fv));
 				if (maxdeg % 2 == 0)
 				{
@@ -232,44 +232,44 @@ internal class TrigInverseExpand : LambdaAlgebraic
 				}
 				else
 				{
-					FunctionVariable fv2 = new FunctionVariable("exp", ((FunctionVariable)xr.den.@var).arg.div(Zahl.TWO), ((FunctionVariable)xr.den.@var).la);
+					FunctionVariable fv2 = new FunctionVariable("exp", ((FunctionVariable)xr.den.v).arg.div(Zahl.TWO), ((FunctionVariable)xr.den.v).la);
 					Algebraic ex = new Polynomial(fv2, new Algebraic[] {Zahl.ZERO, Zahl.ZERO,Zahl.ONE});
-					Algebraic xr1 = xr.nom.value(xr.den.@var, ex).div(xr.den.value(xr.den.@var, ex));
+					Algebraic xr1 = xr.nom.value(xr.den.v, ex).div(xr.den.value(xr.den.v, ex));
 					return f_exakt(xr1);
 				}
 			}
 		}
-		if (x is Polynomial && ((Polynomial)x).@var is FunctionVariable)
+		if (x is Polynomial && ((Polynomial)x).v is FunctionVariable)
 		{
 			Polynomial xp = (Polynomial)x;
 			Algebraic xf = null;
-			FunctionVariable @var = (FunctionVariable)xp.@var;
+			FunctionVariable @var = (FunctionVariable)xp.v;
 			if (@var.fname.Equals("exp"))
 			{
 				Algebraic re = @var.arg.realpart();
 				Algebraic im = @var.arg.imagpart();
 				if (!im.Equals(Zahl.ZERO))
 				{
-					bool minus = minus(im);
-					if (minus)
+					bool _minus = minus(im);
+					if (_minus)
 					{
 						im = im.mult(Zahl.MINUS);
 					}
 					Algebraic a = FunctionVariable.create("exp",re);
 					Algebraic b = FunctionVariable.create("cos", im);
 					Algebraic c = FunctionVariable.create("sin", im).mult(Zahl.IONE);
-					xf = a.mult(minus?(b.sub(c)):b.add(c));
+					xf = a.mult(_minus?(b.sub(c)):b.add(c));
 				}
 			}
 			if (@var.fname.Equals("log"))
 			{
 				Algebraic arg = @var.arg;
 				Algebraic factor = Zahl.ONE, sum = Zahl.ZERO;
-				if (arg is Polynomial && ((Polynomial)arg).degree() == 1 && ((Polynomial)arg).@var is FunctionVariable && ((Polynomial)arg).a[0].Equals(Zahl.ZERO) && ((FunctionVariable)((Polynomial)arg).@var).fname.Equals("sqrt"))
+				if (arg is Polynomial && ((Polynomial)arg).degree() == 1 && ((Polynomial)arg).v is FunctionVariable && ((Polynomial)arg).a[0].Equals(Zahl.ZERO) && ((FunctionVariable)((Polynomial)arg).v).fname.Equals("sqrt"))
 				{
 					sum = FunctionVariable.create("log",((Polynomial)arg).a[1]);
 					factor = new Unexakt(0.5);
-					arg = ((FunctionVariable)((Polynomial)arg).@var).arg;
+					arg = ((FunctionVariable)((Polynomial)arg).v).arg;
 					xf = FunctionVariable.create("log", arg);
 				}
 				try

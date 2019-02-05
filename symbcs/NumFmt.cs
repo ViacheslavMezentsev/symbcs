@@ -1,8 +1,9 @@
-﻿internal interface NumFmt
+﻿internal interface INumFmt
 {
 	string ToString(double x);
 }
-internal class NumFmtVar : NumFmt
+
+public class NumFmtVar : INumFmt
 {
 	internal double @base;
 	internal int ibase;
@@ -46,10 +47,10 @@ internal class NumFmtVar : NumFmt
 		while (xl != 0L)
 		{
 			nc--;
-			int digit = digit(xl % ibase);
-			if (!(r.Equals("") && digit == '0'))
+			int _digit = digit(xl % ibase);
+			if (!(r.Equals("") && _digit == '0'))
 			{
-				r = (char)digit + r;
+				r = (char)_digit + r;
 			}
 			xl = xl / ibase;
 		}
@@ -81,16 +82,16 @@ internal class NumFmtVar : NumFmt
 	}
 	string sub(string s, int a, int b)
 	{
-		if (s.length() >= b)
+		if (s.Length >= b)
 		{
 			return s.Substring(a, b - a);
 		}
 		string r = "";
 		while (a < b)
 		{
-			if (a < s.length())
+			if (a < s.Length)
 			{
-				r += s.charAt(a);
+				r += s[a];
 			}
 			else
 			{
@@ -101,13 +102,10 @@ internal class NumFmtVar : NumFmt
 		return r;
 	}
 }
-internal class NumFmtJava : NumFmt
+public class NumFmtJava : INumFmt
 {
-	private readonly NumFmtVar outerInstance;
-
-	public NumFmtJava(NumFmtVar outerInstance)
+	public NumFmtJava()
 	{
-		this.outerInstance = outerInstance;
 	}
 
 	public virtual string ToString(double x)

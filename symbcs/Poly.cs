@@ -158,7 +158,7 @@
 		}
 		Polynomial p = (Polynomial)p1;
 		Polynomial q = (Polynomial)q1;
-		if (p.@var.Equals(q.@var))
+		if (p.v.Equals(q.v))
 		{
 			int len = p.degree() - q.degree();
 			if (len < 0)
@@ -177,7 +177,7 @@
 					nom[j] = nom[j].sub(cdiv[i].mult(q.a[l]));
 				}
 			}
-			return horner(p.@var,cdiv);
+			return horner(p.v,cdiv);
 		}
 		else
 		{
@@ -186,7 +186,7 @@
 			{
 				cn[i] = polydiv(p.a[i], q1);
 			}
-			return horner(p.@var,cn);
+			return horner(p.v,cn);
 		}
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
@@ -244,7 +244,7 @@
 		{
 			return Zahl.ONE;
 		}
-		Variable r = ((Polynomial)q).@var.smaller(((Polynomial)p).@var) ? ((Polynomial)p).@var : ((Polynomial)q).@var;
+		Variable r = ((Polynomial)q).v.smaller(((Polynomial)p).v) ? ((Polynomial)p).v : ((Polynomial)q).v;
 		Algebraic pc = content(p,r), qc = content(q,r);
 		Algebraic eu = euclid(polydiv(p,pc), polydiv(q,qc), r);
 		Algebraic re = polydiv(eu, content(eu,r)).mult(poly_gcd(pc,qc));

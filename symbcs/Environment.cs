@@ -3,120 +3,149 @@ using System.Collections;
 
 public class Environment : Hashtable
 {
-	internal static ArrayList path = new ArrayList();
-	internal static Hashtable globals = new Hashtable();
-	public Environment()
+	internal ArrayList path = new ArrayList();
+	internal Hashtable globals = new Hashtable();
+
+    internal virtual void addPath(string s)
 	{
-	}
-	internal virtual void addPath(string s)
-	{
-		if (!path.Contains(s))
+		if ( !path.Contains(s) )
 		{
 			path.Add(s);
 		}
 	}
+
 	public virtual Environment copy()
 	{
-		Environment e = new Environment();
-		System.Collections.IEnumerator k = this.Keys.GetEnumerator();
-		while (k.hasMoreElements())
+		var e = new Environment();
+
+		var k = Keys.GetEnumerator();
+
+		while ( k.MoveNext() )
 		{
-			object key = k.nextElement();
-			e[key] = this[key];
+			var key = k.Current;
+
+			e[ key ] = this[ key ];
 		}
+
 		return e;
 	}
-	public virtual void update(Environment local)
+
+	public virtual void update( Environment local )
 	{
-		System.Collections.IEnumerator kl = local.Keys.GetEnumerator();
-		while (kl.hasMoreElements())
+		var kl = local.Keys.GetEnumerator();
+
+        while ( kl.MoveNext() )
 		{
-			object key = kl.nextElement();
-			if (this[key] != null)
+            var key = kl.Current;
+
+			if ( this[ key ] != null )
 			{
-				this[key] = local[key];
+				this[ key ] = local[ key ];
 			}
 		}
 	}
+
 	public override string ToString()
 	{
-		System.Collections.IEnumerator k = this.Keys.GetEnumerator();
-		string s = "";
-		while (k.hasMoreElements())
+		var k = Keys.GetEnumerator();
+
+		var s = "";
+
+        while ( k.MoveNext() )
 		{
-			object key = k.nextElement();
-			s += (key + ": ");
-			s += (getValue((string)key) + "\n");
+            var key = k.Current;
+
+			s += key + ": ";
+
+			s += getValue( ( string ) key ) + "\n";
 		}
+
 		k = globals.Keys.GetEnumerator();
+
 		s += "Globals:\n";
-		while (k.hasMoreElements())
+
+        while ( k.MoveNext() )
 		{
-			object key = k.nextElement();
-			s += (key + ": ");
-			s += (getValue((string)key) + "\n");
+            var key = k.Current;
+
+			s += key + ": ";
+			s += getValue( ( string ) key ) + "\n";
 		}
+
 		return s;
 	}
-	public virtual void putValue(string @var, object x)
+
+	public virtual void putValue( string name, object x )
 	{
-		if (x.Equals("null"))
+		if ( x.Equals( "null" ) )
 		{
-			this.Remove(@var);
+            Remove( name );
 		}
 		else
 		{
-			if (x is Lambda)
+			if ( x is Lambda )
 			{
-				globals[@var] = x;
+			    globals[ name ] = x;
 			}
 			else
 			{
-				this[@var] = x;
+			    this[ name ] = x;
 			}
 		}
 	}
-	public virtual object getValue(string @var)
+
+    public virtual object getValue( string name )
 	{
-		if (@var.StartsWith(" ", StringComparison.Ordinal))
+	    if ( name.StartsWith( " ", StringComparison.Ordinal ) )
 		{
-			return @var;
+            return name;
 		}
-		object r = this[@var];
-		if (r != null)
-		{
-			return r;
-		}
-		r = globals[@var];
-		if (r != null)
+
+        var r = this[ name ];
+
+		if ( r != null )
 		{
 			return r;
 		}
+
+        r = globals[ name ];
+
+		if ( r != null )
+		{
+			return r;
+		}
+
 		try
 		{
-			string fname = "Lambda" + @var.ToUpper();
-			Type c = Type.GetType(fname);
-			Lambda f = (Lambda)c.newInstance();
-			putValue(@var, f);
+            var fname = "Lambda" + name.ToUpper();
+
+			var c = Type.GetType( fname );
+
+			var f = ( Lambda ) Activator.CreateInstance(c);
+
+		    putValue( name, f );
+
 			r = f;
 		}
-		catch (Exception)
-		{
-		}
+		catch {}
+
 		return r;
 	}
-	public virtual Zahl getnum(string @var)
+
+	public virtual Zahl getnum( string name )
 	{
-		@var = @var;
-		object r = this[@var];
-		if (r == null)
+        var r = this[ name ];
+
+		if ( r == null )
 		{
-			r = globals[@var];
+            r = globals[ name ];
 		}
-		if (r is Zahl)
+
+		if ( r is Zahl )
 		{
-			return (Zahl)r;
+			return ( Zahl ) r;
 		}
+
 		return null;
 	}
 }

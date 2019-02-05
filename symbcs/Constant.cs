@@ -73,9 +73,9 @@ internal class ExpandConstants : LambdaAlgebraic
 //ORIGINAL LINE: Algebraic f_exakt(Algebraic f) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic f)
 	{
-		while (f is Polynomial && ((Polynomial)f).@var is Constant)
+		while (f is Polynomial && ((Polynomial)f).v is Constant)
 		{
-			f = f.value(((Polynomial)f).@var, ((Constant)((Polynomial)f).@var).Value);
+			f = f.value(((Polynomial)f).v, ((Constant)((Polynomial)f).v).Value);
 		}
 		return f.map(this);
 	}

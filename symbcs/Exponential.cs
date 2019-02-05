@@ -18,14 +18,14 @@ public class Exponential : Polynomial
 		{
 			la = new LambdaEXP();
 		}
-		this.@var = new FunctionVariable("exp", new Polynomial(x, z),(LambdaAlgebraic)la);
+		this.v = new FunctionVariable("exp", new Polynomial(x, z),(LambdaAlgebraic)la);
 		this.expvar = x;
 		this.exp_b = b;
 	}
-	public Exponential(Polynomial x) : base(x.@var, x.a)
+	public Exponential(Polynomial x) : base(x.v, x.a)
 	{
-		this.expvar = ((Polynomial)((FunctionVariable)this.@var).arg).@var;
-		this.exp_b = ((Polynomial)((FunctionVariable)this.@var).arg).a[1];
+		this.expvar = ((Polynomial)((FunctionVariable)this.v).arg).v;
+		this.exp_b = ((Polynomial)((FunctionVariable)this.v).arg).a[1];
 	}
 	public static Algebraic poly2exp(Algebraic x)
 	{
@@ -33,9 +33,9 @@ public class Exponential : Polynomial
 		{
 			return x;
 		}
-		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).@var is FunctionVariable && ((FunctionVariable)(((Polynomial)x).@var)).fname.Equals("exp"))
+		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).v is FunctionVariable && ((FunctionVariable)(((Polynomial)x).v)).fname.Equals("exp"))
 		{
-			Algebraic arg = ((FunctionVariable)(((Polynomial)x).@var)).arg;
+			Algebraic arg = ((FunctionVariable)(((Polynomial)x).v)).arg;
 			if (arg is Polynomial && ((Polynomial)arg).degree() == 1 && ((Polynomial)arg).a[0].Equals(Zahl.ZERO))
 			{
 				return new Exponential((Polynomial)x);
@@ -70,9 +70,9 @@ public class Exponential : Polynomial
 					return true;
 				}
 			}
-				if (((Polynomial)x).@var is FunctionVariable)
+				if (((Polynomial)x).v is FunctionVariable)
 				{
-					return containsexp(((FunctionVariable)((Polynomial)x).@var).arg);
+					return containsexp(((FunctionVariable)((Polynomial)x).v).arg);
 				}
 				return false;
 		}
@@ -103,11 +103,11 @@ public class Exponential : Polynomial
 		}
 		if (x is Exponential)
 		{
-			if (@var.Equals(((Exponential)x).@var))
+			if (v.Equals(((Exponential)x).v))
 			{
 				return poly2exp(base.add(x));
 			}
-			if (@var.smaller(((Exponential)x).@var))
+			if (v.smaller(((Exponential)x).v))
 			{
 				return x.add(this);
 			}
@@ -220,7 +220,7 @@ public class Exponential : Polynomial
 			Variable x = null;
 			if (a is Polynomial)
 			{
-				x = ((Polynomial)a).@var;
+				x = ((Polynomial)a).v;
 			}
 			else
 			{
@@ -286,7 +286,7 @@ internal class SubstExp : LambdaAlgebraic
 		{
 			return ratsubst(((Rational)expr).nom).div(ratsubst(((Rational)expr).den));
 		}
-		if (expr is Polynomial && ((Polynomial)expr).@var is FunctionVariable && ((FunctionVariable)((Polynomial)expr).@var).fname.Equals("exp") && ((FunctionVariable)((Polynomial)expr).@var).arg is Polynomial && ((Polynomial)((FunctionVariable)((Polynomial)expr).@var).arg).@var.Equals(@var) && ((Polynomial)((FunctionVariable)((Polynomial)expr).@var).arg).degree() == 1 && ((Polynomial)((FunctionVariable)((Polynomial)expr).@var).arg).a[0].Equals(Zahl.ZERO))
+		if (expr is Polynomial && ((Polynomial)expr).v is FunctionVariable && ((FunctionVariable)((Polynomial)expr).v).fname.Equals("exp") && ((FunctionVariable)((Polynomial)expr).v).arg is Polynomial && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).v.Equals(@var) && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).degree() == 1 && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).a[0].Equals(Zahl.ZERO))
 		{
 			Polynomial pexpr = (Polynomial)expr;
 			int degree = pexpr.degree();
@@ -333,9 +333,9 @@ internal class SubstExp : LambdaAlgebraic
 		if (f is Polynomial)
 		{
 			Polynomial p = (Polynomial)f;
-			if (p.@var is FunctionVariable && ((FunctionVariable)p.@var).fname.Equals("exp") && Poly.degree(((FunctionVariable)p.@var).arg,@var) == 1)
+			if (p.v is FunctionVariable && ((FunctionVariable)p.v).fname.Equals("exp") && Poly.degree(((FunctionVariable)p.v).arg,@var) == 1)
 			{
-				Algebraic arg = ((FunctionVariable)p.@var).arg;
+				Algebraic arg = ((FunctionVariable)p.v).arg;
 				Algebraic[] new_coef = new Algebraic[2];
 				new_coef[1] = gcd.unexakt();
 				new_coef[0] = Zahl.ZERO;
@@ -395,11 +395,11 @@ internal class NormExp : LambdaAlgebraic
 			return f.map(this);
 		}
 		Polynomial fp = (Polynomial)f;
-		if (!(fp.@var is FunctionVariable) || !((FunctionVariable)fp.@var).fname.Equals("exp"))
+		if (!(fp.v is FunctionVariable) || !((FunctionVariable)fp.v).fname.Equals("exp"))
 		{
 			return f.map(this);
 		}
-		Algebraic arg = ((FunctionVariable)fp.@var).arg.reduce();
+		Algebraic arg = ((FunctionVariable)fp.v).arg.reduce();
 		if (arg is Zahl)
 		{
 			return fp.value(FunctionVariable.create("exp",arg)).map(this);
@@ -417,14 +417,14 @@ internal class NormExp : LambdaAlgebraic
 			Algebraic ebi = Zahl.ONE;
 			while (b is Polynomial && ((Polynomial)b).degree() == 1)
 			{
-				Algebraic f1 = FunctionVariable.create("exp", (new Polynomial(((Polynomial)b).@var)).mult(((Polynomial)b).a[1].mult(I)));
+				Algebraic f1 = FunctionVariable.create("exp", (new Polynomial(((Polynomial)b).v)).mult(((Polynomial)b).a[1].mult(I)));
 				f1 = Exponential.poly2exp(f1);
 				ebi = ebi.mult(f1);
 				b = ((Polynomial)b).a[0];
 			}
 			ebi = ebi.mult(FunctionVariable.create("exp", b.mult(I)));
 			Algebraic cf = f_exakt(fp.a[i].mult(ebi));
-			Algebraic f2 = FunctionVariable.create("exp", (new Polynomial(((Polynomial)arg).@var)).mult(a.mult(I)));
+			Algebraic f2 = FunctionVariable.create("exp", (new Polynomial(((Polynomial)arg).v)).mult(a.mult(I)));
 			f2 = Exponential.poly2exp(f2);
 			r = r.add(cf.mult(f2));
 		}
@@ -443,6 +443,7 @@ internal class CollectExp : LambdaAlgebraic
 	public CollectExp(Algebraic f)
 	{
 		v = new ArrayList();
+
 		(new GetExpVars(v)).f_exakt(f);
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
@@ -453,60 +454,81 @@ internal class CollectExp : LambdaAlgebraic
 		{
 			return x1;
 		}
+
 		if (!(x1 is Exponential))
 		{
 			return x1.map(this);
 		}
+
 		Exponential e = (Exponential)x1;
+
 		int exp = 1;
+
 		Algebraic exp_b = e.exp_b;
+
 		if (exp_b is Zahl && ((Zahl)exp_b).smaller(Zahl.ZERO))
 		{
 			exp *= -1;
 			exp_b = exp_b.mult(Zahl.MINUS);
 		}
+
 		Variable x = e.expvar;
+
 		for (int i = 0; i < v.Count; i++)
 		{
 			Polynomial y = (Polynomial)v[i];
-			if (y.@var.Equals(x))
+
+			if (y.v.Equals(x))
 			{
 				Algebraic rat = exp_b.div(y.a[1]);
+
 				if (rat is Zahl && !((Zahl)rat).komplexq())
 				{
-					int cfs = cfs(((Zahl)rat).unexakt().real);
-					if (cfs != 0 && cfs != 1)
+					int _cfs = cfs( ( ( Zahl ) rat ).unexakt().real );
+
+					if (_cfs != 0 && _cfs != 1)
 					{
-						exp *= cfs;
-						exp_b = exp_b.div(new Unexakt((double)cfs));
+						exp *= _cfs;
+						exp_b = exp_b.div(new Unexakt((double)_cfs));
 					}
 				}
 			}
 		}
-		Algebraic p = (new Polynomial(x)).mult(exp_b);
-		p = FunctionVariable.create("exp",p).pow_n(exp);
-		return p.mult(f_exakt(e.a[1])).add(f_exakt(e.a[0]));
-	}
+
+        var p = ( new Polynomial( x ) ).mult( exp_b );
+
+        p = FunctionVariable.create( "exp", p ).pow_n( exp );
+
+        return p.mult( f_exakt( e.a[1] ) ).add( f_exakt( e.a[0] ) );
+    }
+
 	internal virtual int cfs(double x)
 	{
 		if (x < 0)
 		{
 			return cfs(-x);
 		}
-		int a0 = (int)Math.Floor(x);
-		if (x == (double)a0)
+
+		int a0 = ( int ) Math.Floor(x);
+
+		if ( x == ( double ) a0 )
 		{
 			return a0;
 		}
-		int a1 = (int)Math.Floor(1.0 / (x - a0));
+
+		int a1 = ( int ) Math.Floor( 1.0 / ( x - a0 ) );
+
 		int z = a0 * a1 + 1;
-		if (Math.Abs((double)z / (double)a1 - x) < 1.e-6)
+
+	    if ( Math.Abs( ( double ) z / ( double ) a1 - x ) < 1.0e-6 )
 		{
 			return z;
 		}
+
 		return 0;
 	}
 }
+
 internal class GetExpVars : LambdaAlgebraic
 {
 	internal ArrayList v;
@@ -544,9 +566,9 @@ internal class GetExpVars2 : LambdaAlgebraic
 		if (f is Polynomial)
 		{
 			Polynomial p = (Polynomial)f;
-			if (p.@var is FunctionVariable && ((FunctionVariable)p.@var).fname.Equals("exp"))
+			if (p.v is FunctionVariable && ((FunctionVariable)p.v).fname.Equals("exp"))
 			{
-				v.Add(((FunctionVariable)p.@var).arg);
+				v.Add(((FunctionVariable)p.v).arg);
 			}
 			for (int i = 0; i < p.a.Length; i++)
 			{
@@ -569,7 +591,7 @@ internal class DeExp : LambdaAlgebraic
 			Algebraic[] cn = new Algebraic[2];
 			cn[0] = f_exakt(x.a[0]);
 			cn[1] = f_exakt(x.a[1]);
-			return new Polynomial(x.@var, cn);
+			return new Polynomial(x.v, cn);
 		}
 		return f.map(this);
 	}
@@ -602,7 +624,7 @@ internal class LambdaEXP : LambdaAlgebraic
 		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).a[0].Equals(Zahl.ZERO))
 		{
 			Polynomial xp = (Polynomial)x;
-			if (xp.@var is SimpleVariable && ((SimpleVariable)xp.@var).name.Equals("pi"))
+			if (xp.v is SimpleVariable && ((SimpleVariable)xp.v).name.Equals("pi"))
 			{
 				Algebraic q = xp.a[1].div(Zahl.IONE);
 				if (q is Zahl)
@@ -610,12 +632,12 @@ internal class LambdaEXP : LambdaAlgebraic
 					return fzexakt((Zahl)q);
 				}
 			}
-			if (xp.a[1] is Zahl && xp.@var is FunctionVariable && ((FunctionVariable)xp.@var).fname.Equals("log"))
+			if (xp.a[1] is Zahl && xp.v is FunctionVariable && ((FunctionVariable)xp.v).fname.Equals("log"))
 			{
 				if (((Zahl)xp.a[1]).integerq())
 				{
 					int n = ((Zahl)xp.a[1]).intval();
-					return ((FunctionVariable)xp.@var).arg.pow_n(n);
+					return ((FunctionVariable)xp.v).arg.pow_n(n);
 				}
 			}
 		}
@@ -727,9 +749,9 @@ internal class LambdaLOG : LambdaAlgebraic
 		{
 			return Zahl.PI.mult(Zahl.IONE);
 		}
-		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).a[0].Equals(Zahl.ZERO) && ((Polynomial)x).@var is FunctionVariable && ((FunctionVariable)((Polynomial)x).@var).fname.Equals("exp"))
+		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).a[0].Equals(Zahl.ZERO) && ((Polynomial)x).v is FunctionVariable && ((FunctionVariable)((Polynomial)x).v).fname.Equals("exp"))
 		{
-			return ((FunctionVariable)((Polynomial)x).@var).arg.add(FunctionVariable.create("log",((Polynomial)x).a[1]));
+			return ((FunctionVariable)((Polynomial)x).v).arg.add(FunctionVariable.create("log",((Polynomial)x).a[1]));
 		}
 		return null;
 	}

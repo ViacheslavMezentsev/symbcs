@@ -129,7 +129,7 @@ internal class LambdaFOR : Lambda
 			case Processor.EXIT:
 		case Processor.ERROR:
 			return ret;
-		case Processor.CONTINUE:
+		case Processor.CONTINUE: break;
 			}
 		}
 		return 0;
@@ -182,7 +182,7 @@ internal class LambdaXFOR : Lambda
 			case Processor.EXIT:
 		case Processor.ERROR:
 			return ret;
-		case Processor.CONTINUE:
+		case Processor.CONTINUE: break;
 			}
 			x = (Zahl)x.add(step);
 		}
@@ -219,7 +219,7 @@ internal class LambdaWHILE : Lambda
 			case Processor.EXIT:
 		case Processor.ERROR:
 			return ret;
-		case Processor.CONTINUE:
+		case Processor.CONTINUE: break;
 			}
 		}
 		return 0;

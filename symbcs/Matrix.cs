@@ -298,19 +298,19 @@ public class Matrix : Algebraic
 		}
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
 //ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][xm.a[0].Length];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, xm.a[0].Length);
+		Algebraic[][] b1 = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, xm.a[0].Length);
 		for (int i = 0; i < a.Length; i++)
 		{
 			for (int k = 0; k < xm.a[0].Length; k++)
 			{
-			b[i][k] = a[i][0].mult(xm.a[0][k]);
+			b1[i][k] = a[i][0].mult(xm.a[0][k]);
 			for (int l = 1; l < xm.a.Length; l++)
 			{
-				b[i][k] = b[i][k].add(a[i][l].mult(xm.a[l][k]));
+				b1[i][k] = b1[i][k].add(a[i][l].mult(xm.a[l][k]));
 			}
 			}
 		}
-		return new Matrix(b);
+		return new Matrix(b1);
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Algebraic div(Algebraic x) throws JasymcaException
@@ -626,8 +626,8 @@ public class Matrix : Algebraic
 //ORIGINAL LINE: public Matrix invert() throws JasymcaException
 	public virtual Matrix invert()
 	{
-		Algebraic det = det();
-		if (det.Equals(Zahl.ZERO))
+		Algebraic _det = det();
+		if (_det.Equals(Zahl.ZERO))
 		{
 			throw new JasymcaException("Matrix not invertible.");
 		}
@@ -636,7 +636,7 @@ public class Matrix : Algebraic
 		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a.Length);
 		if (a.Length == 1)
 		{
-			b[0][0] = Zahl.ONE.div(det);
+			b[0][0] = Zahl.ONE.div(_det);
 		}
 		else
 		{
@@ -644,7 +644,7 @@ public class Matrix : Algebraic
 			{
 				for (int k = 0; k < a[0].Length; k++)
 				{
-					b[i][k] = unterdet(k,i).div(det);
+					b[i][k] = unterdet(k,i).div(_det);
 				}
 			}
 		}
@@ -744,7 +744,7 @@ public class Matrix : Algebraic
 	{
 		Variable x = SimpleVariable.top;
 		Polynomial p = charpoly(x);
-		Algebraic[] ps = p.square_free_dec(p.@var);
+		Algebraic[] ps = p.square_free_dec(p.v);
 		Vektor r;
 		ArrayList v = new ArrayList();
 		for (int i = 0; i < ps.Length; i++)
@@ -851,7 +851,7 @@ public class Matrix : Algebraic
 		{
 			return k;
 		}
-		int pivot = k;
+		int _pivot = k;
 		double maxa = a[k][k].norm();
 		for (int i = k + 1; i < nrow(); i++)
 		{
@@ -859,7 +859,7 @@ public class Matrix : Algebraic
 			if (dummy > maxa)
 			{
 				maxa = dummy;
-				pivot = i;
+				_pivot = i;
 			}
 		}
 		if (maxa == 0.0)
@@ -874,16 +874,16 @@ public class Matrix : Algebraic
 				return kn;
 			}
 		}
-		if (pivot != k)
+		if (_pivot != k)
 		{
 			for (int j = k;j < ncol();j++)
 			{
-				Algebraic dummy = a[pivot][j];
-				a[pivot][j] = a[k][j];
+				Algebraic dummy = a[_pivot][j];
+				a[_pivot][j] = a[k][j];
 				a[k][j] = dummy;
 			}
 		}
-		return pivot;
+		return _pivot;
 	}
 	private bool row_zero(int k)
 	{
@@ -977,10 +977,10 @@ public class Matrix : Algebraic
 		Matrix D = eye(m,m);
 		for (int k = 0; k < m - 1; k++)
 		{
-			int pivot = pivot(k);
-			if (pivot != k)
+			int _pivot = pivot(k);
+			if (_pivot != k)
 			{
-				Matrix E = elementary(m,k,pivot);
+				Matrix E = elementary(m,k,_pivot);
 				C = (Matrix)C.mult(E);
 				D = (Matrix)D.mult(E);
 				perm++;

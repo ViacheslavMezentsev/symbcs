@@ -27,17 +27,17 @@ internal class LambdaODE : Lambda
 		Algebraic cn = new Polynomial(new SimpleVariable("C"));
 		Algebraic res = qi.add(cn).mult(dn);
 		res = (new ExpandUser()).f_exakt(res);
-		p("User Function expand: " + res);
+		debug("User Function expand: " + res);
 		res = (new TrigExpand()).f_exakt(res);
-		p("Trigexpand: " + res);
+		debug("Trigexpand: " + res);
 		res = (new NormExp()).f_exakt(res);
-		p("Norm: " + res);
+		debug("Norm: " + res);
 		if (res is Rational)
 		{
 			res = (new LambdaRAT()).f_exakt(res);
 		}
 		res = (new TrigInverseExpand()).f_exakt(res);
-		p("Triginverse: " + res);
+		debug("Triginverse: " + res);
 		res = (new SqrtExpand()).f_exakt(res);
 		st.Push(res);
 		return 0;

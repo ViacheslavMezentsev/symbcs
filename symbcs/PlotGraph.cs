@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Threading;
 
-using jsystem;
-using kjava.awt;
 internal class LambdaPLOT : Lambda
 {
 	internal static PlotGraph pg = null;
@@ -187,7 +185,7 @@ public class PlotGraph : Frame, Runnable
 			repaint();
 		}
 	}
-	internal NumFmt fmt = new NumFmtVar(10, 4);
+	internal INumFmt fmt = new NumFmtVar(10, 4);
 	internal int xp = -1, yp;
 	internal int dx = 0, dy = 0;
 	internal double a0, a1;

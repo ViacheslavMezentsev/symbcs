@@ -70,7 +70,7 @@ public class Exakt : Zahl
 			br[0] = br[0].negate();
 			return br;
 		}
-		double eps = 1.e-8;
+		double eps = 1.0e-8;
 		Zahl a = Lambda.pc.env.getnum("ratepsilon");
 		if (a != null)
 		{
@@ -206,9 +206,11 @@ public class Exakt : Zahl
 	}
 	private double floatValue(BigInteger[] x)
 	{
-		BigInteger[] q = x[0].divideAndRemainder(x[1]);
-		return (double)q[0] + (double)q[1] / (double)x[1];
+		var q = x[0].divideAndRemainder( x[1] );
+
+		return q[0].doubleValue() + q[1].doubleValue() / x[1].doubleValue();
 	}
+
 	public virtual Unexakt tofloat()
 	{
 		if (imag == null)
@@ -477,6 +479,6 @@ public class Exakt : Zahl
 	}
 	public override int intval()
 	{
-		return (int)real[0];
+		return real[0].intValue();
 	}
 }

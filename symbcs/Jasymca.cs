@@ -1,132 +1,151 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 
-using kjava.io;
-using kjava.util;
-using jsystem;
-using jsystem.JConsole;
-public class Jasymca : javax.microedition.midlet.MIDlet, Runnable
+public class PrintStream
 {
-	internal static InputStream getFileInputStream(string fname)
+    public void print(string text)
+    {
+        Console.Write(text);
+    }
+
+    public void println( string text )
+    {
+        Console.WriteLine( text );
+    }
+}
+
+public class Jasymca
+{    
+	internal static Stream getFileInputStream( string fname )
 	{
-		return new kjava.io.FileInputStream(fname);
+        return new FileStream( fname, FileMode.Open );
 	}
-	internal static OutputStream getFileOutputStream(string fname, bool append)
+
+	internal static Stream getFileOutputStream( string fname, bool append )
 	{
-		return new kjava.io.FileOutputStream(fname, append);
+        return new FileStream( fname, append ? FileMode.Create | FileMode.Append : FileMode.Create );
 	}
+
 	internal static string JasymcaRC = "vfs/Jasymca.";
-	public virtual void startApp()
+
+	public static void Main()
 	{
-		JSystem.init(Display.getDisplay(this));
-		FileHandler[] fh = new FileHandler[] {new TextEdit()};
-		JSystem.browser = new FileBrowser(JSystem.display, JSystem.console, fh);
-		JSystem.console.Title = "Jasymca";
-		JSystem.showConsole();
-		JSystem.@out = JSystem.console.stdout;
-		JSystem.err = JSystem.console.stdout;
-		JSystem.@in = JSystem.console.stdin;
-		start(JSystem.@in, JSystem.@out);
+        try
+        {
+            var fname = JasymcaRC + ui + ".rc";
+
+            var file = getFileInputStream( fname );
+
+            LambdaLOADFILE.readFile( file );
+        }
+        catch { }
+
+        Console.Write( welcome );
+
+        proc.PrintStream = ps;
+
+        var myThread = new Thread( Run );
+
+        myThread.Start();
 	}
-	public virtual void destroyApp(bool a)
-	{
-	}
-	public virtual void pauseApp()
-	{
-	}
-	public Environment env;
-	public Processor proc = null;
-	public Parser pars;
-	internal string ui = "Octave";
-	internal PrintStream ps;
-	internal InputStream @is;
+
+	public static Environment env;
+	public static Processor proc;
+	public static Parser pars;
+
+	internal static string ui = "Octave";
+    internal PrintStream pstream;
+    internal InputStream istream;
+
 	public virtual void interrupt()
 	{
-		if (proc != null)
+		if ( proc != null )
 		{
-			proc.set_interrupt(true);
+			proc.set_interrupt( true );
 		}
 	}
-	internal string welcome = "Jasymca	- Java Symbolic Calculator\n" + "version 2.1\n" + "Copyright (C) 2006, 2009 - Helmut Dersch\n" + "der@hs-furtwangen.de\n\n";
-	internal static NumFmt fmt = new NumFmtVar(10, 5);
-	internal Thread evalLoop = null;
-	public Jasymca() : this("Octave")
-	{
+
+	internal static string welcome = "Jasymca	- Java Symbolic Calculator\n" + "version 2.1\n" + "Copyright (C) 2006, 2009 - Helmut Dersch\n" + "der@hs-furtwangen.de\n\n";
+	internal static INumFmt fmt = new NumFmtVar(10, 5);
+
+	internal Thread evalLoop;
+
+	public Jasymca() : this( "Octave" ) 
+    {
 	}
-	public Jasymca(string ui)
+
+	public Jasymca( string ui )
 	{
-		setup_ui(ui, true);
+		setup_ui( ui, true );
+
 		welcome += "Executing in " + ui + "-Mode.\n";
 		welcome += "Welcome and have fun!\n";
 	}
-	public virtual void setup_ui(string ui, bool clear_env)
+
+	public static void setup_ui( string ui, bool clear_env )
 	{
-		if (clear_env)
+		if ( clear_env )
 		{
 			env = new Environment();
 		}
-		if (ui != null)
+
+		if ( ui != null )
 		{
-			this.ui = ui;
+		    Jasymca.ui = ui;
 		}
-		if (this.ui.Equals("Maxima"))
+
+        if ( Jasymca.ui.Equals( "Maxima" ) )
 		{
-			proc = new XProcessor(env);
-			pars = new MaximaParser(env);
+			proc = new XProcessor( env );
+			pars = new MaximaParser( env );
 		}
-		else if (this.ui.Equals("Octave"))
+
+        else if ( Jasymca.ui.Equals( "Octave" ) )
 		{
-			proc = new Processor(env);
-			pars = new OctaveParser(env);
+			proc = new Processor( env );
+			pars = new OctaveParser( env );
 		}
+
 		else
 		{
-			Console.WriteLine("Mode " + this.ui + " not available.");
-			Environment.Exit(0);
+            Console.WriteLine( "Mode " + Jasymca.ui + " not available." );
+			//Environment.Exit(0);
 		}
 	}
-	public virtual void start(InputStream @is, PrintStream ps)
+
+
+    public static void Run()
 	{
-		this.@is = @is;
-		this.ps = ps;
-		try
+		while ( true )
 		{
-			string fname = JasymcaRC + ui + ".rc";
-			InputStream file = getFileInputStream(fname);
-			LambdaLOADFILE.readFile(file);
-		}
-		catch (Exception)
-		{
-		}
-		ps.print(welcome);
-		proc.PrintStream = ps;
-		evalLoop = new Thread(this);
-		evalLoop.Start();
-	}
-	public virtual void run()
-	{
-		while (true)
-		{
-			ps.print(pars.prompt());
+			ps.print( pars.prompt() );
+
 			try
 			{
-				proc.set_interrupt(false);
-				List code = pars.compile(@is, ps);
-				if (code == null)
+				proc.set_interrupt( false );
+
+                var code = pars.compile( istream, pstream );
+
+				if ( code == null )
 				{
 					ps.println("");
 					continue;
 				}
-				if (proc.process_list(code, false) == proc.EXIT)
+
+				if ( proc.process_list( code, false ) == proc.EXIT )
 				{
-					ps.println("\nGoodbye.");
+					Console.WriteLine( "\nGoodbye." );
+
 					return;
 				}
+
 				proc.printStack();
 			}
-			catch (Exception e)
+			catch ( Exception ex )
 			{
-				ps.println("\n" + e);
+			    Console.WriteLine( "\n" + ex.Message );
+
 				proc.clearStack();
 			}
 		}

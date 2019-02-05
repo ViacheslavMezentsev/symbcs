@@ -3,6 +3,7 @@
 public class Compiler
 {
 	internal Parser p;
+
 	internal static string[] expr_vars = new string[] {"u","v","w","z"};
 	internal static string[] stmnt_vars = new string[] {"X","Y"};
 	internal static string[] lval_vars = new string[] {"y"};
@@ -10,10 +11,12 @@ public class Compiler
 	internal static string[] list_vars = new string[] {"x"};
 	internal List rule_in, rule_out;
 	internal Hashtable vars;
+
 	internal virtual bool variableq(object x)
 	{
-		return Parser.oneof(x, expr_vars) || Parser.oneof(x, stmnt_vars) || Parser.oneof(x, lval_vars) || Parser.oneof(x, func_vars) || Parser.oneof(x, list_vars);
+		return p.oneof(x, expr_vars) || p.oneof(x, stmnt_vars) || p.oneof(x, lval_vars) || p.oneof(x, func_vars) || p.oneof(x, list_vars);
 	}
+
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: Object match(Object v, List expr) throws ParseException
 	internal virtual object match(object v, List expr)
@@ -35,12 +38,13 @@ public class Compiler
 		{
 			r = p.compile_func(expr);
 		}
-		else if (Parser.oneof(v, list_vars))
+		else if (p.oneof(v, list_vars))
 		{
 			r = p.compile_list(expr);
 		}
 		return r;
 	}
+
 	internal virtual List change()
 	{
 		List r = Comp.vec2list(new ArrayList());
@@ -66,10 +70,10 @@ public class Compiler
 	internal virtual string ToString(Hashtable h)
 	{
 		string s = "";
-		System.Collections.IEnumerator k = vars.Keys.GetEnumerator();
-		while (k.hasMoreElements())
+		var k = vars.Keys.GetEnumerator();
+		while (k.MoveNext())
 		{
-			object key = k.nextElement();
+			object key = k.Current;
 			object val = h[key];
 			s = s + "key:" + key + "   val:" + val + "\n";
 		}

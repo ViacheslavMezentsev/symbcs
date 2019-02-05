@@ -3,61 +3,67 @@
 public abstract class Algebraic
 {
 	internal string name = null;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public abstract Algebraic add(Algebraic x) throws JasymcaException;
-	public abstract Algebraic add(Algebraic x);
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic sub(Algebraic x) throws JasymcaException
-	public virtual Algebraic sub(Algebraic x)
+    
+    // ORIGINAL LINE: public abstract Algebraic add(Algebraic x) throws JasymcaException;
+	public abstract Algebraic add( Algebraic x );
+
+    // ORIGINAL LINE: public Algebraic sub(Algebraic x) throws JasymcaException
+	public virtual Algebraic sub( Algebraic x )
 	{
-		return add(x.mult(Zahl.MINUS));
+		return add( x.mult( Zahl.MINUS ) );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public abstract Algebraic mult(Algebraic x) throws JasymcaException;
-	public abstract Algebraic mult(Algebraic x);
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic div(Algebraic x) throws JasymcaException
-	public virtual Algebraic div(Algebraic x)
+
+    // ORIGINAL LINE: public abstract Algebraic mult(Algebraic x) throws JasymcaException;
+	public abstract Algebraic mult( Algebraic x );
+
+    // ORIGINAL LINE: public Algebraic div(Algebraic x) throws JasymcaException
+	public virtual Algebraic div( Algebraic x )
 	{
-		if (x is Polynomial)
+		if ( x is Polynomial )
 		{
-			return (new Rational(this, (Polynomial)x)).reduce();
+			return ( new Rational( this, ( Polynomial ) x ) ).reduce();
 		}
-		if (x is Rational)
+		if ( x is Rational )
 		{
-			return ((Rational)x).den.mult(this).div(((Rational)x).nom);
+			return ( ( Rational ) x ).den.mult( this ).div( ( ( Rational ) x ).nom );
 		}
-		if (!x.scalarq())
+		if ( !x.scalarq() )
 		{
-			return (new Matrix(this)).div(x);
+			return ( new Matrix( this ) ).div(x);
 		}
-		throw new JasymcaException("Can not divide " + this + " through " + x);
+
+		throw new JasymcaException( "Can not divide " + this + " through " + x );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic pow_n(int n) throws JasymcaException
-	public virtual Algebraic pow_n(int n)
+
+    // ORIGINAL LINE: public Algebraic pow_n(int n) throws JasymcaException
+	public virtual Algebraic pow_n( int n )
 	{
-		Algebraic pow , x = this;
-		if (n <= 0)
+		Algebraic pow, x = this;
+
+		if ( n <= 0 )
 		{
-			if (n == 0 || Equals(Zahl.ONE))
+			if ( n == 0 || Equals( Zahl.ONE ) )
 			{
 				return Zahl.ONE;
 			}
-			if (Equals(Zahl.ZERO))
+
+			if ( Equals( Zahl.ZERO ) )
 			{
-				throw new JasymcaException("Division by Zero.");
+				throw new JasymcaException( "Division by Zero." );
 			}
+
 			x = Zahl.ONE.div(x);
 			n = -n;
 		}
-		for (pow = Zahl.ONE; ;)
+
+		for ( pow = Zahl.ONE; ; )
 		{
-			if ((n & 1) != 0)
+			if ( ( n & 1 ) != 0 )
 			{
 				pow = pow.mult(x);
 			}
-			if ((n >>= 1) != 0)
+
+			if ( ( n >>= 1 ) != 0 )
 			{
 				x = x.mult(x);
 			}
@@ -66,35 +72,37 @@ public abstract class Algebraic
 				break;
 			}
 		}
+
 		return pow;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public abstract Algebraic cc() throws JasymcaException;
+
+    // ORIGINAL LINE: public abstract Algebraic cc() throws JasymcaException;
 	public abstract Algebraic cc();
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic realpart() throws JasymcaException
+
+    // ORIGINAL LINE: public Algebraic realpart() throws JasymcaException
 	public virtual Algebraic realpart()
 	{
-		return add(cc()).div(Zahl.TWO);
+		return add( cc() ).div( Zahl.TWO );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic imagpart() throws JasymcaException
+
+    // ORIGINAL LINE: public Algebraic imagpart() throws JasymcaException
 	public virtual Algebraic imagpart()
 	{
-		return sub(cc()).div(Zahl.TWO).div(Zahl.IONE);
+		return sub( cc() ).div( Zahl.TWO ).div( Zahl.IONE );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public abstract Algebraic deriv(Variable var) throws JasymcaException;
-	public abstract Algebraic deriv(Variable @var);
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public abstract Algebraic integrate(Variable var) throws JasymcaException;
-	public abstract Algebraic integrate(Variable @var);
+
+    // ORIGINAL LINE: public abstract Algebraic deriv(Variable var) throws JasymcaException;
+	public abstract Algebraic deriv( Variable var );
+
+    // ORIGINAL LINE: public abstract Algebraic integrate(Variable var) throws JasymcaException;
+	public abstract Algebraic integrate( Variable var );
+
 	public abstract double norm();
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public abstract Algebraic map(LambdaAlgebraic f) throws JasymcaException;
-	public abstract Algebraic map(LambdaAlgebraic f);
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic rat() throws JasymcaException
+
+    // ORIGINAL LINE: public abstract Algebraic map(LambdaAlgebraic f) throws JasymcaException;
+	public abstract Algebraic map( LambdaAlgebraic f );
+
+    // ORIGINAL LINE: public Algebraic rat() throws JasymcaException
 	public virtual Algebraic rat()
 	{
 		return map(new LambdaRAT());
@@ -127,7 +135,7 @@ public abstract class Algebraic
 	{
 		return false;
 	}
-	public override abstract bool Equals(object x);
+	public abstract override bool Equals(object x);
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public boolean komplexq() throws JasymcaException
 	public virtual bool komplexq()
@@ -176,13 +184,15 @@ public abstract class Algebraic
 		}
 		throw new JasymcaException("Wrong argument type.");
 	}
-	public virtual void print(PrintStream p)
+
+	public virtual void print( PrintStream p )
 	{
-		p.print(StringFmt.compact(ToString()));
+		p.print( StringFmt.compact( ToString() ) );
 	}
-	internal static void p(string s)
+
+	internal static void debug(string s)
 	{
-		Lambda.p(s);
+		Lambda.debug(s);
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Algebraic map_lambda(LambdaAlgebraic lambda, Algebraic arg2) throws ParseException,JasymcaException

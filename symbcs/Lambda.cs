@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
+using System.Text;
 
 public abstract class Lambda : Constants
 {
 	internal static Processor pc;
 	internal static Parser pr;
-	internal const bool debug = false;
-	internal static void p(string s)
+	internal const bool DEBUG = false;
+	internal static void debug(string s)
 	{
-		if (debug)
+	    if ( DEBUG )
 		{
 			Console.WriteLine(s);
 		}
@@ -100,7 +102,7 @@ public abstract class Lambda : Constants
 	internal static Variable getVariable(Stack st)
 	{
 		Polynomial p = getPolynomial(st);
-		return p.@var;
+		return p.v;
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: static int getInteger(Stack st) throws ParseException, JasymcaException
@@ -175,7 +177,7 @@ public abstract class Lambda : Constants
 		}
 	}
 }
-internal abstract class LambdaAlgebraic : Lambda
+/*internal*/ public abstract class LambdaAlgebraic : Lambda
 {
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
@@ -506,7 +508,7 @@ internal class UserFunction : LambdaAlgebraic
 }
 internal class LambdaFLOAT : LambdaAlgebraic
 {
-	internal double eps = 1.e-8;
+	internal double eps = 1.0e-8;
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
@@ -575,7 +577,7 @@ internal class LambdaMATRIX : Lambda
 				a[i] = new Algebraic[1];
 				a[i][0] = b;
 			}
-			if (a[i].length != a[0].length)
+			if ( a[i].GetLength(0) != a[0].GetLength(0) )
 			{
 				throw new JasymcaException("Matrix rows must have equal length.");
 			}
@@ -912,16 +914,21 @@ internal class LambdaGCD : Lambda
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
+
 		if (narg < 2)
 		{
 			throw new ParseException("GCD requires at least 2 arguments.");
 		}
-		Algebraic gcd = getAlgebraic(st);
+
+		var _gcd = getAlgebraic(st);
+
 		for (int i = 1; i < narg; i++)
 		{
-			gcd = gcd(gcd, getAlgebraic(st));
+			_gcd = gcd( _gcd, getAlgebraic(st) );
 		}
-		st.Push(gcd);
+
+		st.Push(_gcd);
+
 		return 0;
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
@@ -1043,7 +1050,7 @@ internal class LambdaCFS : Lambda
 		{
 			throw new ParseException("Argument must be exact number");
 		}
-		double eps = 1.e-5;
+		double eps = 1.0e-5;
 		if (narg > 1)
 		{
 			eps = getNumber(st).unexakt().real;
@@ -1073,11 +1080,11 @@ internal class LambdaDIFF : Lambda
 		{
 			if (f is Polynomial)
 			{
-				v = ((Polynomial)f).@var;
+				v = ((Polynomial)f).v;
 			}
 			else if (f is Rational)
 			{
-				v = ((Rational)f).den.@var;
+				v = ((Rational)f).den.v;
 			}
 			else
 			{
@@ -1107,7 +1114,7 @@ internal class LambdaSUBST : Lambda
 		Algebraic a = getAlgebraic(st);
 		Polynomial b = getPolynomial(st);
 		Algebraic c = getAlgebraic(st);
-		Variable bx = b.@var;
+		Variable bx = b.v;
 		while (bx is FunctionVariable)
 		{
 			Algebraic arg = ((FunctionVariable)bx).arg;
@@ -1115,7 +1122,7 @@ internal class LambdaSUBST : Lambda
 			{
 				throw new JasymcaException("Can not solve " + b + " for a variable.");
 			}
-			bx = ((Polynomial)arg).@var;
+			bx = ((Polynomial)arg).v;
 		}
 		Vektor sol = LambdaSOLVE.solve(a.sub(b), bx);
 		Algebraic[] res = new Algebraic[sol.length()];
@@ -1321,54 +1328,71 @@ internal class LambdaSAVE : Lambda
 {
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int lambda( Stack st )
 	{
 		int size = getNarg(st);
+
 		if (size < 2)
 		{
 			throw new ParseException("Usage: SAVE (filename,arg1, arg2,...,argi)");
 		}
-		object filename = st.Pop();
+
+		var filename = st.Pop();
+
 		try
 		{
-			OutputStream f = Jasymca.getFileOutputStream((string)filename, true);
-			for (int i = 1; i < size; i++)
+			var f = Jasymca.getFileOutputStream( (string) filename, true );
+
+			for ( var i = 1; i < size; i++ )
 			{
-				string @var = (string)st.Pop();
-				if ("ALL".Equals(@var, StringComparison.CurrentCultureIgnoreCase))
+				var name = ( string ) st.Pop();
+
+				if ( "ALL".Equals( name, StringComparison.CurrentCultureIgnoreCase ) )
 				{
-					System.Collections.IEnumerator en = pc.env.Keys.GetEnumerator();
-					while (en.hasMoreElements())
+					var en = pc.env.Keys.GetEnumerator();
+
+					while ( en.MoveNext() )
 					{
-						object key = en.nextElement();
-						if (!"pi".Equals((string)key, StringComparison.CurrentCultureIgnoreCase))
-						{
-							object val = pc.env.getValue((string)key);
-							if (!(val is Lambda))
-							{
-								string line = key.ToString() + ":" + val.ToString() + ";\n";
-								f.write(line.GetBytes());
-							}
-						}
+						var key = en.Current;
+
+					    if ( "pi".Equals( ( string ) key, StringComparison.CurrentCultureIgnoreCase ) ) continue;
+
+					    var val = pc.env.getValue( ( string ) key );
+
+					    if ( val is Lambda ) continue;
+
+					    var line = key + ":" + val + ";\n";
+
+                        var bytes = Encoding.UTF8.GetBytes( line );
+
+                        f.Write( bytes, 0, bytes.Length );
 					}
 				}
 				else
 				{
-					object val = pc.env.getValue(@var);
-					string line = @var.ToString() + ":" + val.ToString() + ";\n";
-					f.write(line.GetBytes());
+					var val = pc.env.getValue( name );
+
+					var line = name + ":" + val + ";\n";
+
+                    var bytes = Encoding.UTF8.GetBytes( line );
+
+                    f.Write( bytes, 0, bytes.Length );
 				}
 			}
-			f.close();
-			Console.WriteLine("Wrote variables to " + filename);
+
+			f.Close();
+
+			Console.WriteLine( "Wrote variables to " + filename );
 		}
-		catch (Exception e)
+		catch ( Exception ex )
 		{
-			throw new JasymcaException("Could not write to " + filename + " :" + e.ToString());
+			throw new JasymcaException( "Could not write to " + filename + " : " + ex.Message );
 		}
+
 		return 0;
 	}
 }
+
 internal class LambdaLOADFILE : Lambda
 {
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
@@ -1402,60 +1426,76 @@ internal class LambdaLOADFILE : Lambda
 	{
 		string sep = "/";
 		string s;
-		Type c = (new LambdaLOADFILE()).GetType();
-		for (int i = 0; i < pc.env.path.size(); i++)
+
+		var c = typeof( LambdaLOADFILE );
+
+		for (int i = 0; i < pc.env.path.Count; i++)
 		{
-			string dir = (string)pc.env.path.elementAt(i);
+			string dir = (string)pc.env.path[i];
+
 			s = fname.StartsWith(sep, StringComparison.Ordinal) ? dir + fname : dir + sep + fname;
-			InputStream f = c.getResourceAsStream(s);
+
+			Stream f = c.getResourceAsStream(s);
+
 			if (f == null)
 			{
 				try
 				{
 					f = Jasymca.getFileInputStream(s);
 				}
-				catch (Exception)
+				catch
 				{
 					continue;
 				}
 			}
+
 			if (f == null)
 			{
 				continue;
 			}
+
 			readFile(f);
+
 			return;
 		}
+
 		throw new IOException("Could not open " + fname + ".");
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public static void readFile(InputStream f) throws JasymcaException
-	public static void readFile(InputStream f)
+	public static void readFile( Stream f)
 	{
-		Stack old_stack = pc.stack;
+		var old_stack = pc.stack;
+
 		pc.stack = new Stack();
+
 		try
 		{
 			while (true)
 			{
-				List code = pr.compile(f,null);
-				if (code == null)
+				var code = pr.compile(f,null);
+
+				if ( code == null )
 				{
 					break;
 				}
-				pc.process_list(code, true);
+
+				pc.process_list( code, true );
 			}
-			f.close();
+
+			f.Close();
+
 			pc.stack = old_stack;
-			return;
 		}
-		catch (Exception e)
+		catch ( Exception ex )
 		{
 			pc.stack = old_stack;
-			throw new JasymcaException(e.ToString());
+
+			throw new JasymcaException( ex.Message );
 		}
 	}
 }
+
 internal class LambdaRAT : LambdaAlgebraic
 {
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
@@ -1514,7 +1554,7 @@ internal class LambdaSQFR : Lambda
 			throw new ParseException("Argument to sqfr() must be polynomial.");
 		}
 		f = ((Polynomial)f).rat();
-		Algebraic[] fs = ((Polynomial)f).square_free_dec(((Polynomial)f).@var);
+		Algebraic[] fs = ((Polynomial)f).square_free_dec(((Polynomial)f).v);
 		if (fs == null)
 		{
 			st.Push(f);
@@ -1541,7 +1581,7 @@ internal class LambdaALLROOTS : Lambda
 			throw new JasymcaException("Argument to allroots must be polynomial.");
 		}
 		Polynomial p = (Polynomial)((Polynomial)x).rat();
-		Algebraic[] ps = p.square_free_dec(p.@var);
+		Algebraic[] ps = p.square_free_dec(p.v);
 		Vektor r;
 		ArrayList v = new ArrayList();
 		for (int i = 0; i < ps.Length; i++)
@@ -1730,9 +1770,9 @@ internal class LambdaSQRT : LambdaAlgebraic
 		{
 			return fzexakt((Zahl)x);
 		}
-		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).a[0].Equals(Zahl.ZERO) && ((Polynomial)x).a[1].Equals(Zahl.ONE) && ((Polynomial)x).@var is FunctionVariable && ((FunctionVariable)((Polynomial)x).@var).fname.Equals("exp"))
+		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).a[0].Equals(Zahl.ZERO) && ((Polynomial)x).a[1].Equals(Zahl.ONE) && ((Polynomial)x).v is FunctionVariable && ((FunctionVariable)((Polynomial)x).v).fname.Equals("exp"))
 		{
-			return FunctionVariable.create("exp", ((FunctionVariable)((Polynomial)x).@var).arg.div(Zahl.TWO));
+			return FunctionVariable.create("exp", ((FunctionVariable)((Polynomial)x).v).arg.div(Zahl.TWO));
 		}
 		return null;
 	}
@@ -1751,18 +1791,18 @@ internal class LambdaSQRT : LambdaAlgebraic
 				}
 				return r;
 			}
-			long nom = (long)((Exakt)x).real[0];
-			long den = (long)((Exakt)x).real[1];
+			long nom = (long)((Exakt)x).real[0].longValue();
+			long den = (long)((Exakt)x).real[1].longValue();
 			long a0 = introot(nom), a1 = nom / (a0 * a0);
 			long b0 = introot(den), b1 = den / (b0 * b0);
 			BigInteger[] br = new BigInteger[] {BigInteger.valueOf(a0), BigInteger.valueOf(b0 * b1)};
-			Exakt r = new Exakt(br);
+			Exakt r1 = new Exakt(br);
 			a0 = a1 * b1;
 			if (a0 == 1L)
 			{
-				return r;
+				return r1;
 			}
-			return r.mult(new Polynomial(new FunctionVariable("sqrt", new Exakt(BigInteger.valueOf(a0)), this)));
+			return r1.mult(new Polynomial(new FunctionVariable("sqrt", new Exakt(BigInteger.valueOf(a0)), this)));
 		}
 		return null;
 	}
@@ -1862,11 +1902,11 @@ internal class ExpandUser : LambdaAlgebraic
 			return x1.map(this);
 		}
 		Polynomial p = (Polynomial)x1;
-		if (p.@var is SimpleVariable)
+		if (p.v is SimpleVariable)
 		{
 			return p.map(this);
 		}
-		FunctionVariable f = (FunctionVariable)p.@var;
+		FunctionVariable f = (FunctionVariable)p.v;
 		object lx = pc.env.getValue(f.fname);
 		if (!(lx is UserFunction))
 		{
@@ -2048,21 +2088,27 @@ internal class LambdaPATH : Lambda
 //ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
-		int n = pc.env.path.size();
-		string s = "";
-		while (n-- > 0)
+        int n = pc.env.path.Count;
+
+		var s = "";
+
+		while ( n-- > 0 )
 		{
-			object p = pc.env.path.elementAt(n);
+			var p = pc.env.path[n];
+
 			s = s + p;
-			if (n != 0)
+
+			if ( n != 0 )
 			{
 				s = s + ":";
 			}
 		}
-		if (pc.ps != null)
+
+		if ( pc.ps != null )
 		{
 			pc.ps.println(s);
 		}
+
 		return 0;
 	}
 }

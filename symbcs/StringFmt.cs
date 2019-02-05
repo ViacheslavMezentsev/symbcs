@@ -29,8 +29,9 @@
 					{
 						return false;
 					}
-					default:
-						break;
+				    break;
+                default:
+                    break;
 			}
 		}
 		return nopen == 0;
