@@ -3,8 +3,6 @@ using System.Collections;
 
 public class LambdaPRIMES : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException,JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -80,8 +78,6 @@ public class LambdaPRIMES : Lambda
 		}
 		return X;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Vektor teiler(long X) throws JasymcaException
 	internal static Vektor teiler(long X)
 	{
 		ArrayList teiler = new ArrayList();
@@ -201,7 +197,5 @@ public class LambdaPRIMES : Lambda
 		}
 
 		return Vektor.create(teiler);
-
-	    //throws JasymcaException();
 	}
 }

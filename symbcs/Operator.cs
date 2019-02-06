@@ -12,27 +12,27 @@ public class Operator : Constants
 	internal static Operator[] OPS = new Operator[0];
 	public virtual bool unary()
 	{
-		return (type & Constants_Fields.UNARY) != 0;
+		return (type & Fields.UNARY) != 0;
 	}
 	public virtual bool binary()
 	{
-        return ( type & Constants_Fields.BINARY ) != 0;
+        return ( type & Fields.BINARY ) != 0;
 	}
 	public virtual bool ternary()
 	{
-        return ( type & Constants_Fields.TERNARY ) != 0;
+        return ( type & Fields.TERNARY ) != 0;
 	}
 	public virtual bool lvalue()
 	{
-        return ( type & Constants_Fields.LVALUE ) != 0;
+        return ( type & Fields.LVALUE ) != 0;
 	}
 	public virtual bool list()
 	{
-        return ( type & Constants_Fields.LIST ) != 0;
+        return ( type & Fields.LIST ) != 0;
 	}
 	public virtual bool left_right()
 	{
-		return associativity == Constants_Fields.LEFT_RIGHT;
+		return associativity == Fields.LEFT_RIGHT;
 	}
 	public Operator(string mnemonic, string symbol, int precedence, int associativity, int type)
 	{
@@ -77,19 +77,19 @@ public class Operator : Constants
 			{
 				switch (pos)
 				{
-					case Constants_Fields.START:
+					case Fields.START:
 						if (op.unary() && op.left_right())
 						{
 							return op;
 						}
 						continue;
-                    case Constants_Fields.END:
+                    case Fields.END:
 						if (op.unary() && !op.left_right())
 						{
 							return op;
 						}
 						continue;
-                    case Constants_Fields.MID:
+                    case Fields.MID:
 						if (op.binary() || op.ternary())
 						{
 							return op;

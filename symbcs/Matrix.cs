@@ -67,8 +67,6 @@ public class Matrix : Algebraic
 			};
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic get(int i, int k) throws JasymcaException
 	public virtual Algebraic get(int i, int k)
 	{
 		if (i < 0 || i >= a.Length || k < 0 || k >= a[0].Length)
@@ -77,8 +75,6 @@ public class Matrix : Algebraic
 		}
 		return a[i][k];
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public void set(int i, int k, Algebraic x) throws JasymcaException
 	public virtual void set(int i, int k, Algebraic x)
 	{
 		if (i < 0 || i >= a.Length || k < 0 || k >= a[0].Length)
@@ -95,8 +91,6 @@ public class Matrix : Algebraic
 	{
 		return a[0].Length;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public double[][] getDouble(int nr, int nc) throws JasymcaException
 	public virtual double[][] getDouble(int nr, int nc)
 	{
 		if (nr == 0)
@@ -126,8 +120,6 @@ public class Matrix : Algebraic
 		}
 		return b;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public double[][] getDouble() throws JasymcaException
 	public virtual double[][] Double
 	{
 		get
@@ -155,8 +147,6 @@ public class Matrix : Algebraic
 		}
 		return (new Vektor(c)).reduce();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public void insert(Matrix x, Index idx) throws JasymcaException
 	public virtual void insert(Matrix x, Index idx)
 	{
 		if (idx.row_max > nrow() || idx.col_max > ncol())
@@ -195,8 +185,6 @@ public class Matrix : Algebraic
 		}
 		throw new JasymcaException("Wrong index dimension.");
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Matrix extract(Index idx) throws JasymcaException
 	public virtual Matrix extract(Index idx)
 	{
 		if (idx.row_max > nrow() || idx.col_max > ncol())
@@ -213,20 +201,14 @@ public class Matrix : Algebraic
 		}
 			return x;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Matrix column(Vektor x) throws JasymcaException
 	public static Matrix column(Vektor x)
 	{
 		return (new Matrix(x)).transpose();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Matrix row(Vektor x) throws JasymcaException
 	public static Matrix row(Vektor x)
 	{
 		return new Matrix(x);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic cc() throws JasymcaException
 	public override Algebraic cc()
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
@@ -241,8 +223,6 @@ public class Matrix : Algebraic
 		}
 			return new Matrix(b);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic add(Algebraic x) throws JasymcaException
 	public override Algebraic add(Algebraic x)
 	{
 		if (x.scalarq())
@@ -273,8 +253,6 @@ public class Matrix : Algebraic
 	{
 		return nrow() == x.nrow() && ncol() == x.ncol();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic mult(Algebraic x) throws JasymcaException
 	public override Algebraic mult(Algebraic x)
 	{
 		if (x.scalarq())
@@ -312,8 +290,6 @@ public class Matrix : Algebraic
 		}
 		return new Matrix(b1);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic div(Algebraic x) throws JasymcaException
 	public override Algebraic div(Algebraic x)
 	{
 		if (x.scalarq())
@@ -346,8 +322,6 @@ public class Matrix : Algebraic
 		}
 			return new Matrix(b);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic mpow(int n) throws JasymcaException
 	public virtual Algebraic mpow(int n)
 	{
 		if (n == 0)
@@ -376,8 +350,6 @@ public class Matrix : Algebraic
 			return this;
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic deriv(Variable var) throws JasymcaException
 	public override Algebraic deriv(Variable @var)
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
@@ -392,8 +364,6 @@ public class Matrix : Algebraic
 		}
 			return new Matrix(b);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic integrate(Variable var) throws JasymcaException
 	public override Algebraic integrate(Variable @var)
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
@@ -452,8 +422,6 @@ public class Matrix : Algebraic
 		}
 				return true;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic map_lambda(LambdaAlgebraic f, Algebraic arg2) throws ParseException,JasymcaException
 	public override Algebraic map_lambda(LambdaAlgebraic f, Algebraic arg2)
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
@@ -498,8 +466,6 @@ public class Matrix : Algebraic
 		}
 		return new Matrix(b);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic value(Variable var, Algebraic x) throws JasymcaException
 	public override Algebraic value(Variable @var, Algebraic x)
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
@@ -574,8 +540,6 @@ public class Matrix : Algebraic
 			}
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic map(LambdaAlgebraic f) throws JasymcaException
 	public override Algebraic map(LambdaAlgebraic f)
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
@@ -590,8 +554,6 @@ public class Matrix : Algebraic
 		}
 			return new Matrix(cn);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Matrix transpose() throws JasymcaException
 	public virtual Matrix transpose()
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
@@ -606,8 +568,6 @@ public class Matrix : Algebraic
 		}
 			return new Matrix(b);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Matrix adjunkt() throws JasymcaException
 	public virtual Matrix adjunkt()
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
@@ -622,8 +582,6 @@ public class Matrix : Algebraic
 		}
 			return new Matrix(b);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Matrix invert() throws JasymcaException
 	public virtual Matrix invert()
 	{
 		Algebraic _det = det();
@@ -650,8 +608,6 @@ public class Matrix : Algebraic
 		}
 		return new Matrix(b);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic min() throws JasymcaException
 	public virtual Algebraic min()
 	{
 		Algebraic[] r = new Algebraic[ncol()];
@@ -678,8 +634,6 @@ public class Matrix : Algebraic
 		}
 		return (new Vektor(r)).reduce();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic max() throws JasymcaException
 	public virtual Algebraic max()
 	{
 		Algebraic[] r = new Algebraic[ncol()];
@@ -706,8 +660,6 @@ public class Matrix : Algebraic
 		}
 		return (new Vektor(r)).reduce();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic find() throws JasymcaException
 	public virtual Algebraic find()
 	{
 		ArrayList v = new ArrayList();
@@ -728,8 +680,6 @@ public class Matrix : Algebraic
 		}
 		return column(vx);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Polynomial charpoly(Variable x) throws JasymcaException
 	public virtual Polynomial charpoly(Variable x)
 	{
 		Polynomial p = new Polynomial(x);
@@ -738,8 +688,6 @@ public class Matrix : Algebraic
 		p = (Polynomial)p.rat();
 		return p;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Vektor eigenvalues() throws JasymcaException
 	public virtual Vektor eigenvalues()
 	{
 		Variable x = SimpleVariable.top;
@@ -763,8 +711,6 @@ public class Matrix : Algebraic
 		}
 		return Vektor.create(v);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic det() throws JasymcaException
 	public virtual Algebraic det()
 	{
 		if (a.Length != a[0].Length)
@@ -790,8 +736,6 @@ public class Matrix : Algebraic
 				return (perm % 2 == 0 ? r : r.mult(Zahl.MINUS));
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic det2() throws JasymcaException
 	internal virtual Algebraic det2()
 	{
 		if (a.Length != a[0].Length)
@@ -809,8 +753,6 @@ public class Matrix : Algebraic
 		}
 		return d;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic unterdet(int i, int k) throws JasymcaException
 	public virtual Algebraic unterdet(int i, int k)
 	{
 		if (i < 0 || i>a.Length || k < 0 || k>a[0].Length)
@@ -843,8 +785,6 @@ public class Matrix : Algebraic
 		}
 		return u.mult(Zahl.MINUS);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: int pivot(int k) throws JasymcaException
 	internal virtual int pivot(int k)
 	{
 		if (k >= ncol())
@@ -951,16 +891,12 @@ public class Matrix : Algebraic
 		}
 		a = b;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Matrix elementary(int n, int i, int k, Algebraic m)throws JasymcaException
 	internal static Matrix elementary(int n, int i, int k, Algebraic m)
 	{
 		Matrix t = eye(n,n);
 		t.a[i][k] = m;
 		return t;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Matrix elementary(int n, int i, int k)throws JasymcaException
 	internal static Matrix elementary(int n, int i, int k)
 	{
 		Matrix t = eye(n,n);
@@ -968,8 +904,6 @@ public class Matrix : Algebraic
 		t.a[i][k] = t.a[k][i] = Zahl.ONE;
 		return t;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int rank_decompose(Matrix B, Matrix P) throws JasymcaException
 	public virtual int rank_decompose(Matrix B, Matrix P)
 	{
 		int m = nrow(), n = ncol(), perm = 0;
@@ -1044,8 +978,6 @@ public class Matrix : Algebraic
 		}
 			return new Matrix(b);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Matrix pseudoinverse() throws JasymcaException
 	public virtual Matrix pseudoinverse()
 	{
 		if (!det().Equals(Zahl.ZERO))

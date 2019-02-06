@@ -5,8 +5,6 @@ using System.Threading;
 
 internal class LambdaERROR : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		LambdaPRINTF.printf(st);
@@ -15,8 +13,6 @@ internal class LambdaERROR : Lambda
 }
 internal class LambdaEVAL : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -32,8 +28,6 @@ internal class LambdaEVAL : Lambda
 }
 internal class LambdaBLOCK : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -56,8 +50,6 @@ internal class LambdaBLOCK : Lambda
 }
 internal class LambdaBRANCH : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st), sel ;
@@ -104,8 +96,6 @@ internal class LambdaBRANCH : Lambda
 }
 internal class LambdaFOR : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -137,8 +127,6 @@ internal class LambdaFOR : Lambda
 }
 internal class LambdaXFOR : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -191,8 +179,6 @@ internal class LambdaXFOR : Lambda
 }
 internal class LambdaWHILE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -227,15 +213,11 @@ internal class LambdaWHILE : Lambda
 }
 internal class LambdaPRINTF : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		printf(st);
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static void printf(Stack st)throws ParseException, JasymcaException
 	internal static void printf(Stack st)
 	{
 		int narg = getNarg(st);
@@ -283,8 +265,6 @@ internal class LambdaPAUSE : Lambda
 		this.outerInstance = outerInstance;
 	}
 
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);

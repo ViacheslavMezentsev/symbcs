@@ -137,7 +137,7 @@
 				}
 			}
 		}
-		return (r << 32) | (q & 0xFFFFFFFFl);
+		return (r << 32) | (q & 0xFFFFFFFFL);
 	}
 	public static int divmod_1(int[] quotient, int[] dividend, int len, int divisor)
 	{

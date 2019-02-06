@@ -3,130 +3,129 @@
 public sealed class JMath
 {
 	public static readonly double PI = BitConverter.Int64BitsToDouble(0x400921fb54442d18L);
+
 	public const double E = 2.7182818284590452354;
+
 	private static Random random_Renamed;
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static int abs(int x)
+
 	public static int abs(int x)
 	{
 		return ((x < 0) ? - x : x);
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static long abs(long x)
+
 	public static long abs(long x)
 	{
 		return ((x < 0L) ? - x : x);
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static float abs(float x)
+
 	public static float abs(float x)
 	{
 		return ((x <= 0.0f) ? 0.0f - x : x);
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static double abs(double x)
+
 	public static double abs(double x)
 	{
 		return ((x <= 0.0) ? 0.0 - x : x);
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static int min(int x, int y)
+
 	public static int min(int x, int y)
 	{
 		return ((x < y) ? x : y);
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static long min(long x, long y)
+
 	public static long min(long x, long y)
 	{
 		return ((x < y) ? x : y);
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static float min(float x, float y)
+
 	public static float min(float x, float y)
 	{
 		if (float.IsNaN(x))
 		{
 			return x;
 		}
+
 		float ans = ((x <= y) ? x : y);
-		if (ans == 0.0f && float.floatToIntBits(y) == 0x80000000)
+
+		if (ans == 0.0f && y == 1.0f / float.NegativeInfinity )
 		{
 			ans = y;
 		}
+
 		return ans;
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static double min(double x, double y)
+
 	public static double min(double x, double y)
-	{
+	{	    
 		if (double.IsNaN(x))
 		{
 			return x;
 		}
+
 		double ans = ((x <= y) ? x : y);
-		if (x == 0.0 && y == 0.0 && BitConverter.DoubleToInt64Bits(y) == 0x8000000000000000L)
+
+        if ( x == 0.0 && y == 0.0 && y == 1.0 / double.NegativeInfinity )
 		{
 			ans = y;
 		}
+
 		return ans;
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static int max(int x, int y)
+
 	public static int max(int x, int y)
 	{
 		return ((x > y) ? x : y);
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static long max(long x, long y)
+
 	public static long max(long x, long y)
 	{
 		return ((x > y) ? x : y);
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static float max(float x, float y)
+
 	public static float max(float x, float y)
 	{
 		if (float.IsNaN(x))
 		{
 			return x;
 		}
+
 		float ans = ((x >= y) ? x : y);
-		if (ans == 0.0f && float.floatToIntBits(x) == 0x80000000)
+
+        if ( ans == 0.0f && y == 1.0f / float.NegativeInfinity )
 		{
 			ans = y;
 		}
+
 		return ans;
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static double max(double x, double y)
+
 	public static double max(double x, double y)
 	{
 		if (double.IsNaN(x))
 		{
 			return x;
 		}
+
 		double ans = ((x >= y) ? x : y);
-		if (x == 0.0 && y == 0.0 && BitConverter.DoubleToInt64Bits(x) == 0x8000000000000000L)
+
+        if ( x == 0.0 && y == 0.0 && y == 1.0 / double.NegativeInfinity )
 		{
 			ans = y;
 		}
+
 		return ans;
 	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static int round(float x)
-	public static int round(float x)
-	{
-		return (int)floor(x + 0.5f);
-	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: strictfp public static long round(double x)
-	public static long round(double x)
-	{
-		return (long)floor(x + 0.5);
-	}
-//JAVA TO C# CONVERTER TODO TASK: There is no equivalent to 'strictfp' in .NET:
-//ORIGINAL LINE: synchronized strictfp public static double random()
+
+    public static int round( float x )
+    {
+        return ( int ) floor( x + 0.5f );
+    }
+
+    public static long round( double x )
+    {
+        return ( long ) floor( x + 0.5 );
+    }
+
 	public static double random()
 	{
 		lock (typeof(JMath))
@@ -135,74 +134,92 @@ public sealed class JMath
 			{
 				random_Renamed = new Random();
 			}
-			return random_Renamed.NextDouble();
+
+			return random_Renamed.nextDouble();
 		}
 	}
+
 	private const double huge = 1.0e+300;
 	private const double tiny = 1.0e-300;
+
 	public static double ceil(double x)
 	{
 		int exp, sign;
 		long ix;
+
 		if (x == 0)
 		{
 			return x;
 		}
+
 		ix = BitConverter.DoubleToInt64Bits(x);
-		sign = (int)((ix >> 63) & 1);
-		exp = ((int)(ix >> 52) & 0x7ff) - 0x3ff;
-		if (exp < 0)
-		{
-			if (x < 0.0)
-			{
-				return NEGATIVE_ZERO;
-			}
-			else if (x == 0.0)
-			{
-				return x;
-			}
-			else
-			{
-				return 1.0;
-			}
-		}
-		else if (exp < 53)
-		{
-			long mask = ((int)((uint)0x000fffffffffffffL >> exp));
-			if ((mask & ix) == 0)
-			{
-				return x;
-			}
-			if (x > 0.0)
-			{
-				ix += 0x0010000000000000L >> exp;
-			}
-			ix = ix & (~mask);
-		}
-		else if (exp == 1024)
-		{
-			return x;
-		}
+
+        sign = ( int ) ( ( ix >> 63 ) & 1 );
+
+        exp = ( ( int ) ( ix >> 52 ) & 0x7ff ) - 0x3ff;
+
+        if ( exp < 0 )
+        {
+            if ( x < 0.0 )
+            {
+                return NEGATIVE_ZERO;
+            }
+            else if ( x == 0.0 )
+            {
+                return x;
+            }
+            else
+            {
+                return 1.0;
+            }
+        }
+        else if ( exp < 53 )
+        {
+            long mask = ( int ) ( 0x000fffffffffffffL >> exp );
+
+            if ( ( mask & ix ) == 0 )
+            {
+                return x;
+            }
+
+            if ( x > 0.0 )
+            {
+                ix += 0x0010000000000000L >> exp;
+            }
+
+            ix = ix & ( ~mask );
+        }
+        else if ( exp == 1024 )
+        {
+            return x;
+        }
+
 		return BitConverter.Int64BitsToDouble(ix);
 	}
+
 	public static double floor(double x)
 	{
 		int exp, sign;
 		long ix;
-		if (x == 0)
+
+		if ( x == 0 )
 		{
 			return x;
 		}
+
 		ix = BitConverter.DoubleToInt64Bits(x);
-		sign = (int)((ix >> 63) & 1);
-		exp = ((int)(ix >> 52) & 0x7ff) - 0x3ff;
-		if (exp < 0)
+
+	    sign = ( int ) ( ( ix >> 63 ) & 1 );
+
+	    exp = ( ( int ) ( ix >> 52 ) & 0x7ff ) - 0x3ff;
+
+	    if ( exp < 0 )
 		{
-			if (x < 0.0)
+		    if ( x < 0.0 )
 			{
 				return -1.0;
 			}
-			else if (x == 0.0)
+		    else if ( x == 0.0 )
 			{
 				return x;
 			}
@@ -213,48 +230,66 @@ public sealed class JMath
 		}
 		else if (exp < 53)
 		{
-			long mask = ((int)((uint)0x000fffffffffffffL >> exp));
-			if ((mask & ix) == 0)
+			long mask = ( int ) ( 0x000fffffffffffffL >> exp );
+
+		    if ( ( mask & ix ) == 0 )
 			{
 				return x;
 			}
-			if (x < 0.0)
+
+		    if ( x < 0.0 )
 			{
 				ix += 0x0010000000000000L >> exp;
 			}
-			ix = ix & (~mask);
+
+		    ix = ix & ( ~mask );
 		}
-		else if (exp == 1024)
+	    else if ( exp == 1024 )
 		{
 			return x;
 		}
+
 		return BitConverter.Int64BitsToDouble(ix);
 	}
-	private static readonly double[] TWO52 = new double[] {BitConverter.Int64BitsToDouble(0x4330000000000000L), BitConverter.Int64BitsToDouble(0xc330000000000000L)};
-	private static readonly double NEGATIVE_ZERO = BitConverter.Int64BitsToDouble(0x8000000000000000L);
+
+	private static readonly double[] TWO52 =
+	{
+	    BitConverter.Int64BitsToDouble( 0x4330000000000000L ), 
+	    BitConverter.ToDouble( BitConverter.GetBytes( 0xc330000000000000 ), 0 )
+	};
+
+    private static readonly double NEGATIVE_ZERO = 1.0 / double.NegativeInfinity;
+
+    const ulong SignBit = 0x8000000000000000;
+
 	public static double rint(double x)
 	{
 		int exp, sign;
 		long ix;
 		double w;
-		if (x == 0)
+
+	    if ( x == 0 )
 		{
 			return x;
 		}
+
 		ix = BitConverter.DoubleToInt64Bits(x);
-		sign = (int)((ix >> 63) & 1);
-		exp = ((int)(ix >> 52) & 0x7ff) - 0x3ff;
-		if (exp < 0)
+
+	    sign = ( int ) ( ( ix >> 63 ) & 1 );
+
+	    exp = ( ( int ) ( ix >> 52 ) & 0x7ff ) - 0x3ff;
+
+	    if ( exp < 0 )
 		{
-			if (x < -0.5)
+		    if ( x < -0.5 )
 			{
 				return -1.0;
 			}
-			else if (x > 0.5)
+		    else if ( x > 0.5 )
 			{
 				return 1.0;
 			}
-			else if (sign == 0)
+		    else if ( sign == 0 )
 			{
 				return 0.0;
 			}
@@ -265,56 +300,71 @@ public sealed class JMath
 		}
 		else if (exp < 53)
 		{
-			long mask = ((int)((uint)0x000fffffffffffffL >> exp));
-			if ((mask & ix) == 0)
+		    long mask = ( ( int ) ( /*(uint)*/0x000fffffffffffffL >> exp ) );
+
+		    if ( ( mask & ix ) == 0 )
 			{
 				return x;
 			}
 		}
-		else if (exp == 1024)
+	    else if ( exp == 1024 )
 		{
 			return x;
 		}
-		x = BitConverter.Int64BitsToDouble(ix);
-		w = TWO52[sign] + x;
-		return w - TWO52[sign];
+
+	    x = BitConverter.Int64BitsToDouble( ix );
+
+	    w = TWO52[ sign ] + x;
+
+	    return w - TWO52[ sign ];
 	}
-	public static double IEEEremainder(double x, double p)
+
+    public static double IEEEremainder( double x, double p )
 	{
 		int hx, hp;
 		int sx, lx, lp;
 		double p_half;
+
 		hx = __HI(x);
 		lx = __LO(x);
 		hp = __HI(p);
 		lp = __LO(p);
-		sx = hx & unchecked((int)0x80000000);
+
+	    sx = hx & unchecked( ( int ) 0x80000000 );
+
 		hp &= 0x7fffffff;
 		hx &= 0x7fffffff;
-		if ((hp | lp) == 0)
+
+	    if ( ( hp | lp ) == 0 )
 		{
-			return (x * p) / (x * p);
+		    return ( x * p ) / ( x * p );
 		}
-		if ((hx >= 0x7ff00000) || ((hp >= 0x7ff00000) && (((hp - 0x7ff00000) | lp) != 0)))
+
+	    if ( ( hx >= 0x7ff00000 ) || ( ( hp >= 0x7ff00000 ) && ( ( ( hp - 0x7ff00000 ) | lp ) != 0 ) ) )
 		{
-			return (x * p) / (x * p);
+		    return ( x * p ) / ( x * p );
 		}
-		if (hp <= 0x7fdfffff)
+
+	    if ( hp <= 0x7fdfffff )
 		{
-			x = x % (p + p);
+		    x = x % ( p + p );
 		}
-		if (((hx - hp) | (lx - lp)) == 0)
+
+	    if ( ( ( hx - hp ) | ( lx - lp ) ) == 0 )
 		{
 			return zero * x;
 		}
+
 		x = abs(x);
 		p = abs(p);
-		if (hp < 0x00200000)
+
+	    if ( hp < 0x00200000 )
 		{
-			if (x + x > p)
+		    if ( x + x > p )
 			{
 				x -= p;
-				if (x + x >= p)
+
+			    if ( x + x >= p )
 				{
 					x -= p;
 				}
@@ -323,132 +373,175 @@ public sealed class JMath
 		else
 		{
 			p_half = 0.5 * p;
-			if (x > p_half)
+
+		    if ( x > p_half )
 			{
 				x -= p;
-				if (x >= p_half)
+
+			    if ( x >= p_half )
 				{
 					x -= p;
 				}
 			}
 		}
+
 		lx = __HI(x);
 		lx ^= sx;
-		return setHI(x, lx);
+
+	    return setHI( x, lx );
 	}
-	public static double sqrt(double x)
+
+    public static double sqrt( double x )
 	{
 		long ix = BitConverter.DoubleToInt64Bits(x);
-		if ((ix & 0x7ff0000000000000L) == 0x7ff0000000000000L)
+
+	    if ( ( ix & 0x7ff0000000000000L ) == 0x7ff0000000000000L )
 		{
 			return x * x + x;
 		}
-		if (x < 0.0)
+
+	    if ( x < 0.0 )
 		{
 			return double.NaN;
 		}
-		else if (x == 0.0)
+	    else if ( x == 0.0 )
 		{
 			return x;
 		}
-		long m = (ix >> 52);
+
+	    long m = ( ix >> 52 );
+
 		ix &= 0x000fffffffffffffL;
-		if (m != 0)
+
+	    if ( m != 0 )
 		{
 			ix |= 0x0010000000000000L;
 		}
+
 		m -= 1023L;
-		if ((m & 1) != 0)
+
+	    if ( ( m & 1 ) != 0 )
 		{
 			ix += ix;
 		}
+
 		m >>= 1;
 		m += 1023L;
 		ix += ix;
-		long q = 0L;
-		long s = 0L;
-		long r = 0x0020000000000000L;
-		while (r != 0)
+
+		var q = 0L;
+		var s = 0L;
+		var r = 0x0020000000000000L;
+
+	    while ( r != 0 )
 		{
-			long t = s + r;
-			if (t <= ix)
+			var t = s + r;
+
+		    if ( t <= ix )
 			{
 				s = t + r;
 				ix -= t;
 				q += r;
 			}
+
 			ix += ix;
 			r >>= 1;
 		}
-		if (ix != 0)
+
+	    if ( ix != 0 )
 		{
-			q += (q & 1L);
+		    q += ( q & 1L );
 		}
-		ix = (m << 52) | (0x000fffffffffffffL & (q>>1));
-		return BitConverter.Int64BitsToDouble(ix);
+
+	    ix = ( m << 52 ) | ( 0x000fffffffffffffL & ( q >> 1 ) );
+
+	    return BitConverter.Int64BitsToDouble( ix );
 	}
-	private static readonly double[] halF = new double[] {0.5, -0.5};
-	private static readonly double twom1000 = BitConverter.Int64BitsToDouble(0x0170000000000000L);
-	private static readonly double o_threshold = BitConverter.Int64BitsToDouble(0x40862e42fefa39efL);
-	private static readonly double u_threshold = BitConverter.Int64BitsToDouble(0xc0874910d52d3051L);
-	private static readonly double[] ln2HI = new double[] {BitConverter.Int64BitsToDouble(0x3fe62e42fee00000L), BitConverter.Int64BitsToDouble(0xbfe62e42fee00000L)};
-	private static readonly double[] ln2LO = new double[] {BitConverter.Int64BitsToDouble(0x3dea39ef35793c76L), BitConverter.Int64BitsToDouble(0xbdea39ef35793c76L)};
-	private static readonly double invln2 = BitConverter.Int64BitsToDouble(0x3ff71547652b82feL);
-	private static readonly double P1 = BitConverter.Int64BitsToDouble(0x3fc555555555553eL);
-	private static readonly double P2 = BitConverter.Int64BitsToDouble(0xbf66c16c16bebd93L);
-	private static readonly double P3 = BitConverter.Int64BitsToDouble(0x3f11566aaf25de2cL);
-	private static readonly double P4 = BitConverter.Int64BitsToDouble(0xbebbbd41c5d26bf1L);
-	private static readonly double P5 = BitConverter.Int64BitsToDouble(0x3e66376972bea4d0L);
-	public static double exp(double x)
+
+    private static readonly double[] halF = { 0.5, -0.5 };
+
+    private static readonly double twom1000 = BitConverter.Int64BitsToDouble( 0x0170000000000000L );
+    private static readonly double o_threshold = BitConverter.Int64BitsToDouble( 0x40862e42fefa39efL );
+
+    private static readonly double u_threshold = BitConverter.ToDouble( BitConverter.GetBytes( 0xc0874910d52d3051 ), 0 );
+
+    private static readonly double[] ln2HI =
+    {
+        BitConverter.Int64BitsToDouble( 0x3fe62e42fee00000L ), 
+        BitConverter.ToDouble( BitConverter.GetBytes( 0xbfe62e42fee00000 ), 0 )
+    };
+
+    private static readonly double[] ln2LO =
+    {
+        BitConverter.Int64BitsToDouble( 0x3dea39ef35793c76L ),
+        BitConverter.ToDouble( BitConverter.GetBytes( 0xbdea39ef35793c76 ), 0 ) 
+    };
+
+    private static readonly double invln2 = BitConverter.Int64BitsToDouble( 0x3ff71547652b82feL );
+
+    private static readonly double P1 = BitConverter.Int64BitsToDouble( 0x3fc555555555553eL );
+    private static readonly double P2 = BitConverter.ToDouble( BitConverter.GetBytes( 0xbf66c16c16bebd93 ), 0 );
+    private static readonly double P3 = BitConverter.Int64BitsToDouble( 0x3f11566aaf25de2cL );
+    private static readonly double P4 = BitConverter.ToDouble( BitConverter.GetBytes( 0xbebbbd41c5d26bf1 ), 0 );
+    private static readonly double P5 = BitConverter.Int64BitsToDouble( 0x3e66376972bea4d0L );
+
+    public static double exp( double x )
 	{
 		double y , hi = 0, lo = 0, c , t ;
 		int k = 0, xsb ;
 		int hx;
+
 		hx = __HI(x);
-		xsb = ((int)((uint)hx >> 31)) & 1;
+	    xsb = ( ( int ) ( ( uint ) hx >> 31 ) ) & 1;
+
 		hx &= 0x7fffffff;
-		if (hx >= 0x40862E42)
+
+	    if ( hx >= 0x40862E42 )
 		{
-			if (hx >= 0x7ff00000)
+		    if ( hx >= 0x7ff00000 )
 			{
-				if (((hx & 0xfffff) | __LO(x)) != 0)
+			    if ( ( ( hx & 0xfffff ) | __LO( x ) ) != 0 )
 				{
 					return x + x;
 				}
 				else
 				{
-					return ((xsb == 0) ? x : 0.0);
+				    return ( ( xsb == 0 ) ? x : 0.0 );
 				}
 			}
-			if (x > o_threshold)
+
+		    if ( x > o_threshold )
 			{
 				return huge * huge;
 			}
-			if (x < u_threshold)
+
+		    if ( x < u_threshold )
 			{
 				return twom1000 * twom1000;
 			}
 		}
-		if (hx > 0x3fd62e42)
+
+	    if ( hx > 0x3fd62e42 )
 		{
-			if (hx < 0x3FF0A2B2)
+		    if ( hx < 0x3FF0A2B2 )
 			{
-				hi = x - ln2HI[xsb];
-				lo = ln2LO[xsb];
-				k = 1 - xsb - xsb;
-			}
+                hi = x - ln2HI[ xsb ];
+                lo = ln2LO[ xsb ];
+                k = 1 - xsb - xsb;
+            }
 			else
 			{
-				k = (int)(invln2 * x + halF[xsb]);
-				t = k;
-				hi = x - t * ln2HI[0];
-				lo = t * ln2LO[0];
-			}
+                k = ( int ) ( invln2 * x + halF[ xsb ] );
+                t = k;
+                hi = x - t * ln2HI[0];
+                lo = t * ln2LO[0];
+            }
+
 			x = hi - lo;
 		}
-		else if (hx < 0x3e300000)
+	    else if ( hx < 0x3e300000 )
 		{
-			if (huge + x > one)
+		    if ( huge + x > one )
 			{
 				return one + x;
 			}
@@ -457,36 +550,43 @@ public sealed class JMath
 		{
 			k = 0;
 		}
+
 		t = x * x;
-		c = x - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
-		if (k == 0)
+	    c = x - t * ( P1 + t * ( P2 + t * ( P3 + t * ( P4 + t * P5 ) ) ) );
+
+	    if ( k == 0 )
 		{
-			return one - ((x * c) / (c - 2.0) - x);
+		    return one - ( ( x * c ) / ( c - 2.0 ) - x );
 		}
 		else
 		{
-			y = one - ((lo - (x * c) / (2.0 - c)) - hi);
+		    y = one - ( ( lo - ( x * c ) / ( 2.0 - c ) ) - hi );
 		}
+
 		long iy = BitConverter.DoubleToInt64Bits(y);
-		if (k >= -1021)
-		{
-			iy += ((long)k << 52);
-		}
-		else
-		{
-			iy += ((k + 1000L) << 52);
-		}
-		return BitConverter.Int64BitsToDouble(iy);
+
+        if ( k >= -1021 )
+        {
+            iy += ( ( long ) k << 52 );
+        }
+        else
+        {
+            iy += ( ( k + 1000L ) << 52 );
+        }
+
+        return BitConverter.Int64BitsToDouble( iy );
 	}
-	private static readonly double ln2_hi = BitConverter.Int64BitsToDouble(0x3fe62e42fee00000L);
-	private static readonly double ln2_lo = BitConverter.Int64BitsToDouble(0x3dea39ef35793c76L);
-	private static readonly double Lg1 = BitConverter.Int64BitsToDouble(0x3fe5555555555593L);
-	private static readonly double Lg2 = BitConverter.Int64BitsToDouble(0x3fd999999997fa04L);
-	private static readonly double Lg3 = BitConverter.Int64BitsToDouble(0x3fd2492494229359L);
-	private static readonly double Lg4 = BitConverter.Int64BitsToDouble(0x3fcc71c51d8e78afL);
-	private static readonly double Lg5 = BitConverter.Int64BitsToDouble(0x3fc7466496cb03deL);
-	private static readonly double Lg6 = BitConverter.Int64BitsToDouble(0x3fc39a09d078c69fL);
-	private static readonly double Lg7 = BitConverter.Int64BitsToDouble(0x3fc2f112df3e5244L);
+
+    private static readonly double ln2_hi = BitConverter.Int64BitsToDouble( 0x3fe62e42fee00000L );
+    private static readonly double ln2_lo = BitConverter.Int64BitsToDouble( 0x3dea39ef35793c76L );
+    private static readonly double Lg1 = BitConverter.Int64BitsToDouble( 0x3fe5555555555593L );
+    private static readonly double Lg2 = BitConverter.Int64BitsToDouble( 0x3fd999999997fa04L );
+    private static readonly double Lg3 = BitConverter.Int64BitsToDouble( 0x3fd2492494229359L );
+    private static readonly double Lg4 = BitConverter.Int64BitsToDouble( 0x3fcc71c51d8e78afL );
+    private static readonly double Lg5 = BitConverter.Int64BitsToDouble( 0x3fc7466496cb03deL );
+    private static readonly double Lg6 = BitConverter.Int64BitsToDouble( 0x3fc39a09d078c69fL );
+    private static readonly double Lg7 = BitConverter.Int64BitsToDouble( 0x3fc2f112df3e5244L );
+
 	public static double log(double x)
 	{
 		double hfsq, f, s, z, R, w, t1, t2, dk;
@@ -609,13 +709,15 @@ public sealed class JMath
 			}
 		}
 	}
+
 	private static double S1 = -1.66666666666666324348e-01;
 	private static double S2 = 8.33333333332248946124e-03;
 	private static double S3 = -1.98412698298579493134e-04;
 	private static double S4 = 2.75573137070700676789e-06;
 	private static double S5 = -2.50507602534068634195e-08;
 	private static double S6 = 1.58969099521155010221e-10;
-	internal static double __kernel_sin(double x, double y, int iy)
+
+    internal static double __kernel_sin( double x, double y, int iy )
 	{
 		double z, r, v;
 		int ix;
@@ -639,6 +741,7 @@ public sealed class JMath
 			return x - ((z * (half * y - v * r) - y) - v * S1);
 		}
 	}
+
 	public static double cos(double x)
 	{
 		double z = 0.0;
@@ -670,13 +773,15 @@ public sealed class JMath
 			}
 		}
 	}
+
 	private static readonly double one = BitConverter.Int64BitsToDouble(0x3ff0000000000000L);
 	private static readonly double C1 = BitConverter.Int64BitsToDouble(0x3fa555555555554cL);
-	private static readonly double C2 = BitConverter.Int64BitsToDouble(0xbf56c16c16c15177L);
+	private static readonly double C2 = BitConverter.ToDouble( BitConverter.GetBytes( 0xbf56c16c16c15177 ), 0 );
 	private static readonly double C3 = BitConverter.Int64BitsToDouble(0x3efa01a019cb1590L);
-	private static readonly double C4 = BitConverter.Int64BitsToDouble(0xbe927e4f809c52adL);
+	private static readonly double C4 = BitConverter.ToDouble( BitConverter.GetBytes( 0xbe927e4f809c52ad ), 0 );
 	private static readonly double C5 = BitConverter.Int64BitsToDouble(0x3e21ee9ebdb4b1c4L);
-	private static readonly double C6 = BitConverter.Int64BitsToDouble(0xbda8fae9be8838d4L);
+	private static readonly double C6 = BitConverter.ToDouble( BitConverter.GetBytes( 0xbda8fae9be8838d4 ), 0 );
+
 	private static double __kernel_cos(double x, double y)
 	{
 		double a , hz , z , r , qx = zero;
@@ -731,10 +836,28 @@ public sealed class JMath
 			return __kernel_tan(y[0], y[1], 1 - ((n & 1) << 1));
 		}
 	}
+
 	private static readonly double pio4 = BitConverter.Int64BitsToDouble(0x3fe921fb54442d18L);
 	private static readonly double pio4lo = BitConverter.Int64BitsToDouble(0x3c81a62633145c07L);
-	private static readonly double[] T = new double[] {BitConverter.Int64BitsToDouble(0x3fd5555555555563L), BitConverter.Int64BitsToDouble(0x3fc111111110fe7aL), BitConverter.Int64BitsToDouble(0x3faba1ba1bb341feL), BitConverter.Int64BitsToDouble(0x3f9664f48406d637L), BitConverter.Int64BitsToDouble(0x3f8226e3e96e8493L), BitConverter.Int64BitsToDouble(0x3f6d6d22c9560328L), BitConverter.Int64BitsToDouble(0x3f57dbc8fee08315L), BitConverter.Int64BitsToDouble(0x3f4344d8f2f26501L), BitConverter.Int64BitsToDouble(0x3f3026f71a8d1068L), BitConverter.Int64BitsToDouble(0x3f147e88a03792a6L), BitConverter.Int64BitsToDouble(0x3f12b80f32f0a7e9L), BitConverter.Int64BitsToDouble(0xbef375cbdb605373L), BitConverter.Int64BitsToDouble(0x3efb2a7074bf7ad4L)};
-	private static double __kernel_tan(double x, double y, int iy)
+	
+    private static readonly double[] T =
+    {
+        BitConverter.Int64BitsToDouble(0x3fd5555555555563L), 
+        BitConverter.Int64BitsToDouble(0x3fc111111110fe7aL), 
+        BitConverter.Int64BitsToDouble(0x3faba1ba1bb341feL), 
+        BitConverter.Int64BitsToDouble(0x3f9664f48406d637L), 
+        BitConverter.Int64BitsToDouble(0x3f8226e3e96e8493L), 
+        BitConverter.Int64BitsToDouble(0x3f6d6d22c9560328L), 
+        BitConverter.Int64BitsToDouble(0x3f57dbc8fee08315L), 
+        BitConverter.Int64BitsToDouble(0x3f4344d8f2f26501L), 
+        BitConverter.Int64BitsToDouble(0x3f3026f71a8d1068L), 
+        BitConverter.Int64BitsToDouble(0x3f147e88a03792a6L), 
+        BitConverter.Int64BitsToDouble(0x3f12b80f32f0a7e9L), 
+        BitConverter.ToDouble( BitConverter.GetBytes( 0xbef375cbdb605373 ), 0 ), 
+        BitConverter.Int64BitsToDouble(0x3efb2a7074bf7ad4L)
+    };
+	
+    private static double __kernel_tan(double x, double y, int iy)
 	{
 		double z, r, v, w, s;
 		int ix, hx;
@@ -754,6 +877,7 @@ public sealed class JMath
 				}
 			}
 		}
+
 		if (ix >= 0x3FE59428)
 		{
 			if (hx < 0)
@@ -795,19 +919,21 @@ public sealed class JMath
 			return t + a * (s + t * v);
 		}
 	}
+
 	private static readonly double pio2_hi = BitConverter.Int64BitsToDouble(0x3FF921FB54442D18L);
 	private static readonly double pio2_lo = BitConverter.Int64BitsToDouble(0x3C91A62633145C07L);
 	private static readonly double pio4_hi = BitConverter.Int64BitsToDouble(0x3FE921FB54442D18L);
 	private static readonly double pS0 = BitConverter.Int64BitsToDouble(0x3fc5555555555555L);
-	private static readonly double pS1 = BitConverter.Int64BitsToDouble(0xbfd4d61203eb6f7dL);
+	private static readonly double pS1 = BitConverter.ToDouble( BitConverter.GetBytes(0xbfd4d61203eb6f7d ), 0 );
 	private static readonly double pS2 = BitConverter.Int64BitsToDouble(0x3fc9c1550e884455L);
-	private static readonly double pS3 = BitConverter.Int64BitsToDouble(0xbfa48228b5688f3bL);
+	private static readonly double pS3 = BitConverter.ToDouble( BitConverter.GetBytes(0xbfa48228b5688f3b ), 0 );
 	private static readonly double pS4 = BitConverter.Int64BitsToDouble(0x3f49efe07501b288L);
 	private static readonly double pS5 = BitConverter.Int64BitsToDouble(0x3f023de10dfdf709L);
-	private static readonly double qS1 = BitConverter.Int64BitsToDouble(0xc0033a271c8a2d4bL);
+	private static readonly double qS1 = BitConverter.ToDouble( BitConverter.GetBytes(0xc0033a271c8a2d4b ), 0 );
 	private static readonly double qS2 = BitConverter.Int64BitsToDouble(0x40002ae59c598ac8L);
-	private static readonly double qS3 = BitConverter.Int64BitsToDouble(0xbfe6066c1b8d0159L);
+	private static readonly double qS3 = BitConverter.ToDouble( BitConverter.GetBytes(0xbfe6066c1b8d0159 ), 0 );
 	private static readonly double qS4 = BitConverter.Int64BitsToDouble(0x3fb3b8c5b12e9282L);
+
 	public static double asin(double x)
 	{
 		double t = zero, w , p , q , c , r , s ;
@@ -862,6 +988,7 @@ public sealed class JMath
 		}
 		return ((hx > 0) ? t : -t);
 	}
+
 	public static double acos(double x)
 	{
 		double z, p, q, r, w, s, c, df;
@@ -919,9 +1046,38 @@ public sealed class JMath
 			return 2.0 * (df + w);
 		}
 	}
-	private static readonly double[] atanhi = new double[] {BitConverter.Int64BitsToDouble(0x3fddac670561bb4fL), BitConverter.Int64BitsToDouble(0x3fe921fb54442d18L), BitConverter.Int64BitsToDouble(0x3fef730bd281f69bL), BitConverter.Int64BitsToDouble(0x3ff921fb54442d18L)};
-	private static readonly double[] atanlo = new double[] {BitConverter.Int64BitsToDouble(0x3c7a2b7f222f65e2L), BitConverter.Int64BitsToDouble(0x3c81a62633145c07L), BitConverter.Int64BitsToDouble(0x3c7007887af0cbbdL), BitConverter.Int64BitsToDouble(0x3c91a62633145c07L)};
-	private static readonly double[] aT = new double[] {BitConverter.Int64BitsToDouble(0x3fd555555555550dL), BitConverter.Int64BitsToDouble(0xbfc999999998ebc4L), BitConverter.Int64BitsToDouble(0x3fc24924920083ffL), BitConverter.Int64BitsToDouble(0xbfbc71c6fe231671L), BitConverter.Int64BitsToDouble(0x3fb745cdc54c206eL), BitConverter.Int64BitsToDouble(0xbfb3b0f2af749a6dL), BitConverter.Int64BitsToDouble(0x3fb10d66a0d03d51L), BitConverter.Int64BitsToDouble(0xbfadde2d52defd9aL), BitConverter.Int64BitsToDouble(0x3fa97b4b24760debL), BitConverter.Int64BitsToDouble(0xbfa2b4442c6a6c2fL), BitConverter.Int64BitsToDouble(0x3f90ad3ae322da11L)};
+
+	private static readonly double[] atanhi =
+	{
+	    BitConverter.Int64BitsToDouble(0x3fddac670561bb4fL), 
+        BitConverter.Int64BitsToDouble(0x3fe921fb54442d18L), 
+        BitConverter.Int64BitsToDouble(0x3fef730bd281f69bL), 
+        BitConverter.Int64BitsToDouble(0x3ff921fb54442d18L)
+	};
+
+	private static readonly double[] atanlo =
+	{
+	    BitConverter.Int64BitsToDouble(0x3c7a2b7f222f65e2L), 
+        BitConverter.Int64BitsToDouble(0x3c81a62633145c07L), 
+        BitConverter.Int64BitsToDouble(0x3c7007887af0cbbdL), 
+        BitConverter.Int64BitsToDouble(0x3c91a62633145c07L)
+	};
+
+	private static readonly double[] aT =
+	{
+	    BitConverter.Int64BitsToDouble(0x3fd555555555550dL), 
+	    BitConverter.ToDouble( BitConverter.GetBytes(0xbfc999999998ebc4 ), 0), 
+        BitConverter.Int64BitsToDouble(0x3fc24924920083ffL), 
+        BitConverter.ToDouble( BitConverter.GetBytes(0xbfbc71c6fe231671 ), 0 ), 
+        BitConverter.Int64BitsToDouble(0x3fb745cdc54c206eL), 
+        BitConverter.ToDouble( BitConverter.GetBytes(0xbfb3b0f2af749a6d ), 0 ), 
+        BitConverter.Int64BitsToDouble(0x3fb10d66a0d03d51L), 
+        BitConverter.ToDouble( BitConverter.GetBytes(0xbfadde2d52defd9a ), 0 ), 
+        BitConverter.Int64BitsToDouble(0x3fa97b4b24760debL), 
+        BitConverter.ToDouble( BitConverter.GetBytes(0xbfa2b4442c6a6c2f ), 0 ), 
+        BitConverter.ToDouble( BitConverter.GetBytes(0x3f90ad3ae322da11 ), 0 )
+	};
+
 	public static double atan(double x)
 	{
 		double w, s1, s2, z;
@@ -998,9 +1154,11 @@ public sealed class JMath
 			return (hx < 0)? - z:z;
 		}
 	}
+
 	private static readonly double pi_o_4 = BitConverter.Int64BitsToDouble(0x3fe921fb54442d18L);
 	private static readonly double pi_o_2 = BitConverter.Int64BitsToDouble(0x3ff921fb54442d18L);
 	private static readonly double pi_lo = BitConverter.Int64BitsToDouble(0x3ca1a62633145c07L);
+
 	public static double atan2(double y, double x)
 	{
 		double z;
@@ -1091,16 +1249,20 @@ public sealed class JMath
 			case 0:
 				return z;
 			case 1:
-				return setHI(z, __HI(z) ^ 0x80000000);
+                // TODO: Check this.
+				return setHI(z, __HI(z) ^ BitConverter.ToInt32( BitConverter.GetBytes( 0x80000000 ), 0 ) );
 			case 2:
 				return PI - (z - pi_lo);
 			default:
 				return (z - pi_lo) - PI;
 		}
 	}
-	private static readonly int[] two_over_pi = new int[] {0xa2f983, 0x6e4e44, 0x1529fc, 0x2757d1, 0xf534dd, 0xc0db62, 0x95993c, 0x439041, 0xfe5163, 0xabdebb, 0xc561b7, 0x246e3a, 0x424dd2, 0xe00649, 0x2eea09, 0xd1921c, 0xfe1deb, 0x1cb129, 0xa73ee8, 0x8235f5, 0x2ebb44, 0x84e99c, 0x7026b4, 0x5f7e41, 0x3991d6, 0x398353, 0x39f49c, 0x845f8b, 0xbdf928, 0x3b1ff8, 0x97ffde, 0x05980f, 0xef2f11, 0x8b5a0a, 0x6d1f6d, 0x367ecf, 0x27cb09, 0xb74f46, 0x3f669e, 0x5fea2d, 0x7527ba, 0xc7ebe5, 0xf17b3d, 0x0739f7, 0x8a5292, 0xea6bfb, 0x5fb11f, 0x8d5d08, 0x560330, 0x46fc7b, 0x6babf0, 0xcfbc20, 0x9af436, 0x1da9e3, 0x91615e, 0xe61b08, 0x659985, 0x5f14a0, 0x68408d, 0xffd880, 0x4d7327, 0x310606, 0x1556ca, 0x73a8c9, 0x60e27b, 0xc08c6b};
-	private static readonly int[] npio2_hw = new int[] {0x3ff921fb, 0x400921fb, 0x4012d97c, 0x401921fb, 0x401f6a7a, 0x4022d97c, 0x4025fdbb, 0x402921fb, 0x402c463a, 0x402f6a7a, 0x4031475c, 0x4032d97c, 0x40346b9c, 0x4035fdbb, 0x40378fdb, 0x403921fb, 0x403ab41b, 0x403c463a, 0x403dd85a, 0x403f6a7a, 0x40407e4c, 0x4041475c, 0x4042106c, 0x4042d97c, 0x4043a28c, 0x40446b9c, 0x404534ac, 0x4045fdbb, 0x4046c6cb, 0x40478fdb, 0x404858eb, 0x404921fb};
+
+	private static readonly int[] two_over_pi = {0xa2f983, 0x6e4e44, 0x1529fc, 0x2757d1, 0xf534dd, 0xc0db62, 0x95993c, 0x439041, 0xfe5163, 0xabdebb, 0xc561b7, 0x246e3a, 0x424dd2, 0xe00649, 0x2eea09, 0xd1921c, 0xfe1deb, 0x1cb129, 0xa73ee8, 0x8235f5, 0x2ebb44, 0x84e99c, 0x7026b4, 0x5f7e41, 0x3991d6, 0x398353, 0x39f49c, 0x845f8b, 0xbdf928, 0x3b1ff8, 0x97ffde, 0x05980f, 0xef2f11, 0x8b5a0a, 0x6d1f6d, 0x367ecf, 0x27cb09, 0xb74f46, 0x3f669e, 0x5fea2d, 0x7527ba, 0xc7ebe5, 0xf17b3d, 0x0739f7, 0x8a5292, 0xea6bfb, 0x5fb11f, 0x8d5d08, 0x560330, 0x46fc7b, 0x6babf0, 0xcfbc20, 0x9af436, 0x1da9e3, 0x91615e, 0xe61b08, 0x659985, 0x5f14a0, 0x68408d, 0xffd880, 0x4d7327, 0x310606, 0x1556ca, 0x73a8c9, 0x60e27b, 0xc08c6b};
+	private static readonly int[] npio2_hw = {0x3ff921fb, 0x400921fb, 0x4012d97c, 0x401921fb, 0x401f6a7a, 0x4022d97c, 0x4025fdbb, 0x402921fb, 0x402c463a, 0x402f6a7a, 0x4031475c, 0x4032d97c, 0x40346b9c, 0x4035fdbb, 0x40378fdb, 0x403921fb, 0x403ab41b, 0x403c463a, 0x403dd85a, 0x403f6a7a, 0x40407e4c, 0x4041475c, 0x4042106c, 0x4042d97c, 0x4043a28c, 0x40446b9c, 0x404534ac, 0x4045fdbb, 0x4046c6cb, 0x40478fdb, 0x404858eb, 0x404921fb};
+
 	private const double zero = 0.00000000000000000000e+00;
+
 	private static readonly double half = BitConverter.Int64BitsToDouble(0x3fe0000000000000L);
 	private static readonly double two24 = BitConverter.Int64BitsToDouble(0x4170000000000000L);
 	private static readonly double invpio2 = BitConverter.Int64BitsToDouble(0x3fe45f306dc9c883L);
@@ -1110,6 +1272,7 @@ public sealed class JMath
 	private static readonly double pio2_2t = BitConverter.Int64BitsToDouble(0x3ba3198a2e037073L);
 	private static readonly double pio2_3 = BitConverter.Int64BitsToDouble(0x3ba3198a2e000000L);
 	private static readonly double pio2_3t = BitConverter.Int64BitsToDouble(0x397b839a252049c1L);
+
 	private static int __ieee754_rem_pio2(double x, double[] y)
 	{
 		double z = zero, w , t , r , fn ;
@@ -1235,8 +1398,21 @@ public sealed class JMath
 		}
 		return n;
 	}
-	private static readonly double[] PIo2 = new double[] {BitConverter.Int64BitsToDouble(0x3ff921fb40000000L), BitConverter.Int64BitsToDouble(0x3e74442d00000000L), BitConverter.Int64BitsToDouble(0x3cf8469880000000L), BitConverter.Int64BitsToDouble(0x3b78cc5160000000L), BitConverter.Int64BitsToDouble(0x39f01b8380000000L), BitConverter.Int64BitsToDouble(0x387a252040000000L), BitConverter.Int64BitsToDouble(0x36e3822280000000L), BitConverter.Int64BitsToDouble(0x3569f31d00000000L)};
+
+	private static readonly double[] PIo2 =
+	{
+	    BitConverter.Int64BitsToDouble(0x3ff921fb40000000L), 
+        BitConverter.Int64BitsToDouble(0x3e74442d00000000L), 
+        BitConverter.Int64BitsToDouble(0x3cf8469880000000L), 
+        BitConverter.Int64BitsToDouble(0x3b78cc5160000000L), 
+        BitConverter.Int64BitsToDouble(0x39f01b8380000000L), 
+        BitConverter.Int64BitsToDouble(0x387a252040000000L), 
+        BitConverter.Int64BitsToDouble(0x36e3822280000000L), 
+        BitConverter.Int64BitsToDouble(0x3569f31d00000000L)
+	};
+
 	private static readonly double twon24 = BitConverter.Int64BitsToDouble(0x3E70000000000000L);
+
 	private static int __kernel_rem_pio2(double[] x, double[] y, int e0, int nx)
 	{
 		int jz, jx, jv, jp, jk, carry, n, i, j, k, m, q0, ih;
@@ -1420,10 +1596,13 @@ public sealed class JMath
 		y[1] = ((ih == 0) ? fw: -fw);
 		return n & 7;
 	}
-	private static readonly double[] bp = new double[] {1.0, 1.5};
-	private static readonly double[] dp_h = new double[] {0.0, BitConverter.Int64BitsToDouble(0x3fe2b80340000000L)};
-	private static readonly double[] dp_l = new double[] {0.0, BitConverter.Int64BitsToDouble(0x3e4cfdeb43cfd006L)};
+
+	private static readonly double[] bp = {1.0, 1.5};
+	private static readonly double[] dp_h = {0.0, BitConverter.Int64BitsToDouble(0x3fe2b80340000000L)};
+	private static readonly double[] dp_l = {0.0, BitConverter.Int64BitsToDouble(0x3e4cfdeb43cfd006L)};
+
 	private static readonly double two53 = BitConverter.Int64BitsToDouble(0x4340000000000000L);
+
 	private static readonly double L1 = BitConverter.Int64BitsToDouble(0x3fe3333333333303L);
 	private static readonly double L2 = BitConverter.Int64BitsToDouble(0x3fdb6db6db6fabffL);
 	private static readonly double L3 = BitConverter.Int64BitsToDouble(0x3fd55555518f264dL);
@@ -1432,14 +1611,17 @@ public sealed class JMath
 	private static readonly double L6 = BitConverter.Int64BitsToDouble(0x3fca7e284a454eefL);
 	private static readonly double lg2 = BitConverter.Int64BitsToDouble(0x3fe62e42fefa39efL);
 	private static readonly double lg2_h = BitConverter.Int64BitsToDouble(0x3fe62e4300000000L);
+
 	private const double lg2_l = -1.90465429995776804525e-09;
 	private const double ovt = 8.0085662595372944372e-17;
-	private static readonly double cp = BitConverter.Int64BitsToDouble(0x3feec709dc3a03fdL);
-	private static readonly double cp_h = BitConverter.Int64BitsToDouble(0x3feec709e0000000L);
-	private static readonly double cp_l = BitConverter.Int64BitsToDouble(0xbe3e2fe0145b01f5L);
-	private static readonly double ivln2 = BitConverter.Int64BitsToDouble(0x3ff71547652b82feL);
-	private static readonly double ivln2_h = BitConverter.Int64BitsToDouble(0x3ff7154760000000L);
-	private static readonly double ivln2_l = BitConverter.Int64BitsToDouble(0x3e54ae0bf85ddf44L);
+
+    private static readonly double cp = BitConverter.Int64BitsToDouble( 0x3feec709dc3a03fdL );
+    private static readonly double cp_h = BitConverter.Int64BitsToDouble( 0x3feec709e0000000L );
+    private static readonly double cp_l = BitConverter.ToDouble( BitConverter.GetBytes( 0xbe3e2fe0145b01f5 ), 0 );
+    private static readonly double ivln2 = BitConverter.Int64BitsToDouble( 0x3ff71547652b82feL );
+    private static readonly double ivln2_h = BitConverter.Int64BitsToDouble( 0x3ff7154760000000L );
+    private static readonly double ivln2_l = BitConverter.Int64BitsToDouble( 0x3e54ae0bf85ddf44L );
+
 	public static double pow(double x, double y)
 	{
 		double z, ax, z_h, z_l, p_h, p_l;
@@ -1722,15 +1904,23 @@ public sealed class JMath
 		}
 		return s * z;
 	}
+
+    private static readonly long SignMask = BitConverter.DoubleToInt64Bits( -0.0 ) ^ BitConverter.DoubleToInt64Bits( +0.0 );
+
 	private static double copysign(double x, double y)
 	{
 		long ix = BitConverter.DoubleToInt64Bits(x);
 		long iy = BitConverter.DoubleToInt64Bits(y);
-		ix = (0x7fffffffffffffffL * ix) | (0x8000000000000000L & iy);
+
+        // TODO: Check this.
+        ix = ( 0x7fffffffffffffffL & ix ) | ( SignMask & iy );
+
 		return BitConverter.Int64BitsToDouble(ix);
 	}
+
 	private static readonly double two54 = BitConverter.Int64BitsToDouble(0x4350000000000000L);
 	private static readonly double twom54 = BitConverter.Int64BitsToDouble(0x3c90000000000000L);
+
 	private static double scalbn(double x, int n)
 	{
 		int k, hx, lx;
@@ -1775,33 +1965,46 @@ public sealed class JMath
 		{
 			return tiny * copysign(tiny,x);
 		}
-		k += 54;
-		return twom54 * setHI(x, (hx & unchecked((int)0x800fffff)) | (k << 20));
+		
+        k += 54;
+
+	    return twom54 * setHI( x, ( hx & unchecked( ( int ) 0x800fffff ) ) | ( k << 20 ) );
 	}
+
 	private static double set(int newHiPart, int newLowPart)
 	{
-		return BitConverter.Int64BitsToDouble((((long)newHiPart) << 32) | newLowPart);
+	    return BitConverter.Int64BitsToDouble( ( ( ( long ) newHiPart ) << 32 ) | newLowPart );
 	}
+
 	private static double setLO(double x, int newLowPart)
 	{
 		long lx = BitConverter.DoubleToInt64Bits(x);
-		lx &= 0xFFFFFFFF00000000L;
+
+        // TODO: Check this.
+		lx &= BitConverter.ToInt64( BitConverter.GetBytes( 0xFFFFFFFF00000000 ), 0 );
 		lx |= newLowPart;
+
 		return BitConverter.Int64BitsToDouble(lx);
 	}
+
 	private static double setHI(double x, int newHiPart)
 	{
 		long lx = BitConverter.DoubleToInt64Bits(x);
+
 		lx &= 0x00000000FFFFFFFFL;
-		lx |= (((long)newHiPart) << 32);
-		return BitConverter.Int64BitsToDouble(lx);
+
+	    lx |= ( ( ( long ) newHiPart ) << 32 );
+
+	    return BitConverter.Int64BitsToDouble( lx );
 	}
-	private static int __HI(double x)
-	{
-		return unchecked((int)(0xFFFFFFFF & (BitConverter.DoubleToInt64Bits(x) >> 32)));
-	}
-	private static int __LO(double x)
-	{
-		return unchecked((int)(0xFFFFFFFF & BitConverter.DoubleToInt64Bits(x)));
-	}
+
+    private static int __HI( double x )
+    {
+        return unchecked( ( int ) ( 0xFFFFFFFF & ( BitConverter.DoubleToInt64Bits(x) >> 32 ) ) );
+    }
+
+    private static int __LO( double x )
+    {
+        return unchecked( ( int ) ( 0xFFFFFFFF & BitConverter.DoubleToInt64Bits(x) ) );
+    }
 }

@@ -35,37 +35,37 @@ internal class MatlabParser : Parser
 		pst = new ParserState(null, 0);
 		Operator.OPS = new Operator[]
 		{
-		    new Operator("PPR", "++", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY | Constants_Fields.LVALUE), 
-            new Operator("MMR", "--", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY | Constants_Fields.LVALUE), 
-            new Operator("PPL", "++", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.LVALUE), 
-            new Operator("MML", "--", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.LVALUE), 
-            new Operator("ADE", "+=",10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE), 
-            new Operator("SUE", "-=",10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE), 
-            new Operator("MUE", "*=",10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE), 
-            new Operator("DIE", "/=",10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE), 
-            new Operator("MUL", ".*", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("DIV", "./", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("POW", ".^", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("EQU", "==", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("NEQ", "~=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("GEQ", ">=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("LEQ", "<=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("LES", "<", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("OR", "|", 9, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("NOT", "!", 8, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY), 
-            new Operator("AND", "&", 7, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("ASS", "=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE), 
-            new Operator("CR1", ":", 5, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY | Constants_Fields.TERNARY), 
-            new Operator("ADD", "+", 4, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.BINARY), 
-            new Operator("SUB", "-", 4, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.BINARY), 
-            new Operator("MMU", "*", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("MDR", "/", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("MDL", "\\", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("MPW", "^", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY), 
-            new Operator("ADJ", "'", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY)
+		    new Operator("PPR", "++", 1, Fields.RIGHT_LEFT, Fields.UNARY | Fields.LVALUE), 
+            new Operator("MMR", "--", 1, Fields.RIGHT_LEFT, Fields.UNARY | Fields.LVALUE), 
+            new Operator("PPL", "++", 1, Fields.LEFT_RIGHT, Fields.UNARY | Fields.LVALUE), 
+            new Operator("MML", "--", 1, Fields.LEFT_RIGHT, Fields.UNARY | Fields.LVALUE), 
+            new Operator("ADE", "+=",10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
+            new Operator("SUE", "-=",10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
+            new Operator("MUE", "*=",10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
+            new Operator("DIE", "/=",10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
+            new Operator("MUL", ".*", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("DIV", "./", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("POW", ".^", 1, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("EQU", "==", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("NEQ", "~=", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("GEQ", ">=", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("LEQ", "<=", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("LES", "<", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("OR", "|", 9, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("NOT", "!", 8, Fields.LEFT_RIGHT, Fields.UNARY), 
+            new Operator("AND", "&", 7, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("ASS", "=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
+            new Operator("CR1", ":", 5, Fields.LEFT_RIGHT, Fields.BINARY | Fields.TERNARY), 
+            new Operator("ADD", "+", 4, Fields.LEFT_RIGHT, Fields.UNARY | Fields.BINARY), 
+            new Operator("SUB", "-", 4, Fields.LEFT_RIGHT, Fields.UNARY | Fields.BINARY), 
+            new Operator("MMU", "*", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("MDR", "/", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("MDL", "\\", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("MPW", "^", 1, Fields.LEFT_RIGHT, Fields.BINARY), 
+            new Operator("ADJ", "'", 1, Fields.RIGHT_LEFT, Fields.UNARY)
 		};
 		for (int i = 0; i < Operator.OPS.Length; i++)
 		{
@@ -96,8 +96,6 @@ internal class MatlabParser : Parser
 	{
 		return ">> ";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public List compile(InputStream is, PrintStream ps) throws ParseException, IOException
     public override List compile( Stream instream, PrintStream ps )
 	{
 		string s , sp = null;
@@ -130,16 +128,12 @@ internal class MatlabParser : Parser
 		}
 		return get();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public List compile(String s) throws ParseException
     public override List compile(string s)
 	{
 		reset();
 		translate(s);
 		return get();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List get() throws ParseException
 	internal override List get()
 	{
 		List r = pst.tokens;
@@ -150,8 +144,6 @@ internal class MatlabParser : Parser
 		}
 		throw new ParseException("Compilation failed.");
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: void translate(String s) throws ParseException
 	internal override void translate(string s)
 	{
 		if (s == null)
@@ -181,8 +173,6 @@ internal class MatlabParser : Parser
 	{
 		return Operator.get(expr) != null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Object nextToken(StringBuffer s) throws ParseException
 	public virtual object nextToken(StringBuilder s)
 	{
 		if (pst.inList == IN_BRACK && pst.prev != null && !oneof(pst.prev, listsep))
@@ -307,8 +297,6 @@ case '.':
 		return pst.sub == null;
 	}
 	private string separator = "()[]\n\t\r +-*/^!,;:=.<>'\\&|";
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Object readString(StringBuffer s)throws ParseException
 	internal virtual object readString(StringBuilder s)
 	{
 		int len = s.Length > 1?2:s.Length;
@@ -365,8 +353,6 @@ case '.':
 		}
 		return t;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_unary(Operator op, List expr)throws ParseException
 	internal virtual List compile_unary(Operator op, List expr)
 	{
 		List arg_in = (op.left_right() ? expr.subList(1, expr.Count) : expr.subList(0, expr.Count - 1));
@@ -379,8 +365,6 @@ case '.':
 		arg.Add(op.Lambda);
 		return arg;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_ternary(Operator op, List expr, int k)throws ParseException
 	internal virtual List compile_ternary(Operator op, List expr, int k)
 	{
 		int n = expr.Count;
@@ -415,8 +399,6 @@ case '.':
 		}
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_binary(Operator op, List expr, int k)throws ParseException
 	internal virtual List compile_binary(Operator op, List expr, int k)
 	{
 		List left_in = expr.subList(0, k);
@@ -452,8 +434,6 @@ case '.':
 		left.Add(op.Lambda);
 		return left;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List translate_op(List expr) throws ParseException
 	internal virtual List translate_op(List expr)
 	{
 		List s;
@@ -467,7 +447,7 @@ case '.':
 				{
 					k = n - i - 1;
 				}
-                Operator op = Operator.get( expr[ k ], k == 0 ? Constants_Fields.START : ( k == n - 1 ? Constants_Fields.END : Constants_Fields.MID ) );
+                Operator op = Operator.get( expr[ k ], k == 0 ? Fields.START : ( k == n - 1 ? Fields.END : Fields.MID ) );
 				if (op == null || op.precedence != pred)
 				{
 					continue;
@@ -504,8 +484,6 @@ case '.':
 		}
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_vektor(List expr) throws ParseException
 	internal virtual List compile_vektor(List expr)
 	{
 		if (expr == null || expr.Count == 0 || !"[".Equals(expr[0]))
@@ -540,8 +518,6 @@ case '.':
 		r.Add(CRV);
 		return r;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_list(List expr) throws ParseException
 	internal override List compile_list(List expr)
 	{
 		if (expr == null)
@@ -579,8 +555,6 @@ case '.':
 		r.Add(new int?(n));
 		return r;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_lval(List expr) throws ParseException
 	internal override List compile_lval(List expr)
 	{
 		if (expr == null || expr.Count == 0)
@@ -633,8 +607,6 @@ case '.':
 		r.Insert(0, new int?(n));
 		return r;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_lval1(List expr) throws ParseException
 	internal virtual List compile_lval1(List expr)
 	{
 		if (expr == null)
@@ -673,8 +645,6 @@ case '.':
 				return null;
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_index(List expr) throws ParseException
 	internal virtual List compile_index(List expr)
 	{
 		if (expr == null || expr.Count == 0)
@@ -749,8 +719,6 @@ case '.':
 			}
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_statement(List expr_in) throws ParseException
 	internal override List compile_statement(List expr_in)
 	{
 		if (expr_in == null)
@@ -856,8 +824,6 @@ case '.':
 		}
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_func(List expr) throws ParseException
 	internal override List compile_func(List expr)
 	{
 		if (expr.Count == 2)
@@ -876,8 +842,6 @@ case '.':
 		}
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: List compile_expr(List expr) throws ParseException
 	internal override List compile_expr(List expr)
 	{
 		if (expr == null || expr.Count == 0)

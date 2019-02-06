@@ -16,14 +16,10 @@ public abstract class Lambda : Constants
 		}
 	}
 	internal static int length = 1;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack x) throws ParseException, JasymcaException
 	public virtual int lambda(Stack x)
 	{
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Algebraic getAlgebraic(Stack st) throws ParseException, JasymcaException
 	internal static Algebraic getAlgebraic(Stack st)
 	{
 		object arg_in = st.Pop();
@@ -38,8 +34,6 @@ public abstract class Lambda : Constants
 		}
 		return (Algebraic)arg_in;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Zahl getNumber(Stack st) throws ParseException, JasymcaException
 	internal static Zahl getNumber(Stack st)
 	{
 		object arg = st.Pop();
@@ -53,8 +47,6 @@ public abstract class Lambda : Constants
 		}
 		return (Zahl)arg;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static int getNarg(Stack st) throws ParseException, JasymcaException
 	internal static int getNarg(Stack st)
 	{
 		object arg_in = st.Pop();
@@ -64,8 +56,6 @@ public abstract class Lambda : Constants
 		}
 		return (int)((int?)arg_in);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static String getSymbol(Stack st) throws ParseException, JasymcaException
 	internal static string getSymbol(Stack st)
 	{
 		object arg_in = st.Pop();
@@ -75,8 +65,6 @@ public abstract class Lambda : Constants
 		}
 		return (string)arg_in;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Polynomial getPolynomial(Stack st) throws ParseException, JasymcaException
 	internal static Polynomial getPolynomial(Stack st)
 	{
 		object arg = getAlgebraic(st);
@@ -86,8 +74,6 @@ public abstract class Lambda : Constants
 		}
 		return (Polynomial)arg;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Vektor getVektor(Stack st) throws ParseException, JasymcaException
 	internal static Vektor getVektor(Stack st)
 	{
 		object arg = st.Pop();
@@ -97,15 +83,11 @@ public abstract class Lambda : Constants
 		}
 		return (Vektor)arg;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Variable getVariable(Stack st) throws ParseException, JasymcaException
 	internal static Variable getVariable(Stack st)
 	{
 		Polynomial p = getPolynomial(st);
 		return p.v;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static int getInteger(Stack st) throws ParseException, JasymcaException
 	internal static int getInteger(Stack st)
 	{
 		object arg = st.Pop();
@@ -115,8 +97,6 @@ public abstract class Lambda : Constants
 		}
 		return ((Zahl)arg).intval();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static int getInteger(Algebraic arg) throws ParseException, JasymcaException
 	internal static int getInteger(Algebraic arg)
 	{
 		if (!(arg is Zahl) || !((Zahl)arg).integerq())
@@ -125,8 +105,6 @@ public abstract class Lambda : Constants
 		}
 		return ((Zahl)arg).intval();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static List getList(Stack st) throws ParseException, JasymcaException
 	internal static List getList(Stack st)
 	{
 		object arg = st.Pop();
@@ -136,8 +114,6 @@ public abstract class Lambda : Constants
 		}
 		return (List)arg;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Zahl ensure_Zahl(Object x) throws JasymcaException
 	internal static Zahl ensure_Zahl(object x)
 	{
 		if (!(x is Zahl))
@@ -147,8 +123,6 @@ public abstract class Lambda : Constants
 		return (Zahl)x;
 	}
 	internal static Environment sandbox = null;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Algebraic evalx(String rule, Algebraic x) throws JasymcaException
 	internal static Algebraic evalx(string rule, Algebraic x)
 	{
 		try
@@ -179,8 +153,6 @@ public abstract class Lambda : Constants
 }
 /*internal*/ public abstract class LambdaAlgebraic : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -209,33 +181,23 @@ public abstract class Lambda : Constants
 		}
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal virtual Zahl f(Zahl x)
 	{
 		return x;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal virtual Algebraic f_exakt(Algebraic x)
 	{
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x, Algebraic y) throws JasymcaException
 	internal virtual Algebraic f_exakt(Algebraic x, Algebraic y)
 	{
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic[] x) throws JasymcaException
 	internal virtual Algebraic f_exakt(Algebraic[] x)
 	{
 		return null;
 	}
 	internal string diffrule = null, intrule = null, trigrule = null;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic integrate(Algebraic arg, Variable x) throws JasymcaException
 	public virtual Algebraic integrate(Algebraic arg, Variable x)
 	{
 		if (!(arg.depends(x)))
@@ -259,8 +221,6 @@ public abstract class Lambda : Constants
 }
 internal class LambdaFUNC : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException,JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -325,8 +285,6 @@ internal class UserProgram : Lambda
 	internal SimpleVariable result;
 	internal Environment env = null;
 	internal Stack ups = null;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public UserProgram() throws ParseException,JasymcaException
 	public UserProgram()
 	{
 	}
@@ -339,8 +297,6 @@ internal class UserProgram : Lambda
 		this.env = env;
 		this.ups = ups;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException,JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -402,8 +358,6 @@ internal class UserFunction : LambdaAlgebraic
 	internal SimpleVariable[] @var;
 	internal SimpleVariable result;
 	internal Environment env = null;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public UserFunction() throws ParseException,JasymcaException
 	public UserFunction()
 	{
 	}
@@ -415,8 +369,6 @@ internal class UserFunction : LambdaAlgebraic
 		this.result = result;
 		this.env = env;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Algebraic y = f_exakt(x);
@@ -431,8 +383,6 @@ internal class UserFunction : LambdaAlgebraic
 		}
 		throw new JasymcaException("Can not evaluate Function " + fname + " to number, got " + y + " for " + x);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (@var.Length != 1)
@@ -442,8 +392,6 @@ internal class UserFunction : LambdaAlgebraic
 		Algebraic y = body.value(@var[0], x);
 		return y;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x, Algebraic y) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x, Algebraic y)
 	{
 		if (@var.Length != 2)
@@ -454,8 +402,6 @@ internal class UserFunction : LambdaAlgebraic
 		z = z.value(@var[1], x);
 		return z;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic[] x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic[] x)
 	{
 		if (@var.Length != x.Length)
@@ -469,8 +415,6 @@ internal class UserFunction : LambdaAlgebraic
 		}
 		return y;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic fv(Vektor x) throws JasymcaException
 	internal virtual Algebraic fv(Vektor x)
 	{
 		Environment global = pc.env;
@@ -483,8 +427,6 @@ internal class UserFunction : LambdaAlgebraic
 		}
 		return r;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic integrate(Algebraic arg, Variable x) throws JasymcaException
 	public override Algebraic integrate(Algebraic arg, Variable x)
 	{
 		if (!(body is Algebraic))
@@ -509,8 +451,6 @@ internal class UserFunction : LambdaAlgebraic
 internal class LambdaFLOAT : LambdaAlgebraic
 {
 	internal double eps = 1.0e-8;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -528,8 +468,6 @@ internal class LambdaFLOAT : LambdaAlgebraic
 		st.Push(exp.map(this));
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt f = x.unexakt();
@@ -550,8 +488,6 @@ internal class LambdaFLOAT : LambdaAlgebraic
 		}
 		return new Unexakt(r,i);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		return x.map(this);
@@ -559,8 +495,6 @@ internal class LambdaFLOAT : LambdaAlgebraic
 }
 internal class LambdaMATRIX : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -588,8 +522,6 @@ internal class LambdaMATRIX : Lambda
 }
 internal class LambdaFORMAT : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int nargs = getNarg(st);
@@ -624,8 +556,6 @@ internal class LambdaFORMAT : Lambda
 }
 internal class LambdaSYMS : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int nargs = getNarg(st);
@@ -643,8 +573,6 @@ internal class LambdaSYMS : Lambda
 }
 internal class LambdaCLEAR : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int nargs = getNarg(st);
@@ -662,8 +590,6 @@ internal class LambdaCLEAR : Lambda
 }
 internal class CreateVector : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int nr = getNarg(st);
@@ -679,8 +605,6 @@ internal class CreateVector : Lambda
 		st.Push(m.reduce());
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Algebraic crv(Stack st) throws ParseException, JasymcaException
 	internal static Algebraic crv(Stack st)
 	{
 		int nc = getNarg(st);
@@ -702,8 +626,6 @@ internal class CreateVector : Lambda
 }
 internal class CR1 : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -739,8 +661,6 @@ internal class CR1 : Lambda
 }
 internal class LambdaEYE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -760,8 +680,6 @@ internal class LambdaEYE : Lambda
 }
 internal class LambdaZEROS : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -781,8 +699,6 @@ internal class LambdaZEROS : Lambda
 }
 internal class LambdaONES : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -802,8 +718,6 @@ internal class LambdaONES : Lambda
 }
 internal class LambdaRAND : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -833,8 +747,6 @@ internal class LambdaRAND : Lambda
 }
 internal class LambdaDIAG : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -909,8 +821,6 @@ internal class LambdaDIAG : Lambda
 }
 internal class LambdaGCD : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -931,8 +841,6 @@ internal class LambdaGCD : Lambda
 
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic gcd(Algebraic x, Algebraic y) throws JasymcaException
 	internal virtual Algebraic gcd(Algebraic x, Algebraic y)
 	{
 		if (!x.exaktq())
@@ -969,8 +877,6 @@ internal class LambdaGCD : Lambda
 }
 internal class LambdaEXPAND : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -990,8 +896,6 @@ internal class LambdaEXPAND : Lambda
 }
 internal class LambdaREALPART : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1001,8 +905,6 @@ internal class LambdaREALPART : Lambda
 }
 internal class LambdaIMAGPART : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1012,8 +914,6 @@ internal class LambdaIMAGPART : Lambda
 }
 internal class LambdaCONJ : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1023,8 +923,6 @@ internal class LambdaCONJ : Lambda
 }
 internal class LambdaANGLE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1040,8 +938,6 @@ internal class LambdaANGLE : Lambda
 }
 internal class LambdaCFS : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1061,8 +957,6 @@ internal class LambdaCFS : Lambda
 }
 internal class LambdaDIFF : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1102,8 +996,6 @@ internal class LambdaDIFF : Lambda
 }
 internal class LambdaSUBST : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1137,8 +1029,6 @@ internal class LambdaSUBST : Lambda
 }
 internal class LambdaCOEFF : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1172,8 +1062,6 @@ internal class LambdaCOEFF : Lambda
 }
 internal class LambdaSUM : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1232,8 +1120,6 @@ internal class LambdaSUM : Lambda
 }
 internal class LambdaLSUM : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1255,8 +1141,6 @@ internal class LambdaLSUM : Lambda
 }
 internal class LambdaDIVIDE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int size = getNarg(st);
@@ -1298,8 +1182,6 @@ internal class LambdaDIVIDE : Lambda
 }
 internal class LambdaTAYLOR : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1326,8 +1208,6 @@ internal class LambdaTAYLOR : Lambda
 }
 internal class LambdaSAVE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda( Stack st )
 	{
 		int size = getNarg(st);
@@ -1395,8 +1275,6 @@ internal class LambdaSAVE : Lambda
 
 internal class LambdaLOADFILE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1420,50 +1298,35 @@ internal class LambdaLOADFILE : Lambda
 		}
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static void readFile(String fname) throws IOException, ParseException, JasymcaException
 	public static void readFile(string fname)
 	{
-		string sep = "/";
-		string s;
-
-		var c = typeof( LambdaLOADFILE );
-
-		for (int i = 0; i < pc.env.path.Count; i++)
-		{
-			string dir = (string)pc.env.path[i];
-
-			s = fname.StartsWith(sep, StringComparison.Ordinal) ? dir + fname : dir + sep + fname;
-
-			Stream f = c.getResourceAsStream(s);
-
-			if (f == null)
-			{
-				try
-				{
-					f = Jasymca.getFileInputStream(s);
-				}
-				catch
-				{
-					continue;
-				}
-			}
-
-			if (f == null)
-			{
-				continue;
-			}
-
-			readFile(f);
-
-			return;
-		}
+	    if ( File.Exists( fname ) )
+	    {
+            Stream stream = new FileStream( Path.GetFullPath( fname ), FileMode.Open );
+	        
+            readFile( stream );
+	    }
+		//string sep = "/";
+		//string s;
+        //
+		//var c = typeof( LambdaLOADFILE );
+        //
+		//for (int i = 0; i < pc.env.path.Count; i++)
+		//{
+		//	string dir = (string)pc.env.path[i];
+        //
+		//	s = fname.StartsWith(sep, StringComparison.Ordinal) ? dir + fname : dir + sep + fname;
+        //
+		//	Stream f = c.getResourceAsStream(s);
+        //
+		//	readFile(f);
+        //
+		//	return;
+		//}
 
 		throw new IOException("Could not open " + fname + ".");
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static void readFile(InputStream f) throws JasymcaException
-	public static void readFile( Stream f)
+	public static void readFile( Stream f )
 	{
 		var old_stack = pc.stack;
 
@@ -1498,8 +1361,6 @@ internal class LambdaLOADFILE : Lambda
 
 internal class LambdaRAT : LambdaAlgebraic
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1519,8 +1380,6 @@ internal class LambdaRAT : LambdaAlgebraic
 		}
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x is Zahl)
@@ -1529,8 +1388,6 @@ internal class LambdaRAT : LambdaAlgebraic
 		}
 		return x.map(this);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		return (Zahl)x.rat();
@@ -1538,8 +1395,6 @@ internal class LambdaRAT : LambdaAlgebraic
 }
 internal class LambdaSQFR : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1566,8 +1421,6 @@ internal class LambdaSQFR : Lambda
 }
 internal class LambdaALLROOTS : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1604,8 +1457,6 @@ internal class LambdaALLROOTS : Lambda
 }
 internal class LambdaDET : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1616,8 +1467,6 @@ internal class LambdaDET : Lambda
 }
 internal class LambdaEIG : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1628,8 +1477,6 @@ internal class LambdaEIG : Lambda
 }
 internal class LambdaINV : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1640,8 +1487,6 @@ internal class LambdaINV : Lambda
 }
 internal class LambdaPINV : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1652,8 +1497,6 @@ internal class LambdaPINV : Lambda
 }
 internal class LambdaHILB : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1674,8 +1517,6 @@ internal class LambdaHILB : Lambda
 }
 internal class LambdaLU : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1708,8 +1549,6 @@ internal class LambdaSQRT : LambdaAlgebraic
 		intrule = "2/3*x*sqrt(x)";
 	}
 	internal static string intrule2 = "(2*a*x+b)*sqrt(X)/(4*a)+(4*a*c-b*b)/(8*a*sqrt(a))*log(2*sqrt(a*X)+2*a*x+b)";
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic integrate(Algebraic arg, Variable x) throws JasymcaException
 	public override Algebraic integrate(Algebraic arg, Variable x)
 	{
 		try
@@ -1737,8 +1576,6 @@ internal class LambdaSQRT : LambdaAlgebraic
 			return y;
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
@@ -1754,8 +1591,6 @@ internal class LambdaSQRT : LambdaAlgebraic
 		double phi = JMath.atan2(z.imag,z.real) / 2.0;
 		return new Unexakt(sr * Math.Cos(phi), sr * Math.Sin(phi));
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x.Equals(Zahl.ONE) || x.Equals(Zahl.ZERO))
@@ -1776,8 +1611,6 @@ internal class LambdaSQRT : LambdaAlgebraic
 		}
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic fzexakt(Zahl x) throws JasymcaException
 	internal virtual Algebraic fzexakt(Zahl x)
 	{
 		if (x is Exakt && !x.komplexq())
@@ -1850,8 +1683,6 @@ internal class LambdaSIGN : LambdaAlgebraic
 		diffrule = "x-x";
 		intrule = "x*sign(x)";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x is Zahl)
@@ -1860,8 +1691,6 @@ internal class LambdaSIGN : LambdaAlgebraic
 		}
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		return x.smaller(Zahl.ZERO)?Zahl.MINUS:Zahl.ONE;
@@ -1874,8 +1703,6 @@ internal class LambdaABS : LambdaAlgebraic
 		diffrule = "sign(x)";
 		intrule = "sign(x)*x^2/2";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x is Zahl)
@@ -1884,8 +1711,6 @@ internal class LambdaABS : LambdaAlgebraic
 		}
 		return FunctionVariable.create("sqrt", x.mult(x.cc()));
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		return new Unexakt(x.norm());
@@ -1893,8 +1718,6 @@ internal class LambdaABS : LambdaAlgebraic
 }
 internal class ExpandUser : LambdaAlgebraic
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x1) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x1)
 	{
 		if (!(x1 is Polynomial))
@@ -1945,8 +1768,6 @@ internal class ExpandUser : LambdaAlgebraic
 }
 internal class ASS : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -1992,8 +1813,6 @@ internal class ASS : Lambda
 		}
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static int lambdap(Stack st, Lambda op) throws ParseException, JasymcaException
 	internal static int lambdap(Stack st, Lambda op)
 	{
 		int narg = getNarg(st);
@@ -2014,8 +1833,6 @@ internal class ASS : Lambda
 		pc.process_list(t, true);
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static int lambdai(Stack st, boolean sign, boolean pre) throws ParseException, JasymcaException
 	internal static int lambdai(Stack st, bool sign, bool pre)
 	{
 		int narg = getNarg(st);
@@ -2052,8 +1869,6 @@ internal class ASS : Lambda
 }
 internal class LambdaWHO : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		if (pc.ps != null)
@@ -2065,8 +1880,6 @@ internal class LambdaWHO : Lambda
 }
 internal class LambdaADDPATH : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -2084,8 +1897,6 @@ internal class LambdaADDPATH : Lambda
 }
 internal class LambdaPATH : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
 	public override int lambda(Stack st)
 	{
         int n = pc.env.path.Count;

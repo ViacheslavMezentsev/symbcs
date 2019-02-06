@@ -34,40 +34,40 @@ internal class OctaveParser : Parser
 		pst = new ParserState(null, 0);
         Operator.OPS = new Operator[]
         {
-            new Operator( "POW", ".**", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "PPR", "++", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY | Constants_Fields.LVALUE ), 
-            new Operator( "MMR", "--", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY | Constants_Fields.LVALUE ), 
-            new Operator( "PPL", "++", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.LVALUE ), 
-            new Operator( "MML", "--", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.LVALUE ), 
-            new Operator( "ADE", "+=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
-            new Operator( "SUE", "-=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
-            new Operator( "MUE", "*=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
-            new Operator( "DIE", "/=", 10, Constants_Fields.RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
-            new Operator( "MPW", "**", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "MUL", ".*", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "DIV", "./", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "POW", ".^", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "EQU", "==", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "NEQ", "~=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "GEQ", ">=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "LEQ", "<=", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "TRN", ".'", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY ), 
-            new Operator( "GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "LES", "<", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "OR", "|", 9, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "NOT", "~", 8, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY ), 
-            new Operator( "AND", "&", 7, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "GRE", ">", 6, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "ASS", "=", 10,Constants_Fields. RIGHT_LEFT, Constants_Fields.BINARY | Constants_Fields.LVALUE ), 
-            new Operator( "CR1", ":", 5, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY | Constants_Fields.TERNARY ), 
-            new Operator( "ADD", "+", 4, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.BINARY ), 
-            new Operator( "SUB", "-", 4, Constants_Fields.LEFT_RIGHT, Constants_Fields.UNARY | Constants_Fields.BINARY ), 
-            new Operator( "MMU", "*", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "MDR", "/", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "MDL", "\\", 3, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "MPW", "^", 1, Constants_Fields.LEFT_RIGHT, Constants_Fields.BINARY ), 
-            new Operator( "ADJ", "'", 1, Constants_Fields.RIGHT_LEFT, Constants_Fields.UNARY )
+            new Operator( "POW", ".**", 1, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "PPR", "++", 1, Fields.RIGHT_LEFT, Fields.UNARY | Fields.LVALUE ), 
+            new Operator( "MMR", "--", 1, Fields.RIGHT_LEFT, Fields.UNARY | Fields.LVALUE ), 
+            new Operator( "PPL", "++", 1, Fields.LEFT_RIGHT, Fields.UNARY | Fields.LVALUE ), 
+            new Operator( "MML", "--", 1, Fields.LEFT_RIGHT, Fields.UNARY | Fields.LVALUE ), 
+            new Operator( "ADE", "+=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
+            new Operator( "SUE", "-=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
+            new Operator( "MUE", "*=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
+            new Operator( "DIE", "/=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
+            new Operator( "MPW", "**", 1, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "MUL", ".*", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "DIV", "./", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "POW", ".^", 1, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "EQU", "==", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "NEQ", "~=", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "GEQ", ">=", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "LEQ", "<=", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "TRN", ".'", 1, Fields.RIGHT_LEFT, Fields.UNARY ), 
+            new Operator( "GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "LES", "<", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "OR", "|", 9, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "NOT", "~", 8, Fields.LEFT_RIGHT, Fields.UNARY ), 
+            new Operator( "AND", "&", 7, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "ASS", "=", 10,Fields. RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
+            new Operator( "CR1", ":", 5, Fields.LEFT_RIGHT, Fields.BINARY | Fields.TERNARY ), 
+            new Operator( "ADD", "+", 4, Fields.LEFT_RIGHT, Fields.UNARY | Fields.BINARY ), 
+            new Operator( "SUB", "-", 4, Fields.LEFT_RIGHT, Fields.UNARY | Fields.BINARY ), 
+            new Operator( "MMU", "*", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "MDR", "/", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "MDL", "\\", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "MPW", "^", 1, Fields.LEFT_RIGHT, Fields.BINARY ), 
+            new Operator( "ADJ", "'", 1, Fields.RIGHT_LEFT, Fields.UNARY )
         };
 		for (int i = 0; i < Operator.OPS.Length; i++)
 		{
@@ -485,7 +485,7 @@ case '.':
 				{
 					k = n - i - 1;
 				}
-                Operator op = Operator.get( expr[ k ], k == 0 ? Constants_Fields.START : ( k == n - 1 ? Constants_Fields.END : Constants_Fields.MID ) );
+                Operator op = Operator.get( expr[ k ], k == 0 ? Fields.START : ( k == n - 1 ? Fields.END : Fields.MID ) );
 				if (op == null || op.precedence != pred)
 				{
 					continue;

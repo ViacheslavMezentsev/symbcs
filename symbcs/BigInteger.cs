@@ -48,15 +48,15 @@ public class BigInteger
     private const int CEILING = 2;
     private const int TRUNCATE = 3;
     private const int ROUND = 4;
-    private static readonly int[] primes = new int[] { 2, 3, 5, 7 };
-    private static readonly int[] k = new int[] { 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1250, int.MaxValue };
-    private static readonly int[] t = new int[] { 27, 18, 15, 12, 9, 8, 7, 6, 5, 4, 3, 2 };
+    private static readonly int[] primes = { 2, 3, 5, 7 };
+    private static readonly int[] k = { 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1250, int.MaxValue };
+    private static readonly int[] t = { 27, 18, 15, 12, 9, 8, 7, 6, 5, 4, 3, 2 };
 
     static BigInteger()
     {
-        for ( int i = numFixNum; --i >= 0; )
+        for ( var i = numFixNum; --i >= 0; )
         {
-            smallFixNums[ i ] = new BigInteger( i + minFixNum );
+            smallFixNums[i] = new BigInteger( i + minFixNum );
         }
     }
 
@@ -150,6 +150,7 @@ public class BigInteger
         var result = alloc(2);
 
         result.ival = 2;
+
         result.words[0] = i;
         result.words[1] = ( int ) ( val >> 32 );
 
@@ -181,7 +182,8 @@ public class BigInteger
 
     private static int[] byteArrayToIntArray( sbyte[] bytes, int sign )
     {
-        int[] words = new int[ bytes.Length / 4 + 1 ];
+        var words = new int[ bytes.Length / 4 + 1 ];
+
         int nwords = words.Length;
         int bptr = 0;
         int word = sign;
@@ -221,7 +223,7 @@ public class BigInteger
             {
                 if ( ival > 0 )
                 {
-                    ival = words[ 0 ];
+                    ival = words[0];
                 }
 
                 words = null;
@@ -361,8 +363,9 @@ public class BigInteger
         {
             if ( ival == 1 )
             {
-                ival = words[ 0 ];
+                ival = words[0];
             }
+
             words = null;
         }
 
@@ -410,8 +413,8 @@ public class BigInteger
 
         for ( int i = 0; i < len; i++ )
         {
-            carry += ( ( long ) x.words[ i ] & 0xffffffffL );
-            words[ i ] = ( int ) carry;
+            carry += ( ( long ) x.words[i] & 0xffffffffL );
+            words[i] = ( int ) carry;
             carry >>= 32;
         }
 
@@ -486,22 +489,22 @@ public class BigInteger
         {
             if ( k == -1 )
             {
-                y = BigInteger.neg( y );
+                y = neg(y);
             }
             else
             {
-                y = BigInteger.times( y, valueOf( k ) );
+                y = times( y, valueOf(k) );
             }
         }
 
         if ( x.words == null )
         {
-            return BigInteger.add( y, x.ival );
+            return add( y, x.ival );
         }
 
         if ( y.words == null )
         {
-            return BigInteger.add( x, y.ival );
+            return add( x, y.ival );
         }
 
         if ( y.ival > x.ival )
@@ -512,15 +515,19 @@ public class BigInteger
         }
 
         var result = alloc( x.ival + 1 );
+
         int i = y.ival;
+
         long carry = MPN.add_n( result.words, x.words, y.words, i );
+
         long y_ext = y.words[ i - 1 ] < 0 ? 0xffffffffL : 0;
 
         for ( ; i < x.ival; i++ )
         {
             carry += ( ( long ) x.words[ i ] & 0xffffffffL ) + y_ext;
-            ;
-            result.words[ i ] = ( int ) carry;
+
+            result.words[i] = ( int ) carry;
+
             carry = ( long ) ( ( ulong ) carry >> 32 );
         }
 
@@ -529,7 +536,7 @@ public class BigInteger
             y_ext--;
         }
 
-        result.words[ i ] = ( int ) ( carry + y_ext );
+        result.words[i] = ( int ) ( carry + y_ext );
         result.ival = i + 1;
 
         return result.canonicalize();
@@ -557,7 +564,7 @@ public class BigInteger
             return x;
         }
 
-        int[] xwords = x.words;
+        var xwords = x.words;
         int xlen = x.ival;
 
         if ( xwords == null )
@@ -566,6 +573,7 @@ public class BigInteger
         }
 
         bool negative;
+
         var result = alloc( xlen + 1 );
 
         if ( xwords[ xlen - 1 ] < 0 )
@@ -609,15 +617,18 @@ public class BigInteger
         }
 
         bool negative = false;
-        int[] xwords;
-        int[] ywords;
+
         int xlen = x.ival;
         int ylen = y.ival;
+
+        int[] xwords;
+        int[] ywords;
 
         if ( x.Negative )
         {
             negative = true;
             xwords = new int[ xlen ];
+
             negate( xwords, x.words, xlen );
         }
         else
@@ -630,6 +641,7 @@ public class BigInteger
         {
             negative = !negative;
             ywords = new int[ ylen ];
+
             negate( ywords, y.words, ylen );
         }
         else
@@ -640,15 +652,19 @@ public class BigInteger
         if ( xlen < ylen )
         {
             int[] twords = xwords;
+
             xwords = ywords;
             ywords = twords;
+
             int tlen = xlen;
             xlen = ylen;
             ylen = tlen;
         }
 
         var result = alloc( xlen + ylen );
+
         MPN.mul( result.words, xwords, xlen, ywords, ylen );
+
         result.ival = xlen + ylen;
 
         if ( negative )
@@ -695,11 +711,11 @@ public class BigInteger
                 {
                     if ( quotient != null )
                     {
-                        quotient.set( 0 );
+                        quotient.set(0);
                     }
                     if ( remainder != null )
                     {
-                        remainder.set( x );
+                        remainder.set(x);
                     }
                 }
                 else
@@ -746,11 +762,13 @@ public class BigInteger
             {
                 q++;
             }
+
             if ( qNegative )
             {
                 q = -q;
             }
-            quotient.set( q );
+
+            quotient.set(q);
         }
 
         if ( remainder != null )
@@ -760,14 +778,13 @@ public class BigInteger
                 r = y - r;
                 xNegative = !xNegative;
             }
-            else
-            {
-            }
+
             if ( xNegative )
             {
                 r = -r;
             }
-            remainder.set( r );
+
+            remainder.set(r);
         }
     }
 
@@ -790,6 +807,7 @@ public class BigInteger
         bool qNegative = xNegative ^ yNegative;
 
         int ylen = y.words == null ? 1 : y.ival;
+
         int[] ywords = new int[ ylen ];
 
         y.getAbsolute( ywords );
@@ -800,6 +818,7 @@ public class BigInteger
         }
 
         int xlen = x.words == null ? 1 : x.ival;
+
         int[] xwords = new int[ xlen + 2 ];
 
         x.getAbsolute( xwords );
@@ -815,51 +834,63 @@ public class BigInteger
         if ( cmpval < 0 )
         {
             int[] rwords = xwords;
+
             xwords = ywords;
             ywords = rwords;
             rlen = xlen;
             qlen = 1;
-            xwords[ 0 ] = 0;
+            xwords[0] = 0;
         }
         else if ( cmpval == 0 )
         {
-            xwords[ 0 ] = 1;
+            xwords[0] = 1;
             qlen = 1;
-            ywords[ 0 ] = 0;
+            ywords[0] = 0;
             rlen = 1;
         }
         else if ( ylen == 1 )
         {
             qlen = xlen;
-            if ( ywords[ 0 ] == 1 && xwords[ xlen - 1 ] < 0 )
+
+            if ( ywords[0] == 1 && xwords[ xlen - 1 ] < 0 )
             {
                 qlen++;
             }
+
             rlen = 1;
-            ywords[ 0 ] = MPN.divmod_1( xwords, xwords, xlen, ywords[ 0 ] );
+            ywords[0] = MPN.divmod_1( xwords, xwords, xlen, ywords[0] );
         }
         else
         {
             int nshift = MPN.count_leading_zeros( ywords[ ylen - 1 ] );
+
             if ( nshift != 0 )
             {
                 MPN.lshift( ywords, 0, ywords, ylen, nshift );
+
                 int x_high = MPN.lshift( xwords, 0, xwords, xlen, nshift );
+
                 xwords[ xlen++ ] = x_high;
             }
+
             if ( xlen == ylen )
             {
                 xwords[ xlen++ ] = 0;
             }
+
             MPN.divide( xwords, xlen, ywords, ylen );
+
             rlen = ylen;
+
             MPN.rshift0( ywords, xwords, 0, rlen, nshift );
+
             qlen = xlen + 1 - ylen;
+
             if ( quotient != null )
             {
                 for ( int i = 0; i < qlen; i++ )
                 {
-                    xwords[ i ] = xwords[ i + ylen ];
+                    xwords[i] = xwords[ i + ylen ];
                 }
             }
         }
@@ -886,7 +917,7 @@ public class BigInteger
                     }
                     break;
                 case ROUND:
-                    BigInteger tmp = remainder == null ? new BigInteger() : remainder;
+                    var tmp = remainder ?? new BigInteger();
                     tmp.set( ywords, rlen );
                     tmp = shift( tmp, 1 );
                     if ( yNegative )
@@ -931,6 +962,7 @@ public class BigInteger
             if ( add_one )
             {
                 BigInteger tmp;
+
                 if ( y.words == null )
                 {
                     tmp = remainder;
@@ -940,6 +972,7 @@ public class BigInteger
                 {
                     tmp = add( remainder, y, yNegative ? 1 : -1 );
                 }
+
                 if ( xNegative )
                 {
                     remainder.setNegative( tmp );
@@ -1029,36 +1062,50 @@ public class BigInteger
             {
                 return ONE;
             }
+
             throw new ArithmeticException( "negative exponent" );
         }
+
         if ( Zero )
         {
             return this;
         }
+
         int plen = words == null ? 1 : ival;
         int blen = ( ( bitLength() * exponent ) >> 5 ) + 2 * plen;
+
         bool negative = Negative && ( exponent & 1 ) != 0;
+
         int[] pow2 = new int[ blen ];
         int[] rwords = new int[ blen ];
         int[] work = new int[ blen ];
+
         getAbsolute( pow2 );
+
         int rlen = 1;
-        rwords[ 0 ] = 1;
+
+        rwords[0] = 1;
+
         for ( ; ; )
         {
             if ( ( exponent & 1 ) != 0 )
             {
                 MPN.mul( work, pow2, plen, rwords, rlen );
+
                 int[] temp = work;
+
                 work = rwords;
                 rwords = temp;
                 rlen += plen;
+
                 while ( rwords[ rlen - 1 ] == 0 )
                 {
                     rlen--;
                 }
             }
+
             exponent >>= 1;
+
             if ( exponent == 0 )
             {
                 break;
@@ -1071,89 +1118,116 @@ public class BigInteger
                 work = pow2;
                 pow2 = temp;
                 plen *= 2;
+
                 while ( pow2[ plen - 1 ] == 0 )
                 {
                     plen--;
                 }
             }
         }
+
         if ( rwords[ rlen - 1 ] < 0 )
         {
             rlen++;
         }
+
         if ( negative )
         {
             negate( rwords, rwords, rlen );
         }
-        return BigInteger.make( rwords, rlen );
+
+        return make( rwords, rlen );
     }
+
     private static int[] euclidInv( int a, int b, int prevDiv )
     {
         if ( b == 0 )
         {
             throw new ArithmeticException( "not invertible" );
         }
+
         if ( b == 1 )
         {
-            return new int[] { -prevDiv, 1 };
+            return new[] { -prevDiv, 1 };
         }
-        int[] xy = euclidInv( b, a % b, a / b );
-        a = xy[ 0 ];
-        xy[ 0 ] = a * -prevDiv + xy[ 1 ];
-        xy[ 1 ] = a;
+
+        var xy = euclidInv( b, a % b, a / b );
+
+        a = xy[0];
+
+        xy[0] = a * -prevDiv + xy[1];
+        xy[1] = a;
+
         return xy;
     }
+
     private static void euclidInv( BigInteger a, BigInteger b, BigInteger prevDiv, BigInteger[] xy )
     {
         if ( b.Zero )
         {
             throw new ArithmeticException( "not invertible" );
         }
+
         if ( b.One )
         {
-            xy[ 0 ] = neg( prevDiv );
-            xy[ 1 ] = ONE;
+            xy[0] = neg( prevDiv );
+            xy[1] = ONE;
+
             return;
         }
+
         if ( a.words == null )
         {
-            int[] xyInt = euclidInv( b.ival, a.ival % b.ival, a.ival / b.ival );
-            xy[ 0 ] = new BigInteger( xyInt[ 0 ] );
-            xy[ 1 ] = new BigInteger( xyInt[ 1 ] );
+            var xyInt = euclidInv( b.ival, a.ival % b.ival, a.ival / b.ival );
+
+            xy[0] = new BigInteger( xyInt[0] );
+            xy[1] = new BigInteger( xyInt[1] );
         }
         else
         {
-            BigInteger rem = new BigInteger();
-            BigInteger quot = new BigInteger();
+            var rem = new BigInteger();
+            var quot = new BigInteger();
+
             divide( a, b, quot, rem, FLOOR );
+
             rem.canonicalize();
             quot.canonicalize();
+
             euclidInv( b, rem, quot, xy );
         }
-        BigInteger t = xy[ 0 ];
-        xy[ 0 ] = add( xy[ 1 ], times( t, prevDiv ), -1 );
-        xy[ 1 ] = t;
+
+        var t = xy[0];
+
+        xy[0] = add( xy[1], times( t, prevDiv ), -1 );
+        xy[1] = t;
     }
+
     public virtual BigInteger modInverse( BigInteger y )
     {
         if ( y.Negative || y.Zero )
         {
             throw new ArithmeticException( "non-positive modulo" );
         }
+
         if ( y.One )
         {
             return ZERO;
         }
+
         if ( One )
         {
             return ONE;
         }
-        BigInteger result = new BigInteger();
+
+        var result = new BigInteger();
+
         bool swapped = false;
+
         if ( y.words == null )
         {
             int xval = ( words != null || Negative ) ? mod( y ).ival : ival;
             int yval = y.ival;
+
             if ( yval > xval )
             {
                 int tmp = xval;
@@ -1161,7 +1235,9 @@ public class BigInteger
                 yval = tmp;
                 swapped = true;
             }
+
             result.ival = euclidInv( yval, xval % yval, xval / yval )[ swapped ? 0 : 1 ];
+
             if ( result.ival < 0 )
             {
                 result.ival += y.ival;
@@ -1169,7 +1245,8 @@ public class BigInteger
         }
         else
         {
-            BigInteger x = Negative ? this.mod( y ) : this;
+            var x = Negative ? this.mod(y) : this;
+
             if ( x.compareTo( y ) < 0 )
             {
                 result = x;
@@ -1177,58 +1254,76 @@ public class BigInteger
                 y = result;
                 swapped = true;
             }
-            BigInteger rem = new BigInteger();
-            BigInteger quot = new BigInteger();
+
+            var rem = new BigInteger();
+            var quot = new BigInteger();
+
             divide( x, y, quot, rem, FLOOR );
+
             rem.canonicalize();
             quot.canonicalize();
-            BigInteger[] xy = new BigInteger[ 2 ];
+
+            var xy = new BigInteger[2];
+
             euclidInv( y, rem, quot, xy );
-            result = swapped ? xy[ 0 ] : xy[ 1 ];
+
+            result = swapped ? xy[0] : xy[1];
+
             if ( result.Negative )
             {
                 result = add( result, swapped ? x : y, 1 );
             }
         }
+
         return result;
     }
+
     public virtual BigInteger modPow( BigInteger exponent, BigInteger m )
     {
         if ( m.Negative || m.Zero )
         {
             throw new ArithmeticException( "non-positive modulo" );
         }
+
         if ( exponent.Negative )
         {
-            return modInverse( m );
+            return modInverse(m);
         }
+
         if ( exponent.One )
         {
-            return mod( m );
+            return mod(m);
         }
-        BigInteger s = ONE;
-        BigInteger t = this;
-        BigInteger u = exponent;
+
+        var s = ONE;
+        var t = this;
+        var u = exponent;
+
         while ( !u.Zero )
         {
             if ( u.and( ONE ).One )
             {
-                s = times( s, t ).mod( m );
+                s = times( s, t ).mod(m);
             }
-            u = u.shiftRight( 1 );
-            t = times( t, t ).mod( m );
+
+            u = u.shiftRight(1);
+            t = times( t, t ).mod(m);
         }
+
         return s;
     }
+
     private static int gcd( int a, int b )
     {
         int tmp;
+
         if ( b > a )
         {
             tmp = a;
             a = b;
             b = tmp;
         }
+
         for ( ; ; )
         {
             if ( b == 0 )
@@ -1239,124 +1334,165 @@ public class BigInteger
             {
                 return b;
             }
+
             tmp = b;
             b = a % b;
             a = tmp;
         }
     }
+
     public virtual BigInteger gcd( BigInteger y )
     {
         int xval = ival;
         int yval = y.ival;
+
         if ( words == null )
         {
             if ( xval == 0 )
             {
                 return abs( y );
             }
+
             if ( y.words == null && xval != int.MinValue && yval != int.MinValue )
             {
                 if ( xval < 0 )
                 {
                     xval = -xval;
                 }
+
                 if ( yval < 0 )
                 {
                     yval = -yval;
                 }
+
                 return valueOf( gcd( xval, yval ) );
             }
+
             xval = 1;
         }
+
         if ( y.words == null )
         {
             if ( yval == 0 )
             {
                 return abs( this );
             }
+
             yval = 1;
         }
+
         int len = ( xval > yval ? xval : yval ) + 1;
-        int[] xwords = new int[ len ];
-        int[] ywords = new int[ len ];
+
+        var xwords = new int[ len ];
+        var ywords = new int[ len ];
+
         getAbsolute( xwords );
+
         y.getAbsolute( ywords );
+
         len = MPN.gcd( xwords, ywords, len );
-        BigInteger result = new BigInteger( 0 );
-        result.ival = len;
-        result.words = xwords;
+
+        var result = new BigInteger(0)
+        {
+            ival = len,
+            words = xwords
+        };
+
         if ( result.Negative && len < xwords.Length )
         {
             xwords[ len ] = 0;
             result.ival++;
         }
+
         return result.canonicalize();
     }
+
     public virtual bool isProbablePrime( int certainty )
     {
         if ( certainty < 1 )
         {
             return true;
         }
-        BigInteger rem = new BigInteger();
+
+        var rem = new BigInteger();
+
         int i;
+
         for ( i = 0; i < primes.Length; i++ )
         {
-            if ( words == null && ival == primes[ i ] )
+            if ( words == null && ival == primes[i] )
             {
                 return true;
             }
-            divide( this, smallFixNums[ primes[ i ] - minFixNum ], null, rem, TRUNCATE );
+
+            divide( this, smallFixNums[ primes[i] - minFixNum ], null, rem, TRUNCATE );
+
             if ( rem.canonicalize().Zero )
             {
                 return false;
             }
         }
-        BigInteger pMinus1 = add( this, -1 );
+
+        var pMinus1 = add( this, -1 );
+
         int b = pMinus1.LowestSetBit;
-        BigInteger m = pMinus1.divide( valueOf( 2L << b - 1 ) );
-        int bits = this.bitLength();
+
+        var m = pMinus1.divide( valueOf( 2L << b - 1 ) );
+
+        int bits = bitLength();
+
         for ( i = 0; i < k.Length; i++ )
         {
-            if ( bits <= k[ i ] )
+            if ( bits <= k[i] )
             {
                 break;
             }
         }
-        int trials = t[ i ];
+
+        int trials = t[i];
+
         if ( certainty > 80 )
         {
             trials *= 2;
         }
+
         BigInteger z;
+
         for ( var k = 0; k < trials; k++ )
         {
-            z = smallFixNums[ primes[ k ] - minFixNum ].modPow( m, this );
+            z = smallFixNums[ primes[k] - minFixNum ].modPow( m, this );
 
             if ( z.One || z.Equals( pMinus1 ) )
             {
                 continue;
             }
+
             for ( i = 0; i < b; )
             {
                 if ( z.One )
                 {
                     return false;
                 }
+
                 i++;
+
                 if ( z.Equals( pMinus1 ) )
                 {
                     break;
                 }
+
                 z = z.modPow( valueOf( 2 ), this );
             }
+
             if ( i == b && !z.Equals( pMinus1 ) )
             {
                 return false;
             }
         }
+
         return true;
     }
+
     private void setInvert()
     {
         if ( words == null )
@@ -1367,14 +1503,16 @@ public class BigInteger
         {
             for ( int i = ival; --i >= 0; )
             {
-                words[ i ] = ~words[ i ];
+                words[i] = ~words[i];
             }
         }
     }
+
     private void setShiftLeft( BigInteger x, int count )
     {
         int[] xwords;
         int xlen;
+
         if ( x.words == null )
         {
             if ( count < 32 )
@@ -1382,7 +1520,8 @@ public class BigInteger
                 set( ( long ) x.ival << count );
                 return;
             }
-            xwords = new int[ 1 ];
+
+            xwords = new int[1];
             xwords[ 0 ] = x.ival;
             xlen = 1;
         }
@@ -1391,49 +1530,59 @@ public class BigInteger
             xwords = x.words;
             xlen = x.ival;
         }
+
         int word_count = count >> 5;
+
         count &= 31;
+
         int new_len = xlen + word_count;
+
         if ( count == 0 )
         {
             realloc( new_len );
+
             for ( int i = xlen; --i >= 0; )
             {
-                words[ i + word_count ] = xwords[ i ];
+                words[ i + word_count ] = xwords[i];
             }
         }
         else
         {
             new_len++;
             realloc( new_len );
+
             int shift_out = MPN.lshift( words, word_count, xwords, xlen, count );
+
             count = 32 - count;
             words[ new_len - 1 ] = ( shift_out << count ) >> count;
         }
+
         ival = new_len;
+
         for ( int i = word_count; --i >= 0; )
         {
-            words[ i ] = 0;
+            words[i] = 0;
         }
     }
+
     private void setShiftRight( BigInteger x, int count )
     {
         if ( x.words == null )
         {
-            //JAVA TO C# CONVERTER TODO TASK: Java wildcard generics are not converted to .NET:
-            //ORIGINAL LINE: set(count < 32 ? x.ival >> count : x.ival < 0 ? -1 : 0);
             set( count < 32 ? x.ival >> count : x.ival < 0 ? -1 : 0 );
         }
         else if ( count == 0 )
         {
-            set( x );
+            set(x);
         }
         else
         {
             bool neg = x.Negative;
             int word_count = count >> 5;
             count &= 31;
+
             int d_len = x.ival - word_count;
+
             if ( d_len <= 0 )
             {
                 set( neg ? -1 : 0 );
@@ -1444,8 +1593,11 @@ public class BigInteger
                 {
                     realloc( d_len );
                 }
+
                 MPN.rshift0( words, x.words, word_count, d_len, count );
+
                 ival = d_len;
+
                 if ( neg )
                 {
                     words[ d_len - 1 ] |= -2 << ( 31 - count );
@@ -1453,6 +1605,7 @@ public class BigInteger
             }
         }
     }
+
     private void setShift( BigInteger x, int count )
     {
         if ( count > 0 )
@@ -1464,6 +1617,7 @@ public class BigInteger
             setShiftRight( x, -count );
         }
     }
+
     private static BigInteger shift( BigInteger x, int count )
     {
         if ( x.words == null )
@@ -1472,27 +1626,35 @@ public class BigInteger
             {
                 return valueOf( count > -32 ? x.ival >> ( -count ) : x.ival < 0 ? -1 : 0 );
             }
+
             if ( count < 32 )
             {
                 return valueOf( ( long ) x.ival << count );
             }
         }
+
         if ( count == 0 )
         {
             return x;
         }
-        BigInteger result = new BigInteger( 0 );
+
+        var result = new BigInteger(0);
+
         result.setShift( x, count );
+
         return result.canonicalize();
     }
+
     public virtual BigInteger shiftLeft( int n )
     {
         return shift( this, n );
     }
+
     public virtual BigInteger shiftRight( int n )
     {
         return shift( this, -n );
     }
+
     private void format( int radix, StringBuilder buffer )
     {
         if ( words == null )
@@ -1507,6 +1669,7 @@ public class BigInteger
         {
             bool neg = Negative;
             int[] work;
+
             if ( neg || radix != 16 )
             {
                 work = new int[ ival ];
@@ -1516,20 +1679,26 @@ public class BigInteger
             {
                 work = words;
             }
+
             int len = ival;
+
             if ( radix == 16 )
             {
                 if ( neg )
                 {
                     buffer.Append( '-' );
                 }
+
                 int buf_start = buffer.Length;
+
                 for ( int i = len; --i >= 0; )
                 {
-                    int word = work[ i ];
+                    int word = work[i];
+
                     for ( int j = 8; --j >= 0; )
                     {
                         int hex_digit = ( word >> ( 4 * j ) ) & 0xF;
+
                         if ( hex_digit > 0 || buffer.Length > buf_start )
                         {
                             buffer.Append( Character_forDigit( hex_digit, 16 ) );
@@ -1540,107 +1709,134 @@ public class BigInteger
             else
             {
                 int i = buffer.Length;
+
                 for ( ; ; )
                 {
                     int digit = MPN.divmod_1( work, work, len, radix );
+
                     buffer.Append( Character_forDigit( digit, radix ) );
+
                     while ( len > 0 && work[ len - 1 ] == 0 )
                     {
                         len--;
                     }
+
                     if ( len == 0 )
                     {
                         break;
                     }
                 }
+
                 if ( neg )
                 {
                     buffer.Append( '-' );
                 }
+
                 int j = buffer.Length - 1;
+
                 while ( i < j )
                 {
-                    char tmp = buffer[ i ];
-                    buffer[ i ] = buffer[ j ];
-                    buffer[ j ] = tmp;
+                    char tmp = buffer[i];
+
+                    buffer[i] = buffer[j];
+                    buffer[j] = tmp;
+
                     i++;
                     j--;
                 }
             }
         }
     }
+
     public override string ToString()
     {
         return ToString( 10 );
     }
+
     public virtual string ToString( int radix )
     {
         if ( words == null )
         {
             return Convert.ToString( ival, radix );
         }
+
         if ( ival <= 2 )
         {
             return Convert.ToString( longValue(), radix );
         }
+
         int buf_size = ival * ( MPN.chars_per_word( radix ) + 1 );
-        StringBuilder buffer = new StringBuilder( buf_size );
+
+        var buffer = new StringBuilder( buf_size );
+
         format( radix, buffer );
+
         return buffer.ToString();
     }
+
     public virtual int intValue()
     {
         if ( words == null )
         {
             return ival;
         }
-        return words[ 0 ];
+
+        return words[0];
     }
+
     public virtual long longValue()
     {
         if ( words == null )
         {
             return ival;
         }
+
         if ( ival == 1 )
         {
             return words[ 0 ];
         }
+
         return ( ( long ) words[ 1 ] << 32 ) + ( ( long ) words[ 0 ] & 0xffffffffL );
     }
+
     public override int GetHashCode()
     {
-        return words == null ? ival : ( words[ 0 ] + words[ ival - 1 ] );
+        return words == null ? ival : ( words[0] + words[ ival - 1 ] );
     }
+
     private static bool Equals( BigInteger x, BigInteger y )
     {
         if ( x.words == null && y.words == null )
         {
             return x.ival == y.ival;
         }
+
         if ( x.words == null || y.words == null || x.ival != y.ival )
         {
             return false;
         }
+
         for ( int i = x.ival; --i >= 0; )
         {
-            if ( x.words[ i ] != y.words[ i ] )
+            if ( x.words[i] != y.words[i] )
             {
                 return false;
             }
         }
+
         return true;
     }
+
     public override bool Equals( object obj )
     {
         if ( !( obj is BigInteger ) )
         {
             return false;
         }
+
         return Equals( this, ( BigInteger ) obj );
     }
-    //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-    //ORIGINAL LINE: private static BigInteger valueOf(String s, int radix) throws NumberFormatException
+
     private static BigInteger valueOf( string s, int radix )
     {
         int len = s.Length;
@@ -1658,7 +1854,8 @@ public class BigInteger
 
         for ( int i = 0; i < len; i++ )
         {
-            char ch = s[ i ];
+            char ch = s[i];
+
             if ( ch == '-' )
             {
                 negative = true;
@@ -1682,80 +1879,105 @@ public class BigInteger
 
         return valueOf( bytes, byte_len, negative, radix );
     }
+
     private static BigInteger valueOf( sbyte[] digits, int byte_len, bool negative, int radix )
     {
         int chars_per_word = MPN.chars_per_word( radix );
+
         int[] words = new int[ byte_len / chars_per_word + 1 ];
+
         int size = MPN.set_str( words, digits, byte_len, radix );
+
         if ( size == 0 )
         {
             return ZERO;
         }
+
         if ( words[ size - 1 ] < 0 )
         {
             words[ size++ ] = 0;
         }
+
         if ( negative )
         {
             negate( words, words, size );
         }
+
         return make( words, size );
     }
+
     public virtual double doubleValue()
     {
         if ( words == null )
         {
             return ( double ) ival;
         }
+
         if ( ival <= 2 )
         {
             return ( double ) longValue();
         }
+
         if ( Negative )
         {
             return neg( this ).roundToDouble( 0, true, false );
         }
+
         return roundToDouble( 0, false, false );
     }
+
     public virtual float floatValue()
     {
         return ( float ) doubleValue();
     }
+
     private bool checkBits( int n )
     {
         if ( n <= 0 )
         {
             return false;
         }
+
         if ( words == null )
         {
             return n > 31 || ( ( ival & ( ( 1 << n ) - 1 ) ) != 0 );
         }
+
         int i;
+
         for ( i = 0; i < ( n >> 5 ); i++ )
         {
-            if ( words[ i ] != 0 )
+            if ( words[i] != 0 )
             {
                 return true;
             }
         }
+
         return ( n & 31 ) != 0 && ( words[ i ] & ( ( 1 << ( n & 31 ) ) - 1 ) ) != 0;
     }
+
     private double roundToDouble( int exp, bool neg, bool remainder )
     {
         int il = bitLength();
+
         exp += il - 1;
+
         if ( exp < -1075 )
         {
             return neg ? -0.0 : 0.0;
         }
+
         if ( exp > 1023 )
         {
             return neg ? double.NegativeInfinity : double.PositiveInfinity;
         }
+
         int ml = ( exp >= -1022 ? 53 : 53 + exp + 1022 );
+
         long m;
+
         int excess_bits = il - ( ml + 1 );
+
         if ( excess_bits > 0 )
         {
             m = ( ( words == null ) ? ival >> excess_bits : MPN.rshift_long( words, ival, excess_bits ) );
@@ -1764,6 +1986,7 @@ public class BigInteger
         {
             m = longValue() << ( -excess_bits );
         }
+
         if ( exp == 1023 && ( ( m >> 1 ) == ( 1L << 53 ) - 1 ) )
         {
             if ( remainder || checkBits( il - ml ) )
@@ -1775,9 +1998,11 @@ public class BigInteger
                 return neg ? -double.MaxValue : double.MaxValue;
             }
         }
+
         if ( ( m & 1 ) == 1 && ( ( m & 2 ) == 2 || remainder || checkBits( excess_bits ) ) )
         {
             m += 2;
+
             if ( ( m & ( 1L << 54 ) ) != 0 )
             {
                 exp++;
@@ -1788,54 +2013,68 @@ public class BigInteger
                 exp++;
             }
         }
+
         m >>= 1;
+
         long bits_sign = neg ? ( 1L << 63 ) : 0;
+
         exp += 1023;
+
         long bits_exp = ( exp <= 0 ) ? 0 : ( ( long ) exp ) << 52;
         long bits_mant = m & ~( 1L << 52 );
 
         return BitConverter.Int64BitsToDouble( bits_sign | bits_exp | bits_mant );
     }
+
     private void getAbsolute( int[] words )
     {
         int len;
+
         if ( this.words == null )
         {
             len = 1;
-            words[ 0 ] = this.ival;
+            words[0] = this.ival;
         }
         else
         {
             len = this.ival;
+
             for ( int i = len; --i >= 0; )
             {
                 words[ i ] = this.words[ i ];
             }
         }
+
         if ( words[ len - 1 ] < 0 )
         {
             negate( words, words, len );
         }
+
         for ( int i = words.Length; --i > len; )
         {
             words[ i ] = 0;
         }
     }
+
     private static bool negate( int[] dest, int[] src, int len )
     {
         long carry = 1;
         bool negative = src[ len - 1 ] < 0;
+
         for ( int i = 0; i < len; i++ )
         {
-            carry += ( ( long ) ( ~src[ i ] ) & 0xffffffffL );
-            dest[ i ] = ( int ) carry;
+            carry += ( ( long ) ( ~src[i] ) & 0xffffffffL );
+            dest[i] = ( int ) carry;
             carry >>= 32;
         }
+
         return ( negative && dest[ len - 1 ] < 0 );
     }
+
     private void setNegative( BigInteger x )
     {
         int len = x.ival;
+
         if ( x.words == null )
         {
             if ( len == int.MinValue )
@@ -1846,74 +2085,96 @@ public class BigInteger
             {
                 set( -len );
             }
+
             return;
         }
+
         realloc( len + 1 );
+
         if ( negate( words, x.words, len ) )
         {
             words[ len++ ] = 0;
         }
+
         ival = len;
     }
+
     private void setNegative()
     {
         setNegative( this );
     }
+
     private static BigInteger abs( BigInteger x )
     {
         return x.Negative ? neg( x ) : x;
     }
+
     public virtual BigInteger abs()
     {
         return abs( this );
     }
+
     private static BigInteger neg( BigInteger x )
     {
         if ( x.words == null && x.ival != int.MinValue )
         {
             return valueOf( -x.ival );
         }
-        BigInteger result = new BigInteger( 0 );
-        result.setNegative( x );
+
+        var result = new BigInteger(0);
+
+        result.setNegative(x);
+
         return result.canonicalize();
     }
+
     public virtual BigInteger negate()
     {
         return neg( this );
     }
+
     public virtual int bitLength()
     {
         if ( words == null )
         {
             return MPN.intLength( ival );
         }
+
         return MPN.intLength( words, ival );
     }
+
     public virtual sbyte[] toByteArray()
     {
         sbyte[] bytes = new sbyte[ ( bitLength() + 1 + 7 ) / 8 ];
         int nbytes = bytes.Length;
         int wptr = 0;
         int word;
+
         while ( nbytes > 4 )
         {
             word = words[ wptr++ ];
+
             for ( int i = 4; i > 0; --i, word >>= 8 )
             {
                 bytes[ --nbytes ] = ( sbyte ) word;
             }
         }
+
         word = ( words == null ) ? ival : words[ wptr ];
+
         for ( ; nbytes > 0; word >>= 8 )
         {
             bytes[ --nbytes ] = ( sbyte ) word;
         }
+
         return bytes;
     }
+
     private static int swappedOp( int op )
     {
         return "\x0000\x0001\x0004\x0005\x0002\x0003\x0006\x0007\x0008\x0009\x000C\x000D\x000A\x000B\x000E\x000F"[ op ];
     }
+
     private static BigInteger bitOp( int op, BigInteger x, BigInteger y )
     {
         switch ( op )
@@ -1929,10 +2190,14 @@ public class BigInteger
             case 15:
                 return valueOf( -1 );
         }
-        BigInteger result = new BigInteger();
+
+        var result = new BigInteger();
+
         setBitOp( result, op, x, y );
+
         return result.canonicalize();
     }
+
     private static void setBitOp( BigInteger result, int op, BigInteger x, BigInteger y )
     {
         if ( y.words == null )
@@ -1941,7 +2206,7 @@ public class BigInteger
         }
         else if ( x.words == null || x.ival < y.ival )
         {
-            BigInteger temp = x;
+            var temp = x;
             x = y;
             y = temp;
             op = swappedOp( op );
@@ -2217,23 +2482,29 @@ public class BigInteger
         }
         result.ival = i;
     }
+
     private static BigInteger and( BigInteger x, int y )
     {
         if ( x.words == null )
         {
             return valueOf( x.ival & y );
         }
+
         if ( y >= 0 )
         {
             return valueOf( x.words[ 0 ] & y );
         }
+
         int len = x.ival;
         int[] words = new int[ len ];
+
         words[ 0 ] = x.words[ 0 ] & y;
+
         while ( --len > 0 )
         {
             words[ len ] = x.words[ len ];
         }
+
         return make( words, x.ival );
     }
 
@@ -2249,75 +2520,92 @@ public class BigInteger
             return and( y, ival );
         }
 
-        BigInteger x = this;
+        var x = this;
 
         if ( ival < y.ival )
         {
-            BigInteger temp = this;
+            var temp = this;
             x = y;
             y = temp;
         }
+
         int i;
         int len = y.Negative ? x.ival : y.ival;
         int[] words = new int[ len ];
+
         for ( i = 0; i < y.ival; i++ )
         {
-            words[ i ] = x.words[ i ] & y.words[ i ];
+            words[i] = x.words[i] & y.words[i];
         }
+
         for ( ; i < len; i++ )
         {
-            words[ i ] = x.words[ i ];
+            words[i] = x.words[i];
         }
+
         return make( words, len );
     }
+
     public virtual BigInteger or( BigInteger y )
     {
         return bitOp( 7, this, y );
     }
+
     public virtual BigInteger xor( BigInteger y )
     {
         return bitOp( 6, this, y );
     }
+
     public virtual BigInteger not()
     {
         return bitOp( 12, this, ZERO );
     }
+
     public virtual BigInteger andNot( BigInteger val )
     {
         return and( val.not() );
     }
+
     public virtual BigInteger clearBit( int n )
     {
         if ( n < 0 )
         {
             throw new ArithmeticException();
         }
-        return and( ONE.shiftLeft( n ).not() );
+
+        return and( ONE.shiftLeft(n).not() );
     }
+
     public virtual BigInteger setBit( int n )
     {
         if ( n < 0 )
         {
             throw new ArithmeticException();
         }
-        return or( ONE.shiftLeft( n ) );
+
+        return or( ONE.shiftLeft(n) );
     }
+
     public virtual bool testBit( int n )
     {
         if ( n < 0 )
         {
             throw new ArithmeticException();
         }
-        return !and( ONE.shiftLeft( n ) ).Zero;
+
+        return !and( ONE.shiftLeft(n) ).Zero;
     }
+
     public virtual BigInteger flipBit( int n )
     {
         if ( n < 0 )
         {
             throw new ArithmeticException();
         }
-        return xor( ONE.shiftLeft( n ) );
+
+        return xor( ONE.shiftLeft(n) );
     }
+
     public virtual int LowestSetBit
     {
         get
@@ -2326,6 +2614,7 @@ public class BigInteger
             {
                 return -1;
             }
+
             if ( words == null )
             {
                 return MPN.findLowestBit( ival );
@@ -2336,30 +2625,39 @@ public class BigInteger
             }
         }
     }
-    private static readonly sbyte[] bit4_count = new sbyte[] { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4 };
+
+    private static readonly sbyte[] bit4_count = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4 };
+
     private static int bitCount( int i )
     {
         int count = 0;
+
         while ( i != 0 )
         {
             count += bit4_count[ i & 15 ];
             i = ( int ) ( ( uint ) i >> 4 );
         }
+
         return count;
     }
+
     private static int bitCount( int[] x, int len )
     {
         int count = 0;
+
         while ( --len >= 0 )
         {
             count += bitCount( x[ len ] );
         }
+
         return count;
     }
+
     public virtual int bitCount()
     {
         int i, x_len;
         int[] x_words = words;
+
         if ( x_words == null )
         {
             x_len = 1;
@@ -2370,6 +2668,7 @@ public class BigInteger
             x_len = ival;
             i = bitCount( x_words, x_len );
         }
+
         return Negative ? x_len * 32 - i : i;
     }
 }

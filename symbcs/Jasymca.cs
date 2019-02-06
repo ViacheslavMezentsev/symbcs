@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 public class PrintStream
@@ -29,47 +30,20 @@ public class Jasymca
 
 	internal static string JasymcaRC = "vfs/Jasymca.";
 
-	public static void Main()
-	{
-        try
-        {
-            var fname = JasymcaRC + ui + ".rc";
-
-            var file = getFileInputStream( fname );
-
-            LambdaLOADFILE.readFile( file );
-        }
-        catch { }
-
-        Console.Write( welcome );
-
-        proc.PrintStream = ps;
-
-        var myThread = new Thread( Run );
-
-        myThread.Start();
-	}
-
 	public static Environment env;
 	public static Processor proc;
 	public static Parser pars;
 
 	internal static string ui = "Octave";
-    internal PrintStream pstream;
-    internal InputStream istream;
+    internal static PrintStream ps = new PrintStream();
 
-	public virtual void interrupt()
-	{
-		if ( proc != null )
-		{
-			proc.set_interrupt( true );
-		}
-	}
-
-	internal static string welcome = "Jasymca	- Java Symbolic Calculator\n" + "version 2.1\n" + "Copyright (C) 2006, 2009 - Helmut Dersch\n" + "der@hs-furtwangen.de\n\n";
 	internal static INumFmt fmt = new NumFmtVar(10, 5);
 
-	internal Thread evalLoop;
+    internal static string welcome =
+        "Jasymca	- Java Symbolic Calculator\n" +
+        "version 2.1\n" +
+        "Copyright (C) 2006, 2009 - Helmut Dersch\n" +
+        "der@hs-furtwangen.de\n\n";
 
 	public Jasymca() : this( "Octave" ) 
     {
@@ -82,6 +56,52 @@ public class Jasymca
 		welcome += "Executing in " + ui + "-Mode.\n";
 		welcome += "Welcome and have fun!\n";
 	}
+
+    public virtual void interrupt()
+    {
+        if ( proc != null )
+        {
+            proc.set_interrupt( true );
+        }
+    }
+
+    public static void Main()
+    {
+        var jasymca = new JasymcaOct();
+        //var jasymca = new JasymcaMax();
+
+        //try
+        //{
+        //    var fname = JasymcaRC + ui + ".rc";
+        //
+        //    var file = getFileInputStream( fname );
+        //
+        //    LambdaLOADFILE.readFile( file );
+        //}
+        //catch { }
+
+        Console.Write( welcome );
+
+        var thread = new Thread( Run );
+
+        thread.Start();
+    }
+
+    public static void Test( string[] args )
+    {
+        double[] ar = { 0.0, 1.0, 1.0, 1.0 };
+        double[] ai = { 0.0, 0.0, 1.0, 0.0 };
+
+        bool[] err = { true, true, true, true };
+
+        Pzeros.aberth( ar, ai, err );
+
+        for ( int i = 0; i < ar.Length - 1; i++ )
+        {
+            Console.WriteLine( i + ": " + ar[ i ] + "+i*" + ai[ i ] + "  " + err[ i ] );
+        }
+    }
+
 
 	public static void setup_ui( string ui, bool clear_env )
 	{
@@ -97,20 +117,21 @@ public class Jasymca
 
         if ( Jasymca.ui.Equals( "Maxima" ) )
 		{
-			proc = new XProcessor( env );
+            proc = new XProcessor( env ) { PrintStream = ps };
 			pars = new MaximaParser( env );
 		}
 
         else if ( Jasymca.ui.Equals( "Octave" ) )
 		{
-			proc = new Processor( env );
+            proc = new Processor( env ) { PrintStream = ps };
 			pars = new OctaveParser( env );
 		}
 
 		else
 		{
             Console.WriteLine( "Mode " + Jasymca.ui + " not available." );
-			//Environment.Exit(0);
+		    
+			System.Environment.Exit(0);
 		}
 	}
 
@@ -125,7 +146,11 @@ public class Jasymca
 			{
 				proc.set_interrupt( false );
 
-                var code = pars.compile( istream, pstream );
+                var istream = new MemoryStream( Encoding.UTF8.GetBytes( Console.ReadLine() ) );
+
+			    istream.Seek( 0, SeekOrigin.Begin );
+
+                var code = pars.compile( istream, ps );
 
 				if ( code == null )
 				{
@@ -133,7 +158,7 @@ public class Jasymca
 					continue;
 				}
 
-				if ( proc.process_list( code, false ) == proc.EXIT )
+                if ( proc.process_list( code, false ) == Processor.EXIT )
 				{
 					Console.WriteLine( "\nGoodbye." );
 

@@ -1,95 +1,120 @@
 ﻿internal interface INumFmt
 {
-	string ToString(double x);
+	string ToString( double x );
 }
 
 public class NumFmtVar : INumFmt
 {
-	internal double @base;
+	internal double dbase;
 	internal int ibase;
 	internal int nsign;
 	internal double mantisse_min, mantisse_max;
-	public NumFmtVar(int ibase, int nsign)
+
+	public NumFmtVar( int ibase, int nsign )
 	{
-		this.@base = (double)ibase;
+		this.dbase = (double) ibase;
 		this.ibase = ibase;
 		this.nsign = nsign;
+
 		mantisse_min = 1.0;
-		while (nsign-- > 0)
+
+		while ( nsign-- > 0 )
 		{
-			mantisse_min *= @base;
+			mantisse_min *= dbase;
 		}
-		mantisse_max = mantisse_min * @base;
+
+		mantisse_max = mantisse_min * dbase;
 	}
-	public virtual string ToString(double x)
+
+	public virtual string ToString( double x )
 	{
-		if (x < 0.0)
+		if ( x < 0.0 )
 		{
-			return "-" + ToString(-x);
+			return "-" + ToString( -x );
 		}
-		if (x == 0.0)
+
+		if ( x == 0.0 )
 		{
 			return "0";
 		}
+
 		int exp = nsign - 1;
-		while (x < mantisse_min)
+
+		while ( x < mantisse_min )
 		{
 			exp--;
-			x *= @base;
-		} while (x >= mantisse_min)
+			x *= dbase;
+		} 
+        
+        while ( x >= mantisse_min )
 		{
 			exp++;
-			x /= @base;
+			x /= dbase;
 		}
-		long xl = (long) JMath.round(x);
+
+		long xl = ( long ) JMath.round(x);
+
 		string r = "";
 		int nc = nsign;
-		while (xl != 0L)
+
+		while ( xl != 0L )
 		{
 			nc--;
-			int _digit = digit(xl % ibase);
-			if (!(r.Equals("") && _digit == '0'))
+
+			int _digit = digit( xl % ibase );
+
+		    if ( !( r.Equals( "" ) && _digit == '0' ) )
 			{
-				r = (char)_digit + r;
+			    r = ( char ) _digit + r;
 			}
+
 			xl = xl / ibase;
 		}
+
 		exp -= nc;
-		if (exp > nsign - 1 || exp < -1)
+
+	    if ( exp > nsign - 1 || exp < -1 )
 		{
-			if (r.Length == 1)
+		    if ( r.Length == 1 )
 			{
 				r = r + "0";
 			}
-			return sub(r,0,1) + "." + sub(r,1,r.Length) + "E" + exp;
+
+		    return sub( r, 0, 1 ) + "." + sub( r, 1, r.Length ) + "E" + exp;
 		}
-		if (exp == -1)
+
+	    if ( exp == -1 )
 		{
 			return "0." + r;
 		}
 		else
 		{
-			return sub(r,0,exp + 1) + (r.Length > exp + 1?"." + sub(r,exp + 1,r.Length):"");
+		    return sub( r, 0, exp + 1 ) + ( r.Length > exp + 1 ? "." + sub( r, exp + 1, r.Length ) : "" );
 		}
 	}
+
 	private int digit(long x)
 	{
-		if (x < 10)
+		if ( x < 10 )
 		{
-			return '0' + (int)x;
+			return '0' + ( int ) x;
 		}
-		return 'A' + (int)x - 10;
+
+		return 'A' + ( int ) x - 10;
 	}
-	string sub(string s, int a, int b)
+
+    string sub( string s, int a, int b )
 	{
-		if (s.Length >= b)
+		if ( s.Length >= b )
 		{
-			return s.Substring(a, b - a);
+		    return s.Substring( a, b - a );
 		}
-		string r = "";
-		while (a < b)
+
+		var r = "";
+
+	    while ( a < b )
 		{
-			if (a < s.Length)
+		    if ( a < s.Length )
 			{
 				r += s[a];
 			}
@@ -97,18 +122,21 @@ public class NumFmtVar : INumFmt
 			{
 				r += "0";
 			}
+
 			a++;
 		}
+
 		return r;
 	}
 }
+
 public class NumFmtJava : INumFmt
 {
 	public NumFmtJava()
 	{
 	}
 
-	public virtual string ToString(double x)
+	public virtual string ToString( double x )
 	{
 		return "" + x;
 	}

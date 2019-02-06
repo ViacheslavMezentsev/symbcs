@@ -266,9 +266,13 @@ public abstract class Parser : Constants
 	internal static string readLine( Stream stream )
 	{
 		var sb = new StringBuilder();
-		char c;
-		while ((c = ( char ) stream.ReadByte()) != -1)
+
+		int b;
+
+		while ( ( b = stream.ReadByte() ) !=  -1 )
 		{
+		    var c = ( char ) b;
+
 			sb.Append(c);
 
 			if (c == '\n' || c == '\r')

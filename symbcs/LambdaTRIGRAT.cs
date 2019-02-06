@@ -3,8 +3,6 @@ using System.Collections;
 
 internal class LambdaTRIGRAT : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(java.util.Stack st) throws ParseException, JasymcaException
 	public virtual int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -27,8 +25,6 @@ internal class LambdaTRIGRAT : Lambda
 }
 internal class LambdaTRIGEXP : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(java.util.Stack st) throws ParseException, JasymcaException
 	public virtual int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -47,8 +43,6 @@ internal class LambdaTRIGEXP : Lambda
 }
 internal class TrigExpand : LambdaAlgebraic
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x is Polynomial && ((Polynomial)x).v is FunctionVariable)
@@ -84,8 +78,6 @@ internal class TrigExpand : LambdaAlgebraic
 }
 internal class SqrtExpand : LambdaAlgebraic
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (!(x is Polynomial))
@@ -190,8 +182,6 @@ internal class SqrtExpand : LambdaAlgebraic
 }
 internal class TrigInverseExpand : LambdaAlgebraic
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic divExponential(Algebraic x, FunctionVariable fv, int n) throws JasymcaException
 	public virtual Algebraic divExponential(Algebraic x, FunctionVariable fv, int n)
 	{
 		Algebraic[] a = new Algebraic[2];
@@ -215,8 +205,6 @@ internal class TrigInverseExpand : LambdaAlgebraic
 		}
 		return f_exakt(xk);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x is Rational)
@@ -317,8 +305,6 @@ internal class TrigInverseExpand : LambdaAlgebraic
 		}
 		return x.map(this);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static boolean minus(Algebraic x) throws JasymcaException
 	internal static bool minus(Algebraic x)
 	{
 		if (x is Zahl)
@@ -346,8 +332,6 @@ internal class LambdaSIN : LambdaAlgebraic
 		intrule = "-cos(x)";
 		trigrule = "1/(2*i)*(exp(i*x)-exp(-i*x))";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
@@ -357,8 +341,6 @@ internal class LambdaSIN : LambdaAlgebraic
 		}
 		return (Zahl)evalx(trigrule, z);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x.Equals(Zahl.ZERO))
@@ -376,8 +358,6 @@ internal class LambdaCOS : LambdaAlgebraic
 		intrule = "sin(x)";
 		trigrule = "1/2 *(exp(i*x)+exp(-i*x))";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
@@ -387,8 +367,6 @@ internal class LambdaCOS : LambdaAlgebraic
 		}
 		return (Zahl)evalx(trigrule, z);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x.Equals(Zahl.ZERO))
@@ -406,8 +384,6 @@ internal class LambdaTAN : LambdaAlgebraic
 		intrule = "-log(cos(x))";
 		trigrule = "-i*(exp(i*x)-exp(-i*x))/(exp(i*x)+exp(-i*x))";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
@@ -417,8 +393,6 @@ internal class LambdaTAN : LambdaAlgebraic
 		}
 		return (Zahl)evalx(trigrule, z);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x.Equals(Zahl.ZERO))
@@ -436,8 +410,6 @@ internal class LambdaATAN : LambdaAlgebraic
 		intrule = "x*atan(x)-1/2*log(1+x^2)";
 		trigrule = "-i/2*log((1+i*x)/(1-i*x))";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
@@ -447,8 +419,6 @@ internal class LambdaATAN : LambdaAlgebraic
 		}
 		return (Zahl)evalx(trigrule, z);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x.Equals(Zahl.ZERO))
@@ -466,8 +436,6 @@ internal class LambdaASIN : LambdaAlgebraic
 		intrule = "x*asin(x)+sqrt(1-x^2)";
 		trigrule = "-i*log(i*x+i*sqrt(1-x^2))";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
@@ -486,8 +454,6 @@ internal class LambdaACOS : LambdaAlgebraic
 		intrule = "x*acos(x)-sqrt(1-x^2)";
 		trigrule = "-i*log(x+i*sqrt(1-x^2))";
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
@@ -500,26 +466,18 @@ internal class LambdaACOS : LambdaAlgebraic
 }
 internal class LambdaATAN2 : LambdaAlgebraic
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Zahl f(Zahl x) throws JasymcaException
 	internal override Zahl f(Zahl x)
 	{
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		throw new JasymcaException("Usage: ATAN2(y,x).");
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic[] x) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic[] x)
 	{
 		throw new JasymcaException("Usage: ATAN2(y,x).");
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x, Algebraic y) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic x, Algebraic y)
 	{
 		if (y is Unexakt && !y.komplexq() && x is Unexakt && !x.komplexq())

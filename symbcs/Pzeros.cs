@@ -18,17 +18,6 @@ public class Pzeros
 		c_b35 = new doublecomplex(this, 1.0,0.0);
 	}
 
-	public static void Main(string[] args)
-	{
-		double[] ar = new double[] {0.0, 1.0, 1.0, 1.0};
-		double[] ai = new double[] {0.0, 0.0, 1.0, 0.0};
-		bool[] err = new bool[] {true, true, true, true};
-		Pzeros.aberth(ar, ai, err);
-		for (int i = 0; i < ar.Length - 1; i++)
-		{
-			Console.WriteLine(i + ": " + ar[i] + "+i*" + ai[i] + "  " + err[i]);
-		}
-	}
 	public static void aberth(double[] ar, double[] ai, bool[] err)
 	{
 		for (int i = 0; i < err.Length; i++)

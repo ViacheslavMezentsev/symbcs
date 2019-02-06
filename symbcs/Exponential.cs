@@ -5,6 +5,7 @@ public class Exponential : Polynomial
 {
 	public Variable expvar;
 	public Algebraic exp_b;
+
 	public Exponential(Algebraic a, Algebraic c, Variable x, Algebraic b)
 	{
 		this.a = new Algebraic[2];
@@ -22,11 +23,13 @@ public class Exponential : Polynomial
 		this.expvar = x;
 		this.exp_b = b;
 	}
+
 	public Exponential(Polynomial x) : base(x.v, x.a)
 	{
 		this.expvar = ((Polynomial)((FunctionVariable)this.v).arg).v;
 		this.exp_b = ((Polynomial)((FunctionVariable)this.v).arg).a[1];
 	}
+
 	public static Algebraic poly2exp(Algebraic x)
 	{
 		if (x is Exponential)
@@ -43,14 +46,12 @@ public class Exponential : Polynomial
 		}
 		return x;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic cc() throws JasymcaException
+
 	public override Algebraic cc()
 	{
 		return new Exponential(a[1].cc(), a[0].cc(), expvar, exp_b.cc());
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static boolean containsexp(Algebraic x) throws JasymcaException
+
 	internal static bool containsexp(Algebraic x)
 	{
 		if (x is Zahl)
@@ -93,8 +94,7 @@ public class Exponential : Polynomial
 		}
 		throw new JasymcaException("containsexp not suitable for x");
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic add(Algebraic x) throws JasymcaException
+
 	public override Algebraic add(Algebraic x)
 	{
 		if (x is Zahl)
@@ -115,8 +115,6 @@ public class Exponential : Polynomial
 		}
 		return poly2exp(base.add(x));
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic mult(Algebraic x) throws JasymcaException
 	public override Algebraic mult(Algebraic x)
 	{
 		if (x.Equals(Zahl.ZERO))
@@ -147,8 +145,7 @@ public class Exponential : Polynomial
 		}
 		return poly2exp(base.mult(x));
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic reduce() throws JasymcaException
+
 	public override Algebraic reduce()
 	{
 		if (a[1].reduce().Equals(Zahl.ZERO))
@@ -161,8 +158,7 @@ public class Exponential : Polynomial
 		}
 		return this;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic div(Algebraic x) throws JasymcaException
+
 	public override Algebraic div(Algebraic x)
 	{
 		if (x is Zahl)
@@ -171,14 +167,12 @@ public class Exponential : Polynomial
 		}
 		return base.div(x);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic map(LambdaAlgebraic f) throws JasymcaException
+
 	public override Algebraic map(LambdaAlgebraic f)
 	{
 		return poly2exp(base.map(f));
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Zahl exp_gcd(Vector v, Variable x) throws JasymcaException
+
 	public static Zahl exp_gcd(ArrayList v, Variable x)
 	{
 		Zahl gcd = Zahl.ZERO;
@@ -195,16 +189,14 @@ public class Exponential : Polynomial
 		}
 		return (k > 0 ? gcd : Zahl.ONE);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Algebraic reduce_exp(Algebraic p) throws JasymcaException
+
 	public static Algebraic reduce_exp(Algebraic p)
 	{
 		Algebraic[] a = new Algebraic[] {p};
 		a = reduce_exp(a);
 		return a[0];
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Algebraic[] reduce_exp(Algebraic[] p) throws JasymcaException
+
 	public static Algebraic[] reduce_exp(Algebraic[] p)
 	{
 		ArrayList v = new ArrayList();
@@ -247,18 +239,19 @@ public class Exponential : Polynomial
 		return p;
 	}
 }
+
 internal class SubstExp : LambdaAlgebraic
 {
 	internal Zahl gcd;
 	internal Variable @var;
 	internal Variable t = new SimpleVariable("t_exponential");
+
 	public SubstExp(Zahl gcd, Variable @var)
 	{
 		this.gcd = gcd;
 		this.@var = @var;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public SubstExp(Variable var, Algebraic expr) throws JasymcaException
+
 	public SubstExp(Variable @var, Algebraic expr)
 	{
 		this.@var = @var;
@@ -270,8 +263,7 @@ internal class SubstExp : LambdaAlgebraic
 			t = @var;
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic ratsubst(Algebraic expr) throws JasymcaException
+
 	public virtual Algebraic ratsubst(Algebraic expr)
 	{
 		if (gcd.Equals(Zahl.ZERO))
@@ -286,7 +278,13 @@ internal class SubstExp : LambdaAlgebraic
 		{
 			return ratsubst(((Rational)expr).nom).div(ratsubst(((Rational)expr).den));
 		}
-		if (expr is Polynomial && ((Polynomial)expr).v is FunctionVariable && ((FunctionVariable)((Polynomial)expr).v).fname.Equals("exp") && ((FunctionVariable)((Polynomial)expr).v).arg is Polynomial && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).v.Equals(@var) && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).degree() == 1 && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).a[0].Equals(Zahl.ZERO))
+
+		if (expr is Polynomial && ((Polynomial)expr).v is FunctionVariable 
+            && ((FunctionVariable)((Polynomial)expr).v).fname.Equals("exp") 
+            && ((FunctionVariable)((Polynomial)expr).v).arg is Polynomial 
+            && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).v.Equals(@var) 
+            && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).degree() == 1 
+            && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).a[0].Equals(Zahl.ZERO))
 		{
 			Polynomial pexpr = (Polynomial)expr;
 			int degree = pexpr.degree();
@@ -304,14 +302,12 @@ internal class SubstExp : LambdaAlgebraic
 		}
 		throw new JasymcaException("Could not rationalize " + expr);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic rational(Algebraic expr) throws JasymcaException
+
 	public virtual Algebraic rational(Algebraic expr)
 	{
 		return ratsubst(expr).div(gcd).div(new Polynomial(t)).reduce();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic rat_reverse(Algebraic expr) throws JasymcaException
+
 	public virtual Algebraic rat_reverse(Algebraic expr)
 	{
 		if (gcd.Equals(Zahl.ZERO))
@@ -322,8 +318,7 @@ internal class SubstExp : LambdaAlgebraic
 		Algebraic s = new Exponential(Zahl.ONE, Zahl.ZERO, @var, Zahl.ONE.mult(gc));
 		return expr.value(t, s);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic f) throws JasymcaException
+
 	internal override Algebraic f_exakt(Algebraic f)
 	{
 		if (gcd.Equals(Zahl.ZERO))
@@ -357,13 +352,13 @@ internal class SubstExp : LambdaAlgebraic
 				return r;
 			}
 		}
+
 		return f.map(this);
 	}
 }
+
 internal class NormExp : LambdaAlgebraic
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic f) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic f)
 	{
 		if (f is Rational)
@@ -435,19 +430,18 @@ internal class NormExp : LambdaAlgebraic
 		return Exponential.poly2exp(r);
 	}
 }
+
 internal class CollectExp : LambdaAlgebraic
 {
 	internal ArrayList v;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public CollectExp(Algebraic f) throws JasymcaException
+
 	public CollectExp(Algebraic f)
 	{
 		v = new ArrayList();
 
 		(new GetExpVars(v)).f_exakt(f);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x1) throws JasymcaException
+
 	internal override Algebraic f_exakt(Algebraic x1)
 	{
 		if (v.Count == 0)
@@ -532,12 +526,12 @@ internal class CollectExp : LambdaAlgebraic
 internal class GetExpVars : LambdaAlgebraic
 {
 	internal ArrayList v;
+
 	public GetExpVars(ArrayList v)
 	{
 		this.v = v;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic f) throws JasymcaException
+
 	internal override Algebraic f_exakt(Algebraic f)
 	{
 		if (f is Exponential)
@@ -552,15 +546,16 @@ internal class GetExpVars : LambdaAlgebraic
 		return f.map(this);
 	}
 }
+
 internal class GetExpVars2 : LambdaAlgebraic
 {
 	internal ArrayList v;
+
 	public GetExpVars2(ArrayList v)
 	{
 		this.v = v;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic f) throws JasymcaException
+
 	internal override Algebraic f_exakt(Algebraic f)
 	{
 		if (f is Polynomial)
@@ -579,10 +574,9 @@ internal class GetExpVars2 : LambdaAlgebraic
 		return f.map(this);
 	}
 }
+
 internal class DeExp : LambdaAlgebraic
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic f) throws JasymcaException
 	internal override Algebraic f_exakt(Algebraic f)
 	{
 		if (f is Exponential)
@@ -593,9 +587,11 @@ internal class DeExp : LambdaAlgebraic
 			cn[1] = f_exakt(x.a[1]);
 			return new Polynomial(x.v, cn);
 		}
+
 		return f.map(this);
 	}
 }
+
 internal class LambdaEXP : LambdaAlgebraic
 {
 	public LambdaEXP()
@@ -603,27 +599,34 @@ internal class LambdaEXP : LambdaAlgebraic
 		diffrule = "exp(x)";
 		intrule = "exp(x)";
 	}
+
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
+
 		double r = JMath.exp(z.real);
+
 		if (z.imag != 0.0)
 		{
 			return new Unexakt(r * Math.Cos(z.imag), r * Math.Sin(z.imag));
 		}
+
 		return new Unexakt(r);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
+
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x.Equals(Zahl.ZERO))
 		{
 			return Zahl.ONE;
 		}
-		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).a[0].Equals(Zahl.ZERO))
+
+		if (x is Polynomial 
+            && ((Polynomial)x).degree() == 1 
+            && ((Polynomial)x).a[0].Equals(Zahl.ZERO))
 		{
 			Polynomial xp = (Polynomial)x;
+
 			if (xp.v is SimpleVariable && ((SimpleVariable)xp.v).name.Equals("pi"))
 			{
 				Algebraic q = xp.a[1].div(Zahl.IONE);
@@ -632,19 +635,21 @@ internal class LambdaEXP : LambdaAlgebraic
 					return fzexakt((Zahl)q);
 				}
 			}
-			if (xp.a[1] is Zahl && xp.v is FunctionVariable && ((FunctionVariable)xp.v).fname.Equals("log"))
+			if (xp.a[1] is Zahl 
+                && xp.v is FunctionVariable 
+                && ((FunctionVariable)xp.v).fname.Equals("log"))
 			{
 				if (((Zahl)xp.a[1]).integerq())
 				{
 					int n = ((Zahl)xp.a[1]).intval();
+
 					return ((FunctionVariable)xp.v).arg.pow_n(n);
 				}
 			}
 		}
 		return null;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic fzexakt(Zahl x) throws JasymcaException
+
 	internal virtual Algebraic fzexakt(Zahl x)
 	{
 		if (x.smaller(Zahl.ZERO))
@@ -656,6 +661,7 @@ internal class LambdaEXP : LambdaAlgebraic
 			}
 			return r;
 		}
+
 		if (x.integerq())
 		{
 			if (x.intval() % 2 == 0)
@@ -667,7 +673,9 @@ internal class LambdaEXP : LambdaAlgebraic
 				return Zahl.MINUS;
 			}
 		}
+
 		Algebraic qs = x.add(new Unexakt(.5));
+
 		if (((Zahl)qs).integerq())
 		{
 			if (((Zahl)qs).intval() % 2 == 0)
@@ -679,7 +687,9 @@ internal class LambdaEXP : LambdaAlgebraic
 				return Zahl.IONE;
 			}
 		}
+
 		qs = x.mult(new Unexakt(4));
+
 		if (((Zahl)qs).integerq())
 		{
 			Algebraic sq2 = FunctionVariable.create("sqrt",new Unexakt(0.5));
@@ -721,6 +731,7 @@ internal class LambdaEXP : LambdaAlgebraic
 		return null;
 	}
 }
+
 internal class LambdaLOG : LambdaAlgebraic
 {
 	public LambdaLOG()
@@ -728,6 +739,7 @@ internal class LambdaLOG : LambdaAlgebraic
 		diffrule = "1/x";
 		intrule = "x*log(x)-x";
 	}
+
 	internal override Zahl f(Zahl x)
 	{
 		Unexakt z = x.unexakt();
@@ -737,8 +749,7 @@ internal class LambdaLOG : LambdaAlgebraic
 		}
 		return new Unexakt(JMath.log(z.real));
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic f_exakt(Algebraic x) throws JasymcaException
+
 	internal override Algebraic f_exakt(Algebraic x)
 	{
 		if (x.Equals(Zahl.ONE))
@@ -749,7 +760,11 @@ internal class LambdaLOG : LambdaAlgebraic
 		{
 			return Zahl.PI.mult(Zahl.IONE);
 		}
-		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).a[0].Equals(Zahl.ZERO) && ((Polynomial)x).v is FunctionVariable && ((FunctionVariable)((Polynomial)x).v).fname.Equals("exp"))
+		if (x is Polynomial 
+            && ((Polynomial)x).degree() == 1 
+            && ((Polynomial)x).a[0].Equals(Zahl.ZERO) 
+            && ((Polynomial)x).v is FunctionVariable 
+            && ((FunctionVariable)((Polynomial)x).v).fname.Equals("exp"))
 		{
 			return ((FunctionVariable)((Polynomial)x).v).arg.add(FunctionVariable.create("log",((Polynomial)x).a[1]));
 		}

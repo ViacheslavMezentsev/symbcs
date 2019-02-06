@@ -2,8 +2,6 @@
 
 internal class LambdaSOLVE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(java.util.Stack st) throws ParseException, JasymcaException
 	public virtual int lambda(Stack st)
 	{
 		int narg = getNarg(st);
@@ -21,8 +19,6 @@ internal class LambdaSOLVE : Lambda
 		st.Push(r);
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Algebraic linfaktor(Algebraic expr,Variable var) throws JasymcaException
 	public static Algebraic linfaktor(Algebraic expr, Variable @var)
 	{
 		if (expr is Vektor)
@@ -36,8 +32,6 @@ internal class LambdaSOLVE : Lambda
 		}
 		return (new Polynomial(@var)).sub(expr);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Vektor solve(Algebraic expr, Variable var) throws JasymcaException
 	public static Vektor solve(Algebraic expr, Variable @var)
 	{
 		debug("Solve: " + expr + " = 0, Variable: " + @var);
@@ -152,8 +146,6 @@ internal class LambdaSOLVE : Lambda
 		}
 		return sol;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: private static java.util.Vector depvars(Polynomial p, Variable var) throws JasymcaException
 	private static ArrayList depvars(Polynomial p, Variable @var)
 	{
 		ArrayList r = new ArrayList();
@@ -181,8 +173,6 @@ internal class LambdaSOLVE : Lambda
 		}
 		return r;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: static Algebraic finvert(FunctionVariable f, Algebraic b) throws JasymcaException
 	internal static Algebraic finvert(FunctionVariable f, Algebraic b)
 	{
 		if (f.fname.Equals("sqrt"))
