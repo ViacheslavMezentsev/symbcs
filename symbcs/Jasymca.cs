@@ -98,7 +98,7 @@ public class Jasymca
 
         for ( int i = 0; i < ar.Length - 1; i++ )
         {
-            Console.WriteLine( i + ": " + ar[ i ] + "+i*" + ai[ i ] + "  " + err[ i ] );
+            Console.WriteLine( i + ": " + ar[i] + "+i*" + ai[i] + "  " + err[i] );
         }
     }
 
@@ -155,6 +155,7 @@ public class Jasymca
 				if ( code == null )
 				{
 					ps.println("");
+
 					continue;
 				}
 

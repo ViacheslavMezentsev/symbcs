@@ -55,22 +55,27 @@ public class Processor : Constants
         {
             return LIST;
         }
+
         if ( x is Matrix || x is Vektor )
         {
             return MATRIX;
         }
+
         if ( x is Algebraic )
         {
             return SCALAR;
         }
+
         if ( x.Equals( ":" ) )
         {
             return COLON;
         }
+
         if ( x is string )
         {
-            string s = ( string ) x;
-            switch ( s[ 0 ] )
+            var s = ( string ) x;
+
+            switch ( s[0] )
             {
                 case '@':
                     return SYMREF;
@@ -84,27 +89,30 @@ public class Processor : Constants
                     return SYMBOL;
             }
         }
+
         if ( x is int? )
         {
             return NARG;
         }
+
         if ( x is Lambda )
         {
             return FUNCTION;
         }
+
         return 0;
     }
 
-    //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-    //ORIGINAL LINE: public int process_instruction(Object x, boolean canon) throws ParseException, JasymcaException
     public virtual int process_instruction( object x, bool canon )
     {
         if ( interrupt_flag )
         {
             set_interrupt( false );
+
             throw new JasymcaException( "Interrupted." );
         }
-        switch ( instruction_type( x ) )
+
+        switch ( instruction_type(x) )
         {
             case LIST:
             case SCALAR:
@@ -112,67 +120,89 @@ public class Processor : Constants
             case STRING:
             case LVALUE:
             case COLON:
-                stack.Push( x );
+                stack.Push(x);
                 return 0;
+
             case MATRIX:
-                stack.Push( x );
+                stack.Push(x);
                 return 0;
+
             case FUNCTION:
                 return ( ( Lambda ) x ).lambda( stack );
+
             case SYMREF:
-                string s = ( ( string ) x ).Substring( 1 );
-                object val = env.getValue( s );
+                var s = ( ( string ) x ).Substring(1);
+
+                var val = env.getValue(s);
+
                 if ( val == null )
                 {
                     try
                     {
                         LambdaLOADFILE.readFile( s + ".m" );
+
                         val = env.getValue( s );
                     }
                     catch ( Exception )
                     {
                     }
                 }
+
                 if ( val is Lambda )
                 {
                     return ( ( Lambda ) val ).lambda( stack );
                 }
+
                 if ( val is Algebraic )
                 {
-                    Matrix mx = new Matrix( ( Algebraic ) val );
-                    Index idx = Index.createIndex( stack, mx );
+                    var mx = new Matrix( ( Algebraic ) val );
+
+                    var idx = Index.createIndex( stack, mx );
+
                     mx = mx.extract( idx );
+
                     stack.Push( mx.reduce() );
+
                     return 0;
                 }
+
                 if ( val is string && ( ( string ) val ).Length > 1 )
                 {
-                    s = ( ( string ) val ).Substring( 1 );
-                    val = env.getValue( s );
+                    s = ( ( string ) val ).Substring(1);
+
+                    val = env.getValue(s);
+
                     if ( val == null )
                     {
                         try
                         {
                             LambdaLOADFILE.readFile( s + ".m" );
-                            val = env.getValue( s );
+
+                            val = env.getValue(s);
                         }
                         catch ( Exception )
                         {
                         }
                     }
+
                     if ( val is Lambda )
                     {
                         return ( ( Lambda ) val ).lambda( stack );
                     }
                 }
+
                 throw new ParseException( "Unknown symbol or incorrect symbol type: " + x );
+
             case SYMBOL:
+
                 val = env.getValue( ( string ) x );
+
                 if ( val == null )
                 {
                     try
                     {
                         LambdaLOADFILE.readFile( ( string ) x + ".m" );
+
                         return 0;
                     }
                     catch ( Exception )
@@ -180,9 +210,13 @@ public class Processor : Constants
                         throw new ParseException( "Unknown symbol: " + x );
                     }
                 }
+
                 return process_instruction( val, canon );
+
             case PDIR:
-                string selector = ( ( string ) x ).Substring( 1 );
+
+                var selector = ( ( string ) x ).Substring(1);
+
                 if ( selector.Equals( ";" ) )
                 {
                     clearStack();
@@ -213,29 +247,33 @@ public class Processor : Constants
 
                     Lambda.length = nout;
                 }
+
                 return 0;
         }
+
         throw new JasymcaException( "Unrecognized instruction type: " + x );
     }
 
-    //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-    //ORIGINAL LINE: synchronized public int process_list(List x, boolean canon) throws JasymcaException, ParseException
     public virtual int process_list( List x, bool canon )
     {
         lock ( this )
         {
             int n = x.Count, i = 0;
+
             try
             {
                 for ( i = 0; i < n; i++ )
                 {
-                    object z = x[ i ];
+                    var z = x[i];
+
                     int ret = process_instruction( z, canon );
+
                     if ( ret != 0 )
                     {
                         return ret;
                     }
                 }
+
                 return 0;
             }
             catch ( ParseException p )
@@ -253,7 +291,8 @@ public class Processor : Constants
     {
         while ( stack.Count > 0 )
         {
-            object x = stack.Pop();
+            var x = stack.Pop();
+
             if ( stack.Count == 0 && x is Algebraic )
             {
                 env.putValue( "ans", x );
@@ -265,20 +304,27 @@ public class Processor : Constants
     {
         while ( stack.Count > 0 )
         {
-            object x = stack.Pop();
+            var x = stack.Pop();
+
             if ( x is Algebraic )
             {
-                string vname = "ans";
+                var vname = "ans";
+
                 env.putValue( vname, x );
+
                 if ( ( ( Algebraic ) x ).name != null )
                 {
                     vname = ( ( Algebraic ) x ).name;
                 }
+
                 if ( ps != null )
                 {
-                    string s = vname + " = ";
-                    ps.print( s );
+                    var s = vname + " = ";
+
+                    ps.print(s);
+
                     ( ( Algebraic ) x ).print( ps );
+
                     ps.println( "" );
                 }
             }

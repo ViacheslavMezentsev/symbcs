@@ -175,7 +175,8 @@ public sealed class JMath
         }
         else if ( exp < 53 )
         {
-            long mask = ( int ) ( 0x000fffffffffffffL >> exp );
+            // TODO: Check this
+            long mask = ( long ) ( 0x000fffffffffffffL >> exp );
 
             if ( ( mask & ix ) == 0 )
             {
@@ -230,7 +231,8 @@ public sealed class JMath
 		}
 		else if (exp < 53)
 		{
-			long mask = ( int ) ( 0x000fffffffffffffL >> exp );
+		    // TODO: Check this
+			long mask = ( long ) ( 0x000fffffffffffffL >> exp );
 
 		    if ( ( mask & ix ) == 0 )
 			{
@@ -300,7 +302,8 @@ public sealed class JMath
 		}
 		else if (exp < 53)
 		{
-		    long mask = ( ( int ) ( /*(uint)*/0x000fffffffffffffL >> exp ) );
+		    // TODO: Check this
+		    long mask = ( ( long ) ( 0x000fffffffffffffL >> exp ) );
 
 		    if ( ( mask & ix ) == 0 )
 			{
