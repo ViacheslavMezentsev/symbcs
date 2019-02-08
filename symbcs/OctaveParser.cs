@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 internal class OctaveParser : Parser
@@ -78,25 +79,11 @@ internal class OctaveParser : Parser
             new Operator( "ADJ", "'", 1, Fields.RIGHT_LEFT, Fields.UNARY )
         };
 
-        foreach ( var t in Operator.OPS )
-        {
-            nonsymbols.Add( t.symbol );
-        }
+        nonsymbols.AddRange( Operator.OPS.Select( t => t.symbol ).ToList() );
 
-        foreach ( var t in listsep )
-        {
-            nonsymbols.Add(t);
-        }
-
-        foreach ( var t in commands )
-        {
-            nonsymbols.Add(t);
-        }
-
-        foreach ( var t in keywords )
-        {
-            nonsymbols.Add(t);
-        }
+	    nonsymbols.AddRange( listsep );
+        nonsymbols.AddRange( commands );
+        nonsymbols.AddRange( keywords );
 
 		try
 		{
@@ -205,7 +192,7 @@ internal class OctaveParser : Parser
 
 	internal virtual bool refq(object expr)
 	{
-	    return expr is string && ( ( string ) expr ).Length > 0 && ( ( string ) expr )[ 0 ] == '@';
+	    return expr is string && ( ( string ) expr ).Length > 0 && ( ( string ) expr )[0] == '@';
 	}
 
     internal override bool commandq( object x )
@@ -292,7 +279,8 @@ internal class OctaveParser : Parser
                 if ( symbolq( pst.prev ) )
                 {
                     pst.prev = "@" + pst.prev;
-                    pst.tokens.Remove( pst.tokens.Count - 1 );
+                    // TODO: Check this
+                    pst.tokens.RemoveAt( pst.tokens.Count - 1 );
                     pst.tokens.Add( pst.prev );
                 }
 
@@ -329,7 +317,8 @@ internal class OctaveParser : Parser
 
                 while ( t.Count > 0 && ";".Equals( t[ t.Count - 1 ] ) )
                 {
-                    t.Remove( t.Count - 1 );
+                    // TODO: Check this
+                    t.RemoveAt( t.Count - 1 );
                 }
 
                 t.Insert( 0, "[" );
@@ -397,10 +386,6 @@ internal class OctaveParser : Parser
 	{
 	    int len = s.Length > 2 ? 3 : s.Length;
 
-		//char[] substring = new char[len];
-		//s.getChars(0,len,substring,0);
-		//string st = new string(substring);
-
 	    var st = s.ToString().Substring( 0, len );
 
 		var op = Operator.get(st);
@@ -418,10 +403,6 @@ internal class OctaveParser : Parser
 		{
 			k++;
 		}
-
-		//substring = new char[k];
-		//s.getChars(0,k,substring,0);
-		//string t = new string(substring);
 
 	    var t = s.ToString().Substring( 0, k );
 
@@ -537,38 +518,48 @@ internal class OctaveParser : Parser
 
 	internal virtual List compile_binary(Operator op, List expr, int k)
 	{
-		List left_in = expr.subList(0, k);
-		List left = (op.lvalue() ? compile_lval(left_in) : compile_expr(left_in));
-		if (left == null)
-		{
-			return null;
-		}
-		;
-		List right_in = expr.subList(k + 1, expr.Count);
-		List right = compile_expr(right_in);
-		if (right == null)
-		{
-			return null;
-		}
-		int? nargs = TWO;
-		if (op.lvalue())
-		{
-			object left_narg = left[0];
-			if (left_narg is int?)
-			{
-				nargs = (int?)left_narg;
-				right.Insert(right.Count - 1, "#" + nargs);
-				left.RemoveAt(0);
-			}
-			else
-			{
-				nargs = ONE;
-			}
-		}
-		left.AddRange(right);
-		left.Add(nargs);
-		left.Add(op.Lambda);
-		return left;
+        var left_in = expr.subList( 0, k );
+
+        var left = ( op.lvalue() ? compile_lval( left_in ) : compile_expr( left_in ) );
+
+        if ( left == null )
+        {
+            return null;
+        }
+
+        var right_in = expr.subList( k + 1, expr.Count );
+
+        var right = compile_expr( right_in );
+
+        if ( right == null )
+        {
+            return null;
+        }
+
+        int? nargs = TWO;
+
+        if ( op.lvalue() )
+        {
+            object left_narg = left[0];
+
+            if ( left_narg is int? )
+            {
+                nargs = ( int? ) left_narg;
+
+                right.Insert( right.Count - 1, "#" + nargs );
+                left.RemoveAt( 0 );
+            }
+            else
+            {
+                nargs = ONE;
+            }
+        }
+
+        left.AddRange( right );
+        left.Add( nargs );
+        left.Add( op.Lambda );
+
+        return left;
 	}
 
 	internal virtual List translate_op(List expr)

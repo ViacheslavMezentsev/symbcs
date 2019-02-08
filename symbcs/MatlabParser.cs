@@ -220,7 +220,8 @@ internal class MatlabParser : Parser
 				if (symbolq(pst.prev))
 				{
 					pst.prev = "@" + pst.prev;
-					pst.tokens.Remove(pst.tokens.Count - 1);
+                    // TODO: Check this
+					pst.tokens.RemoveAt(pst.tokens.Count - 1);
 					pst.tokens.Add(pst.prev);
 				}
 				pst = new ParserState(pst, IN_PARENT);
@@ -245,7 +246,8 @@ internal class MatlabParser : Parser
 				t = pst.tokens;
 				while (t.Count > 0 && ";".Equals(t[t.Count - 1]))
 				{
-					t.Remove(t.Count - 1);
+                    // TODO: Check this
+					t.RemoveAt(t.Count - 1);
 				}
 				t.Insert(0, "[");
 				pst = (ParserState)pst.sub;

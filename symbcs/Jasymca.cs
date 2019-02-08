@@ -67,6 +67,11 @@ public class Jasymca
 
     public static void Main()
     {
+        Console.BackgroundColor = ConsoleColor.White;
+        Console.ForegroundColor = ConsoleColor.Black;
+
+        Console.Clear();
+
         var jasymca = new JasymcaOct();
         //var jasymca = new JasymcaMax();
 
@@ -84,7 +89,7 @@ public class Jasymca
 
         var thread = new Thread( Run );
 
-        thread.Start();
+        thread.Start();        
     }
 
     public static void Test( string[] args )
@@ -163,6 +168,8 @@ public class Jasymca
 				{
 					Console.WriteLine( "\nGoodbye." );
 
+				    Console.ResetColor();
+
 					return;
 				}
 
@@ -174,6 +181,6 @@ public class Jasymca
 
 				proc.clearStack();
 			}
-		}
+		}	    
 	}
 }

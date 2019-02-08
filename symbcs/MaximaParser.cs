@@ -213,7 +213,8 @@ internal class MaximaParser : Parser
 				t = pst.tokens;
 				while (t.Count > 0 && ";".Equals(t[t.Count - 1]))
 				{
-					t.Remove(t.Count - 1);
+                    // TODO: Check this
+					t.RemoveAt(t.Count - 1);
 				}
 				t.Insert(0, "[");
 				pst = (ParserState)pst.sub;
