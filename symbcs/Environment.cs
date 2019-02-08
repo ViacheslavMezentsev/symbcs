@@ -3,8 +3,8 @@ using System.Collections;
 
 public class Environment : Hashtable
 {
-	internal ArrayList path = new ArrayList();
-	internal Hashtable globals = new Hashtable();
+    internal static ArrayList path = new ArrayList();
+    internal static Hashtable globals = new Hashtable();
 
     internal virtual void addPath(string s)
 	{

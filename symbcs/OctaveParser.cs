@@ -30,14 +30,14 @@ internal class OctaveParser : Parser
 		env.addPath(".");
 		env.addPath("m");
 
-		env.globals.Add( "pi", Zahl.PI );
-        env.globals.Add( "i", Zahl.IONE );
-        env.globals.Add( "j", Zahl.IONE );
-        env.globals.Add( "eps", new Unexakt( 2.220446049250313E-16 ) );
-        env.globals.Add( "ratepsilon", new Unexakt( 2.0e-8 ) );
-        env.globals.Add( "algepsilon", new Unexakt( 1.0e-8 ) );
-        env.globals.Add( "rombergit", new Unexakt( 11 ) );
-	    env.globals.Add( "rombergtol", new Unexakt( 1.0e-4 ) );
+        Environment.globals.Add( "pi", Zahl.PI );
+        Environment.globals.Add( "i", Zahl.IONE );
+        Environment.globals.Add( "j", Zahl.IONE );
+        Environment.globals.Add( "eps", new Unexakt( 2.220446049250313E-16 ) );
+        Environment.globals.Add( "ratepsilon", new Unexakt( 2.0e-8 ) );
+        Environment.globals.Add( "algepsilon", new Unexakt( 1.0e-8 ) );
+        Environment.globals.Add( "rombergit", new Unexakt( 11 ) );
+	    Environment.globals.Add( "rombergtol", new Unexakt( 1.0e-4 ) );
 
 		pst = new ParserState( null, 0 );
 

@@ -37,7 +37,7 @@ public class Jasymca
 	internal static string ui = "Octave";
     internal static PrintStream ps = new PrintStream();
 
-	internal static INumFmt fmt = new NumFmtVar(10, 5);
+	internal static INumFmt fmt = new NumFmtVar( 10, 5 );
 
     internal static string welcome =
         "Jasymca	- Java Symbolic Calculator\n" +
@@ -103,7 +103,7 @@ public class Jasymca
 
         for ( int i = 0; i < ar.Length - 1; i++ )
         {
-            Console.WriteLine( i + ": " + ar[i] + "+i*" + ai[i] + "  " + err[i] );
+            Console.WriteLine( @"{0}: {1}+i*{2}  {3}", i, ar[i], ai[i], err[i]);
         }
     }
 

@@ -41,13 +41,15 @@ public class BigInteger
     private static readonly int numFixNum = maxFixNum - minFixNum + 1;
     private static readonly BigInteger[] smallFixNums = new BigInteger[ numFixNum ];
 
-    public static readonly BigInteger ZERO = smallFixNums[ 0 - minFixNum ];
-    public static readonly BigInteger ONE = smallFixNums[ 1 - minFixNum ];
-    public static readonly BigInteger TEN = smallFixNums[ 10 - minFixNum ];
+    public static readonly BigInteger ZERO;
+    public static readonly BigInteger ONE;
+    public static readonly BigInteger TEN;
+
     private const int FLOOR = 1;
     private const int CEILING = 2;
     private const int TRUNCATE = 3;
     private const int ROUND = 4;
+
     private static readonly int[] primes = { 2, 3, 5, 7 };
     private static readonly int[] k = { 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1250, int.MaxValue };
     private static readonly int[] t = { 27, 18, 15, 12, 9, 8, 7, 6, 5, 4, 3, 2 };
@@ -58,18 +60,22 @@ public class BigInteger
         {
             smallFixNums[i] = new BigInteger( i + minFixNum );
         }
+
+        ZERO = smallFixNums[ 0 - minFixNum ];
+        ONE = smallFixNums[ 1 - minFixNum ];
+        TEN = smallFixNums[ 10 - minFixNum ];
     }
 
     private BigInteger()
     {
     }
 
-    private BigInteger( int value )
+    private BigInteger( int value ) : this()
     {
         ival = value;
     }
 
-    public BigInteger( string val, int radix )
+    public BigInteger( string val, int radix ) : this()
     {
         var result = valueOf( val, radix );
 
@@ -81,7 +87,7 @@ public class BigInteger
     {
     }
 
-    public BigInteger( sbyte[] val )
+    public BigInteger( sbyte[] val ) : this()
     {
         if ( val == null || val.Length < 1 )
         {
@@ -96,7 +102,7 @@ public class BigInteger
         words = result.words;
     }
 
-    public BigInteger( int signum, sbyte[] magnitude )
+    public BigInteger( int signum, sbyte[] magnitude ) : this()
     {
         if ( magnitude == null || signum > 1 || signum < -1 )
         {

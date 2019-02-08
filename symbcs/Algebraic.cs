@@ -206,7 +206,8 @@ public abstract class Algebraic
 				return r;
 			}
 			
-            var fname = lambda.GetType().FullName;
+            // TODO: Check this
+            var fname = lambda.GetType().Name;
 
 		    if ( fname.StartsWith( "Lambda", StringComparison.Ordinal ) )
 			{
