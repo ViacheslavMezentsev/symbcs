@@ -218,64 +218,75 @@ internal class LambdaPRINTF : Lambda
 		printf(st);
 		return 0;
 	}
-	internal static void printf(Stack st)
+
+	internal static void printf( Stack st )
 	{
-		int narg = getNarg(st);
-		object s_in = st.Pop();
-		if (!(s_in is string))
-		{
-			throw new JasymcaException("Argument to PRINTF must be string.");
-		}
-		string fmt = (string)s_in;
-		int idx , i = 1;
-		string cs = "%f";
-		while ((idx = fmt.IndexOf(cs, StringComparison.Ordinal)) != -1 && st.Count > 0 && narg-- > 1)
-		{
-			object n = st.Pop();
-			if (n != null)
-			{
-				StringBuilder sb = new StringBuilder(fmt);
-				sb.Remove(idx, idx + cs.Length - idx);
-				sb.Insert(idx, n.ToString());
-				fmt = sb.ToString();
-			}
-			else
-			{
-				break;
-			}
-		} while ((idx = fmt.IndexOf("\\n", StringComparison.Ordinal)) != -1)
-		{
-			StringBuilder sb = new StringBuilder(fmt);
-			sb.Remove(idx, idx + "\\n".Length - idx);
-			sb.Insert(idx, "\n");
-			fmt = sb.ToString();
-		}
-		if (pc.ps != null)
-		{
-			pc.ps.print(fmt.ToString());
-		}
-	}
+        int narg = getNarg( st );
+
+        var s_in = st.Pop();
+
+        if ( !( s_in is string ) )
+        {
+            throw new JasymcaException( "Argument to PRINTF must be string." );
+        }
+
+        string fmt = ( string ) s_in;
+
+        int idx, i = 1;
+        var cs = "%f";
+
+        while ( ( idx = fmt.IndexOf( cs, StringComparison.Ordinal ) ) != -1 && st.Count > 0 && narg-- > 1 )
+        {
+            var n = st.Pop();
+
+            if ( n != null )
+            {
+                var sb = new StringBuilder( fmt );
+
+                sb.Remove( idx, idx + cs.Length - idx );
+                sb.Insert( idx, n.ToString() );
+
+                fmt = sb.ToString();
+            }
+            else
+            {
+                break;
+            }
+        } 
+        
+        while ( ( idx = fmt.IndexOf( "\\n", StringComparison.Ordinal ) ) != -1 )
+        {
+            var sb = new StringBuilder( fmt );
+
+            sb.Remove( idx, idx + "\\n".Length - idx );
+            sb.Insert( idx, "\n" );
+
+            fmt = sb.ToString();
+        }
+
+        if ( pc.ps != null )
+        {
+            pc.ps.print( fmt );
+        }
+    }
 }
+
 internal class LambdaPAUSE : Lambda
 {
-	private readonly LambdaPRINTF outerInstance;
-
-	public LambdaPAUSE(LambdaPRINTF outerInstance)
-	{
-		this.outerInstance = outerInstance;
-	}
-
-	public override int lambda(Stack st)
+	public override int lambda( Stack st )
 	{
 		int narg = getNarg(st);
-		int millis = Math.Abs(getInteger(st));
+
+	    int millis = Math.Abs( getInteger( st ) );
+
 		try
 		{
-			Thread.Sleep(millis);
+			Thread.Sleep( millis );
 		}
 		catch (Exception)
 		{
 		}
+
 		return 0;
 	}
 }

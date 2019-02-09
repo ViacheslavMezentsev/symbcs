@@ -2,10 +2,9 @@
 p = 5000;
 printf("Willkommen zur Live-Demonstration von Jasymca\n");
 pause(200);
-printf("Abbruch jederzeit möglich mit Strg-c oder Menu: Run->Interrupt.\n");
 printf("\n\n");
 pause(2000);
-printf("Jasymca ist ein interaktives Rechenprogramm für Java Plattformen\n");
+printf("Jasymca ist ein interaktives Rechenprogramm fuer Java Plattformen\n");
 pause(2000);
 printf("\n\n\n");
 printf("Berechnen Sie beliebige mathematische Formeln\n");
@@ -25,24 +24,15 @@ printf("Oder exakt mit der Funktion 'rat':\n");
 printf(">>rat(2)^75-1\n");
 rat(2)^75-1,
 pause(p);
-printf("\n\n\n");
-printf("Zerlegung in Primfaktoren:\n");
-printf(">>primes( ans )\n");
-primes(ans),
-pause(p);
-printf("\n\n\n");
-printf("Probe durch Ausmultiplizieren:\n");
-printf(">>prod( ans )\n");
-prod( ans ),
-pause(p);
+
 format short;
 printf("\n\n\n");
 printf("Finden von gemeinsamen Teilern:\n");
-printf(">>gcd(289169475515192951703861, 2891694755151939166450249891702715)\n");
-gcd(289169475515192951703861, 2891694755151939166450249891702715),
+printf(">>gcd(2891951703861, 289169475515193915)\n");
+gcd(2891951703861, 289169475515193915),
 pause(p);
 printf("\n\n\n");
-printf("Auch bei symbolischen Ausdrücken:\n");
+printf("Auch bei symbolischen Ausdruecken:\n");
 printf(">>syms x,z\n");
 syms x,z
 printf(">>gcd(z*x^5-z, x^2-2*x+1)\n");
@@ -61,7 +51,7 @@ printf(">> allroots( y )\n");
 allroots( y ),
 pause(p);
 printf("\n\n\n");
-printf("Zerlegung von komplexen Ausdrücken:\n");
+printf("Zerlegung von komplexen Ausdruecken:\n");
 printf(">> syms x;\n");
 syms x;
 printf(">> y=(3+i*x)/(2-i*x)\n");
@@ -73,7 +63,7 @@ printf(">> realpart(y)\n");
 realpart(y),
 pause(p);
 printf("\n\n\n");
-printf("und in Imaginärteil:\n");
+printf("und in Imaginaerteil:\n");
 printf(">> imagpart(y)\n");
 imagpart(y),
 pause(p);
@@ -101,19 +91,19 @@ printf("\n\n\n");
 printf("Symbolische Lineare Gleichungssysteme:\n");
 printf(">> syms x,y;\n");
 syms x,y;
-printf(">> A=[x,1,-2,-2,0;1 2 3*y 4 5;1 2 2 0 1;9 1 6 0 -1;0 0 1 0]\n");
-A=[x,1,-2,-2,0;1 2 3*y 4 5;1 2 2 0 1;9 1 6 0 -1;0 0 1 0],
+printf(">> A=[x,-2,0;1 3*y 4;1 2 0]\n");
+A=[x,-2,0;1 3*y 4;1 2 0],
 pause(p);
 printf("\n");
-printf("Die Matrix A des Gleichungssystems hängt von Variablen x und y ab.\n");
+printf("Die Matrix A des Gleichungssystems haengt von Variablen x und y ab.\n");
 pause(p);
 printf("\n");
 printf("Die rechte Seite des Gleichungssystems:\n");
-printf(">>b = [1 -2  3  2  4 ]\n");
-b = [1 -2  3  2  4 ],
+printf(">>b = [1 -2  2 ]\n");
+b = [1 -2  2 ],
 pause(p);
 printf("\n");
-printf("\n\nUnd schließlich die 5 Lösungen:\n");
+printf("\n\nUnd schliesslich die 3 Loesungen:\n");
 printf(">> trigrat( linsolve( rat(A), b) )\n ");
 trigrat( linsolve( rat(A), b) ),
 
@@ -135,41 +125,6 @@ printf("und differenzieren:\n");
 printf(">>  diff(ans,x)\n");
 diff(ans,x),
 pause(p);
-pause(p);
-printf("\n\n\n");
-printf("Plotten:\n");
-printf(">> t=0:0.1:4*pi; x=sin(0.5*t+1); y=cos(1.5*t);\n");
-t=0:0.1:4*pi; x=sin(0.5*t+1); y=cos(1.5*t);
-printf(">> plot(x,y)\n");
-plot(x,y)
-pause(p);
-printf(">> hold on\n");
-hold on;
-pause(1000);
-printf(">> x=sin(0.5*t+2);plot(x,y,'r');\n");
-x=sin(0.5*t+2);plot(x,y,'r');
-pause(1000);
-printf(">> x=sin(0.5*t+3);plot(x,y,'g');\n");
-x=sin(0.5*t+3);plot(x,y,'g');
-pause(1000);
-printf(">> x=sin(0.5*t+4);plot(x,y,'c');\n");
-x=sin(0.5*t+4);plot(x,y,'c');
-pause(1000);
-printf(">> x=sin(0.5*t+5);plot(x,y,'m');\n");
-x=sin(0.5*t+5);plot(x,y,'m');
-pause(1000);
-printf(">> x=sin(0.5*t+6);plot(x,y,'y');\n");
-x=sin(0.5*t+6);plot(x,y,'y');
-pause(1000);
-printf(">> x=sin(0.5*t+7);plot(x,y,'k');\n");
-x=sin(0.5*t+7);plot(x,y,'k');
-pause(1000);
-printf(">> x=sin(0.5*t+8);plot(x,y,'w');\n");
-x=sin(0.5*t+8);plot(x,y,'w');
-pause(p);
-pause(p);
-printf(">> hold off\n");
-hold off;
 
 printf("\n\n\n");
 printf("Trigonometrische Vereinfachungen:\n");
@@ -179,7 +134,7 @@ printf(">> sin(x)^2+sin(x+2*pi/3)^2+sin(x+4*pi/3)^2\n");
 sin(x)^2+sin(x+2*pi/3)^2+sin(x+4*pi/3)^2,
 printf("\n\n\n");
 pause(p);
-printf("Deshalb benutzt man Drehstrom zur Energieübertragung:\n");
+printf("Deshalb benutzt man Drehstrom zur Energieuebertragung:\n");
 printf(">> trigrat(ans)\n");
 trigrat(ans),
 pause(p);
@@ -188,12 +143,12 @@ printf("\n\n\n");
 printf("Programmierbar, zum Beispiel mit Schleifen:\n");
 pause(p);
 printf("\n");
-printf("Wir berechnen die ersten 10 Taylorpolynome von log(1+x):\n");
+printf("Wir berechnen die ersten 5 Taylorpolynome von log(1+x):\n");
 pause(p);
 printf("\n");
 printf(">> syms x;\n");
 pause(p);
-printf(">>for (k=1:10)\n>");
+printf(">>for (k=1:5)\n>");
 pause(p);
 printf("y = rat( taylor( log(1+x),x,0,k ));\n>" );
 pause(p);
@@ -202,10 +157,10 @@ pause(p);
 printf("end\n\n");
 pause(p);
 syms x; 
-for (k=1:10) y = rat(taylor( log(1+x),x,0,k )); printf('Grad %f: %f\n',k,y); end,
+for (k=1:5) y = rat(taylor( log(1+x),x,0,k )); printf('Grad %f: %f\n',k,y); end,
 pause(p);
 printf("\n\n\n");
-printf("Und viele weitere Möglichkeiten.\n");
-printf("Viel Spaß beim Ausprobieren!\n");
+printf("Und viele weitere Moeglichkeiten.\n");
+printf("Viel Spass beim Ausprobieren!\n");
 printf("Helmut Dersch  der@fh-furtwangen.de\n");
 

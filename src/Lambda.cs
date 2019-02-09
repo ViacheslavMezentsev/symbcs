@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 
 public abstract class Lambda : Constants
@@ -1229,7 +1231,7 @@ internal class LambdaSAVE : Lambda
 
         try
         {
-            var f = Jasymca.getFileOutputStream( ( string ) filename, true );
+            var f = Jasymca.GetFileOutputStream( ( string ) filename, true );
 
             for ( var i = 1; i < size; i++ )
             {
@@ -1292,7 +1294,7 @@ internal class LambdaLOADFILE : Lambda
             throw new ParseException( "Usage: LOADFILE (filename)" );
         }
 
-        object filename = st.Pop();
+        var filename = st.Pop();
 
         if ( !( filename is string ) )
         {
@@ -1301,7 +1303,7 @@ internal class LambdaLOADFILE : Lambda
 
         try
         {
-            readFile( ( string ) filename );
+            ReadFile( ( string ) filename );
 
             Console.WriteLine( "Loaded Variables from " + filename );
         }
@@ -1313,37 +1315,37 @@ internal class LambdaLOADFILE : Lambda
         return 0;
     }
 
-    public static void readFile( string fname )
+    public static void ReadFile( string fname )
     {
-        if ( File.Exists( fname ) )
+        // Try to load from resources.
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var names = assembly.GetManifestResourceNames();
+
+        var resName = names.FirstOrDefault( p => p == "symcs.inc." + fname );
+
+        if ( resName != null )
+        {
+            Read( assembly.GetManifestResourceStream( resName ) );
+
+            return;
+        }
+
+        if ( File.Exists( Path.Combine( Jasymca.AssemblyDirectory, fname ) ) )
         {
             Stream stream = new FileStream( Path.GetFullPath( fname ), FileMode.Open );
 
-            readFile( stream );
-        }
-        //string sep = "/";
-        //string s;
-        //
-        //var c = typeof( LambdaLOADFILE );
-        //
-        //for (int i = 0; i < pc.env.path.Count; i++)
-        //{
-        //	string dir = (string)pc.env.path[i];
-        //
-        //	s = fname.StartsWith(sep, StringComparison.Ordinal) ? dir + fname : dir + sep + fname;
-        //
-        //	Stream f = c.getResourceAsStream(s);
-        //
-        //	readFile(f);
-        //
-        //	return;
-        //}
+            Read( stream );
 
-        throw new IOException( "Could not open " + fname + "." );
+            return;
+        }
+
+        throw new IOException( "Could not find " + fname + "." );
     }
-    public static void readFile( Stream f )
+
+    public static void Read( Stream stream )
     {
-        var old_stack = pc.stack;
+        var stack = pc.stack;
 
         pc.stack = new Stack();
 
@@ -1351,7 +1353,7 @@ internal class LambdaLOADFILE : Lambda
         {
             while ( true )
             {
-                var code = pr.compile( f, null );
+                var code = pr.compile( stream, null );
 
                 if ( code == null )
                 {
@@ -1361,13 +1363,13 @@ internal class LambdaLOADFILE : Lambda
                 pc.process_list( code, true );
             }
 
-            f.Close();
+            stream.Close();
 
-            pc.stack = old_stack;
+            pc.stack = stack;
         }
         catch ( Exception ex )
         {
-            pc.stack = old_stack;
+            pc.stack = stack;
 
             throw new JasymcaException( ex.Message );
         }
@@ -1511,6 +1513,7 @@ internal class LambdaPINV : Lambda
         return 0;
     }
 }
+
 internal class LambdaHILB : Lambda
 {
     public override int lambda( Stack st )

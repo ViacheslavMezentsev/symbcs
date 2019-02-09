@@ -25,21 +25,12 @@ printf("or they are exact if 'rat' is used:\n");
 printf(">>rat(2)^75-1\n");
 rat(2)^75-1,
 pause(p);
-printf("\n\n\n");
-printf("Decompose into primes:\n");
-printf(">>primes( ans )\n");
-primes(ans),
-pause(p);
-printf("\n\n\n");
-printf("Control: multiply primes:\n");
-printf(">>prod( ans )\n");
-prod( ans ),
-pause(p);
+
 format short;
 printf("\n\n\n");
 printf("Greatest common denominator:\n");
-printf(">>gcd(289169475515192951703861, 2891694755151939166450249891702715)\n");
-gcd(289169475515192951703861, 2891694755151939166450249891702715),
+printf(">>gcd(2891951703861, 289169475515193915)\n");
+gcd(2891951703861, 289169475515193915),
 pause(p);
 printf("\n\n\n");
 printf("works also with symbolic expressions:\n");
@@ -101,19 +92,19 @@ printf("\n\n\n");
 printf("System of symbolic linear equations::\n");
 printf(">> syms x,y;\n");
 syms x,y;
-printf(">> A=[x,1,-2,-2,0;1 2 3*y 4 5;1 2 2 0 1;9 1 6 0 -1;0 0 1 0]\n");
-A=[x,1,-2,-2,0;1 2 3*y 4 5;1 2 2 0 1;9 1 6 0 -1;0 0 1 0],
+printf(">> A=[x,-2,0;1 3*y 4;1 2 0]\n");
+A=[x,-2,0;1 3*y 4;1 2 0],
 pause(p);
 printf("\n");
 printf("The system of equation's matrix A depends on symbolic variables x and y.\n");
 pause(p);
 printf("\n");
 printf("The right-hand-side of the equations:\n");
-printf(">>b = [1 -2  3  2  4 ]\n");
-b = [1 -2  3  2  4 ],
+printf(">>b = [1 -2  2 ]\n");
+b = [1 -2  2 ],
 pause(p);
 printf("\n");
-printf("\n\nFinally, the five solutions:\n");
+printf("\n\nFinally, the three solutions:\n");
 printf(">> trigrat( linsolve( rat(A), b) )\n ");
 trigrat( linsolve( rat(A), b) ),
 
@@ -135,41 +126,6 @@ printf("and differentiation:\n");
 printf(">>  diff(ans,x)\n");
 diff(ans,x),
 pause(p);
-pause(p);
-printf("\n\n\n");
-printf("Plots:\n");
-printf(">> t=0:0.1:4*pi; x=sin(0.5*t+1); y=cos(1.5*t);\n");
-t=0:0.1:4*pi; x=sin(0.5*t+1); y=cos(1.5*t);
-printf(">> plot(x,y)\n");
-plot(x,y)
-pause(p);
-printf(">> hold on\n");
-hold on;
-pause(1000);
-printf(">> x=sin(0.5*t+2);plot(x,y,'r');\n");
-x=sin(0.5*t+2);plot(x,y,'r');
-pause(1000);
-printf(">> x=sin(0.5*t+3);plot(x,y,'g');\n");
-x=sin(0.5*t+3);plot(x,y,'g');
-pause(1000);
-printf(">> x=sin(0.5*t+4);plot(x,y,'c');\n");
-x=sin(0.5*t+4);plot(x,y,'c');
-pause(1000);
-printf(">> x=sin(0.5*t+5);plot(x,y,'m');\n");
-x=sin(0.5*t+5);plot(x,y,'m');
-pause(1000);
-printf(">> x=sin(0.5*t+6);plot(x,y,'y');\n");
-x=sin(0.5*t+6);plot(x,y,'y');
-pause(1000);
-printf(">> x=sin(0.5*t+7);plot(x,y,'k');\n");
-x=sin(0.5*t+7);plot(x,y,'k');
-pause(1000);
-printf(">> x=sin(0.5*t+8);plot(x,y,'w');\n");
-x=sin(0.5*t+8);plot(x,y,'w');
-pause(p);
-pause(p);
-printf(">> hold off\n");
-hold off;
 
 printf("\n\n\n");
 printf("Trigonometric simplifications:\n");
@@ -188,12 +144,12 @@ printf("\n\n\n");
 printf("Programmable, e.g. loops:\n");
 pause(p);
 printf("\n");
-printf("We calculate the first 10 Taylorpolynomials of log(1+x):\n");
+printf("We calculate the first 5 Taylorpolynomials of log(1+x):\n");
 pause(p);
 printf("\n");
 printf(">> syms x;\n");
 pause(p);
-printf(">>for (k=1:10)\n>");
+printf(">>for (k=1:5)\n>");
 pause(p);
 printf("y = rat( taylor( log(1+x),x,0,k ));\n>" );
 pause(p);
@@ -202,10 +158,9 @@ pause(p);
 printf("end\n\n");
 pause(p);
 syms x; 
-for (k=1:10) y = rat(taylor( log(1+x),x,0,k )); printf('degree %f: %f\n',k,y); end,
+for (k=1:5) y = rat(taylor( log(1+x),x,0,k )); printf('degree %f: %f\n',k,y); end,
 pause(p);
 printf("\n\n\n");
 printf("And many more options.\n");
 printf("Try it out and have fun!\n");
 printf("Helmut Dersch  der@fh-furtwangen.de\n");
-

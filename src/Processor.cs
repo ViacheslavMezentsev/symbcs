@@ -139,7 +139,7 @@ public class Processor : Constants
                 {
                     try
                     {
-                        LambdaLOADFILE.readFile( s + ".m" );
+                        LambdaLOADFILE.ReadFile( s + ".m" );
 
                         val = env.getValue( s );
                     }
@@ -176,7 +176,7 @@ public class Processor : Constants
                     {
                         try
                         {
-                            LambdaLOADFILE.readFile( s + ".m" );
+                            LambdaLOADFILE.ReadFile( s + ".m" );
 
                             val = env.getValue(s);
                         }
@@ -201,7 +201,7 @@ public class Processor : Constants
                 {
                     try
                     {
-                        LambdaLOADFILE.readFile( ( string ) x + ".m" );
+                        LambdaLOADFILE.ReadFile( ( string ) x + ".m" );
 
                         return 0;
                     }

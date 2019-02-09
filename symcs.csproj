@@ -8,8 +8,8 @@
     <ProjectGuid>{724AAEA1-53B3-484F-B5DC-7AFA99D72625}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>symbcs</RootNamespace>
-    <AssemblyName>symbcs</AssemblyName>
+    <RootNamespace>symcs</RootNamespace>
+    <AssemblyName>symcs</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>
@@ -78,99 +78,60 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="symbcs\Algebraic.cs" />
-    <Compile Include="symbcs\BigInteger.cs" />
-    <Compile Include="symbcs\List.cs" />
-    <Compile Include="symbcs\Compiler.cs" />
-    <Compile Include="symbcs\Constant.cs" />
-    <Compile Include="symbcs\Constants.cs" />
-    <Compile Include="symbcs\DateTimeHelperClass.cs" />
-    <Compile Include="symbcs\Environment.cs" />
-    <Compile Include="symbcs\Exakt.cs" />
-    <Compile Include="symbcs\Exponential.cs" />
-    <Compile Include="symbcs\Extensions.cs" />
-    <Compile Include="symbcs\FunctionVariable.cs" />
-    <Compile Include="symbcs\Index.cs" />
-    <Compile Include="symbcs\Jasymca.cs" />
-    <Compile Include="symbcs\JasymcaMax.cs" />
-    <Compile Include="symbcs\JasymcaOct.cs" />
-    <Compile Include="symbcs\JMath.cs" />
-    <Compile Include="symbcs\Lambda.cs" />
-    <Compile Include="symbcs\LambdaALGSYS.cs" />
-    <Compile Include="symbcs\LambdaFFT.cs" />
-    <Compile Include="symbcs\LambdaINTEGRATE.cs" />
-    <Compile Include="symbcs\LambdaLENGTH.cs" />
-    <Compile Include="symbcs\LambdaLINSOLVE.cs" />
-    <Compile Include="symbcs\LambdaODE.cs" />
-    <Compile Include="symbcs\LambdaPOLY.cs" />
-    <Compile Include="symbcs\LambdaPRIMES.cs" />
-    <Compile Include="symbcs\LambdaSOLVE.cs" />
-    <Compile Include="symbcs\LambdaTRIGRAT.cs" />
-    <Compile Include="symbcs\Loop.cs" />
-    <Compile Include="symbcs\MatlabParser.cs" />
-    <Compile Include="symbcs\Matrix.cs" />
-    <Compile Include="symbcs\MaximaParser.cs" />
-    <Compile Include="symbcs\MPN.cs" />
-    <Compile Include="symbcs\NumFmt.cs" />
-    <Compile Include="symbcs\OctaveParser.cs" />
-    <Compile Include="symbcs\Operator.cs" />
-    <Compile Include="symbcs\ParseException.cs" />
-    <Compile Include="symbcs\Parser.cs" />
-    <Compile Include="symbcs\Poly.cs" />
-    <Compile Include="symbcs\Polynomial.cs" />
-    <Compile Include="symbcs\Processor.cs" />
-    <Compile Include="symbcs\Pzeros.cs" />
-    <Compile Include="symbcs\Random.cs" />
-    <Compile Include="symbcs\Rational.cs" />
-    <Compile Include="symbcs\RectangularArrays.cs" />
-    <Compile Include="symbcs\Sfun.cs" />
-    <Compile Include="symbcs\SimpleVariable.cs" />
-    <Compile Include="symbcs\StringFmt.cs" />
-    <Compile Include="symbcs\StringHelperClass.cs" />
-    <Compile Include="symbcs\Unexakt.cs" />
-    <Compile Include="symbcs\Variable.cs" />
-    <Compile Include="symbcs\Vektor.cs" />
-    <Compile Include="symbcs\XProcessor.cs" />
-    <Compile Include="symbcs\Zahl.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="raw\acosh.m" />
-    <None Include="raw\acsc.m" />
-    <None Include="raw\acsch.m" />
-    <None Include="raw\asec.m" />
-    <None Include="raw\asech.m" />
-    <None Include="raw\asinh.m" />
-    <None Include="raw\cosh.m" />
-    <None Include="raw\csc.m" />
-    <None Include="raw\csch.m" />
-    <None Include="raw\demo.m" />
-    <None Include="raw\demome_de.m" />
-    <None Include="raw\demome_en.m" />
-    <None Include="raw\demo_de.m" />
-    <None Include="raw\demo_en.m" />
-    <None Include="raw\fzero.m" />
-    <None Include="raw\invhilb.m" />
-    <None Include="raw\linspace.m" />
-    <None Include="raw\lsqcurvefit.m" />
-    <None Include="raw\nchoosek.m" />
-    <None Include="raw\poly.m" />
-    <None Include="raw\polyfit.m" />
-    <None Include="raw\polyval.m" />
-    <None Include="raw\quad.m" />
-    <None Include="raw\sec.m" />
-    <None Include="raw\sech.m" />
-    <None Include="raw\sinh.m" />
+    <Compile Include="src\Algebraic.cs" />
+    <Compile Include="src\BigInteger.cs" />
+    <Compile Include="src\List.cs" />
+    <Compile Include="src\Compiler.cs" />
+    <Compile Include="src\Constant.cs" />
+    <Compile Include="src\Constants.cs" />
+    <Compile Include="src\DateTimeHelperClass.cs" />
+    <Compile Include="src\Environment.cs" />
+    <Compile Include="src\Exakt.cs" />
+    <Compile Include="src\Exponential.cs" />
+    <Compile Include="src\Extensions.cs" />
+    <Compile Include="src\FunctionVariable.cs" />
+    <Compile Include="src\Index.cs" />
+    <Compile Include="src\Jasymca.cs" />
+    <Compile Include="src\JasymcaMax.cs" />
+    <Compile Include="src\JasymcaOct.cs" />
+    <Compile Include="src\JMath.cs" />
+    <Compile Include="src\Lambda.cs" />
+    <Compile Include="src\LambdaALGSYS.cs" />
+    <Compile Include="src\LambdaFFT.cs" />
+    <Compile Include="src\LambdaINTEGRATE.cs" />
+    <Compile Include="src\LambdaLENGTH.cs" />
+    <Compile Include="src\LambdaLINSOLVE.cs" />
+    <Compile Include="src\LambdaODE.cs" />
+    <Compile Include="src\LambdaPOLY.cs" />
+    <Compile Include="src\LambdaPRIMES.cs" />
+    <Compile Include="src\LambdaSOLVE.cs" />
+    <Compile Include="src\LambdaTRIGRAT.cs" />
+    <Compile Include="src\Loop.cs" />
+    <Compile Include="src\MatlabParser.cs" />
+    <Compile Include="src\Matrix.cs" />
+    <Compile Include="src\MaximaParser.cs" />
+    <Compile Include="src\MPN.cs" />
+    <Compile Include="src\NumFmt.cs" />
+    <Compile Include="src\OctaveParser.cs" />
+    <Compile Include="src\Operator.cs" />
+    <Compile Include="src\ParseException.cs" />
+    <Compile Include="src\Parser.cs" />
+    <Compile Include="src\Poly.cs" />
+    <Compile Include="src\Polynomial.cs" />
+    <Compile Include="src\Processor.cs" />
+    <Compile Include="src\Pzeros.cs" />
+    <Compile Include="src\Random.cs" />
+    <Compile Include="src\Rational.cs" />
+    <Compile Include="src\RectangularArrays.cs" />
+    <Compile Include="src\Sfun.cs" />
+    <Compile Include="src\SimpleVariable.cs" />
+    <Compile Include="src\StringFmt.cs" />
+    <Compile Include="src\StringHelperClass.cs" />
+    <Compile Include="src\Unexakt.cs" />
+    <Compile Include="src\Variable.cs" />
+    <Compile Include="src\Vektor.cs" />
+    <Compile Include="src\XProcessor.cs" />
+    <Compile Include="src\Zahl.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -183,6 +144,33 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="inc\acosh.m" />
+    <EmbeddedResource Include="inc\acsc.m" />
+    <EmbeddedResource Include="inc\acsch.m" />
+    <EmbeddedResource Include="inc\asec.m" />
+    <EmbeddedResource Include="inc\asech.m" />
+    <EmbeddedResource Include="inc\asinh.m" />
+    <EmbeddedResource Include="inc\cosh.m" />
+    <EmbeddedResource Include="inc\csc.m" />
+    <EmbeddedResource Include="inc\csch.m" />
+    <EmbeddedResource Include="inc\demoDE.m" />
+    <EmbeddedResource Include="inc\demoEN.m" />
+    <EmbeddedResource Include="inc\demoME_DE.m" />
+    <EmbeddedResource Include="inc\demoME_EN.m" />
+    <EmbeddedResource Include="inc\fzero.m" />
+    <EmbeddedResource Include="inc\invhilb.m" />
+    <EmbeddedResource Include="inc\linspace.m" />
+    <EmbeddedResource Include="inc\lsqcurvefit.m" />
+    <EmbeddedResource Include="inc\nchoosek.m" />
+    <EmbeddedResource Include="inc\poly.m" />
+    <EmbeddedResource Include="inc\polyfit.m" />
+    <EmbeddedResource Include="inc\polyval.m" />
+    <EmbeddedResource Include="inc\quad.m" />
+    <EmbeddedResource Include="inc\sec.m" />
+    <EmbeddedResource Include="inc\sech.m" />
+    <EmbeddedResource Include="inc\sinh.m" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
