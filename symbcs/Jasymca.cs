@@ -134,7 +134,7 @@ public class Jasymca
 
 		else
 		{
-            Console.WriteLine( "Mode " + Jasymca.ui + " not available." );
+            Console.WriteLine( @"Mode {0} not available.", Jasymca.ui );
 		    
 			System.Environment.Exit(0);
 		}

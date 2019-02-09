@@ -85,7 +85,7 @@
     </Compile>
     <Compile Include="symbcs\Algebraic.cs" />
     <Compile Include="symbcs\BigInteger.cs" />
-    <Compile Include="symbcs\Comp.cs" />
+    <Compile Include="symbcs\List.cs" />
     <Compile Include="symbcs\Compiler.cs" />
     <Compile Include="symbcs\Constant.cs" />
     <Compile Include="symbcs\Constants.cs" />
@@ -93,6 +93,7 @@
     <Compile Include="symbcs\Environment.cs" />
     <Compile Include="symbcs\Exakt.cs" />
     <Compile Include="symbcs\Exponential.cs" />
+    <Compile Include="symbcs\Extensions.cs" />
     <Compile Include="symbcs\FunctionVariable.cs" />
     <Compile Include="symbcs\Index.cs" />
     <Compile Include="symbcs\Jasymca.cs" />

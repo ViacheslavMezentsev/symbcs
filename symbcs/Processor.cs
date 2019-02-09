@@ -312,9 +312,9 @@ public class Processor : Constants
 
                 env.putValue( vname, x );
 
-                if ( ( ( Algebraic ) x ).name != null )
+                if ( ( ( Algebraic ) x ).Name != null )
                 {
-                    vname = ( ( Algebraic ) x ).name;
+                    vname = ( ( Algebraic ) x ).Name;
                 }
 
                 if ( ps != null )

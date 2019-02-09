@@ -185,7 +185,7 @@ internal class OctaveParser : Parser
 
 	internal static string FUNCTION = "function", FOR = "for", WHILE = "while", IF = "if", ELSE = "else", END = "end", BREAK = "break", RETURN = "return", CONTINUE = "continue", EXIT = "exit";
 
-	private string[] keywords = { FUNCTION, FOR, WHILE, IF, ELSE, END, BREAK, RETURN, CONTINUE, EXIT };
+	private readonly string[] keywords = { FUNCTION, FOR, WHILE, IF, ELSE, END, BREAK, RETURN, CONTINUE, EXIT };
 
 	private string sepright = ")]*/^!,;:=.<>'\\";
 	private string sepleft = "*/^!,;:=.<>'\\+-";
@@ -457,7 +457,7 @@ internal class OctaveParser : Parser
 
 	internal virtual List compile_unary( Operator op, List expr )
 	{
-        var arg_in = ( op.left_right() ? expr.subList( 1, expr.Count ) : expr.subList( 0, expr.Count - 1 ) );
+        var arg_in = ( op.left_right() ? expr.take( 1, expr.Count ) : expr.take( 0, expr.Count - 1 ) );
 
         var arg = ( op.lvalue() ? compile_lval( arg_in ) : compile_expr( arg_in ) );
 
@@ -480,7 +480,7 @@ internal class OctaveParser : Parser
         {
             if ( op.symbol.Equals( expr[ k0 ] ) )
             {
-                var left_in = expr.subList( 0, k0 );
+                var left_in = expr.take( 0, k0 );
                 var left = compile_expr( left_in );
 
                 if ( left == null )
@@ -488,7 +488,7 @@ internal class OctaveParser : Parser
                     continue;
                 }
 
-                var mid_in = expr.subList( k0 + 1, k );
+                var mid_in = expr.take( k0 + 1, k );
                 var mid = compile_expr( mid_in );
 
                 if ( mid == null )
@@ -496,7 +496,7 @@ internal class OctaveParser : Parser
                     continue;
                 }
 
-                var right_in = expr.subList( k + 1, expr.Count );
+                var right_in = expr.take( k + 1, expr.Count );
                 var right = compile_expr( right_in );
 
                 if ( right == null )
@@ -518,7 +518,7 @@ internal class OctaveParser : Parser
 
 	internal virtual List compile_binary(Operator op, List expr, int k)
 	{
-        var left_in = expr.subList( 0, k );
+        var left_in = expr.take( 0, k );
 
         var left = ( op.lvalue() ? compile_lval( left_in ) : compile_expr( left_in ) );
 
@@ -527,7 +527,7 @@ internal class OctaveParser : Parser
             return null;
         }
 
-        var right_in = expr.subList( k + 1, expr.Count );
+        var right_in = expr.take( k + 1, expr.Count );
 
         var right = compile_expr( right_in );
 
@@ -619,12 +619,12 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
-		expr = expr.subList(1, expr.Count);
-		List r = Comp.vec2list(new ArrayList());
+		expr = expr.take(1, expr.Count);
+		List r = new List();
 		int i = 0, ip = 0, nrow = 1;
 		while ((i = nextIndexOf(";",ip,expr)) != -1)
 		{
-			List x = expr.subList(ip, i);
+			List x = expr.take(ip, i);
 			List xs = compile_list(x);
 			if (xs == null)
 			{
@@ -635,7 +635,7 @@ internal class OctaveParser : Parser
 			nrow++;
 			ip = i + 1;
 		}
-		List x1 = expr.subList(ip, expr.Count);
+		List x1 = expr.take(ip, expr.Count);
 		List xs1 = compile_list(x1);
 		if (xs1 == null)
 		{
@@ -654,7 +654,7 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
-		List r = Comp.vec2list(new ArrayList());
+		List r = new List();
 		if (expr.Count == 0)
 		{
 			r.Add(new int?(0));
@@ -663,7 +663,7 @@ internal class OctaveParser : Parser
 		int i , ip = 0, n = 1;
 		while ((i = nextIndexOf(",",ip,expr)) != -1)
 		{
-			List x = expr.subList(ip, i);
+			List x = expr.take(ip, i);
 			List xs = compile_expr(x);
 			if (xs == null)
 			{
@@ -674,7 +674,7 @@ internal class OctaveParser : Parser
 			n++;
 			ip = i + 1;
 		}
-		List x1 = expr.subList(ip, expr.Count);
+		List x1 = expr.take(ip, expr.Count);
 		List xs1 = compile_expr(x1);
 		if (xs1 == null)
 		{
@@ -712,12 +712,12 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
-		expr = expr.subList(1, expr.Count);
-		r = Comp.vec2list(new ArrayList());
+		expr = expr.take(1, expr.Count);
+		r = new List();
 		int i , n = 1;
 		while ((i = expr.IndexOf(",")) != -1)
 		{
-			List x = expr.subList(0, i);
+			List x = expr.take(0, i);
 			List xs1 = compile_lval1(x);
 			if (xs1 == null)
 			{
@@ -725,7 +725,7 @@ internal class OctaveParser : Parser
 			}
 			xs1.AddRange(r);
 			r = xs1;
-			expr = expr.subList(i + 1, expr.Count);
+			expr = expr.take(i + 1, expr.Count);
 			n++;
 		}
 		List xs = compile_lval1(expr);
@@ -755,7 +755,7 @@ internal class OctaveParser : Parser
 				}
 				if (symbolq(x) && !refq(x))
 				{
-					List s = Comp.vec2list(new ArrayList());
+					List s = new List();
 					s.Add("$" + x);
 					return s;
 				}
@@ -786,7 +786,7 @@ internal class OctaveParser : Parser
 		}
 		if (expr.Count == 1 && ":".Equals(expr[0]))
 		{
-			List s = Comp.vec2list(new ArrayList());
+			List s = new List();
 			s.Add(":");
 			s.Add(ONE);
 			return s;
@@ -802,13 +802,13 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
-		List left_in = expr.subList(0, c);
-		List right_in = expr.subList(c + 1, expr.Count);
+		List left_in = expr.take(0, c);
+		List right_in = expr.take(c + 1, expr.Count);
 		if (left_in != null && left_in.Count == 1 && ":".Equals(left_in[0]))
 		{
 			if (right_in != null && right_in.Count == 1 && ":".Equals(right_in[0]))
 			{
-				List s = Comp.vec2list(new ArrayList());
+				List s = new List();
 				s.Add(":");
 				s.Add(":");
 				s.Add(TWO);
@@ -861,9 +861,9 @@ internal class OctaveParser : Parser
 		}
 		if (expr_in.Count == 0)
 		{
-			return Comp.vec2list(new ArrayList());
+			return new List();
 		}
-		List expr = Comp.clonelist(expr_in);
+		List expr = expr_in.clone();
 		object first = expr[0];
 		for (int i = 0; i < rules.Length; i++)
 		{
@@ -871,11 +871,11 @@ internal class OctaveParser : Parser
 			if (r.rule_in[0].Equals(first) && expr.Count >= r.rule_in.Count)
 			{
 				Compiler c = new Compiler(r.rule_in, r.rule_out, this);
-				List expr_sub = expr.subList(0, r.rule_in.Count);
+				List expr_sub = expr.take(0, r.rule_in.Count);
 				List s = c.compile(expr_sub);
 				if (s != null)
 				{
-					Comp.clear(expr, 0, expr_sub.Count);
+					expr.clear( 0, expr_sub.Count);
 					if (expr.Count == 0)
 					{
 						return s;
@@ -896,7 +896,7 @@ internal class OctaveParser : Parser
 			int indx = expr.IndexOf(";");
 			if (indx > 0)
 			{
-				expr_sub = expr.subList(0, indx + 1);
+				expr_sub = expr.take(0, indx + 1);
 			}
 			List s = compile_command(expr_sub);
 			if (s != null)
@@ -904,7 +904,7 @@ internal class OctaveParser : Parser
 				if (indx > 0)
 				{
 					s.Add("#;");
-					Comp.clear(expr, 0, indx + 1);
+					expr.clear( 0, indx + 1);
 					List t = compile_statement(expr);
 					if (t == null)
 					{
@@ -930,17 +930,17 @@ internal class OctaveParser : Parser
 		}
 		if (ic == 0)
 		{
-			Comp.clear(expr,0,1);
+			expr.clear(0,1);
 			return compile_statement(expr);
 		}
 		if (lend != null)
 		{
-			List expr_sub = expr.subList(0, ic);
+			List expr_sub = expr.take(0, ic);
 			List s = compile_expr(expr_sub);
 			if (s != null)
 			{
 				s.Add(lend);
-				Comp.clear(expr, 0, ic + 1);
+				expr.clear( 0, ic + 1);
 				if (expr.Count == 0)
 				{
 					return s;
@@ -1019,11 +1019,7 @@ internal class OctaveParser : Parser
 
             if ( x is Algebraic )
             {
-                var s = Comp.vec2list( new ArrayList() );
-
-                s.Add(x);
-
-                return s;
+                return new List {x};
             }
 
             if ( x is string )
@@ -1032,20 +1028,12 @@ internal class OctaveParser : Parser
 
                 if ( y != null )
                 {
-                    var s = Comp.vec2list( new ArrayList() );
-
-                    s.Add(y);
-
-                    return s;
+                    return new List {y};
                 }
 
                 if ( stringq(x) )
                 {
-                    var s = Comp.vec2list( new ArrayList() );
-
-                    s.Add(x);
-
-                    return s;
+                    return new List {x};
                 }
 
                 if ( symbolq(x) )
@@ -1055,11 +1043,7 @@ internal class OctaveParser : Parser
                         x = "$" + ( ( string ) x ).Substring(1);
                     }
 
-                    var s = Comp.vec2list( new ArrayList() );
-
-                    s.Add( x );
-
-                    return s;
+                    return new List {x};
                 }
 
                 return null;
@@ -1106,7 +1090,7 @@ internal class OctaveParser : Parser
             return null;
         }
 
-        var left_in = expr.subList( 0, expr.Count - 1 );
+        var left_in = expr.take( 0, expr.Count - 1 );
 
         if ( left_in.Count == 1 && symbolq( left_in[0] ) && refq( left_in[0] ) )
         {

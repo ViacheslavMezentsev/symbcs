@@ -2,36 +2,70 @@
 
 public abstract class Algebraic
 {
-	internal string name = null;
-    
-	public abstract Algebraic add( Algebraic x );
 
-	public virtual Algebraic sub( Algebraic x )
+    #region Internal fields
+
+	internal string Name = null;
+
+    #endregion
+
+    #region Internal methods
+
+    internal static void debug( string s )
+    {
+        Lambda.debug(s);
+    }
+
+    #endregion
+    
+    #region Public methods
+
+    #region Abstract
+
+    public abstract Algebraic add( Algebraic x );
+
+    public abstract Algebraic mult( Algebraic x );
+
+    public abstract Algebraic cc();
+
+    public abstract Algebraic deriv( Variable var );
+
+    public abstract Algebraic integrate( Variable var );
+
+    public abstract double norm();
+
+    public abstract Algebraic map( LambdaAlgebraic f );
+
+    public abstract override bool Equals( object x );
+
+    #endregion
+
+    #region Virtual
+
+    public virtual Algebraic sub( Algebraic x )
 	{
 		return add( x.mult( Zahl.MINUS ) );
 	}
 
-	public abstract Algebraic mult( Algebraic x );
+    public virtual Algebraic div( Algebraic x )
+    {
+        if ( x is Polynomial )
+        {
+            return new Rational( this, ( Polynomial ) x ).reduce();
+        }
 
-	public virtual Algebraic div( Algebraic x )
-	{
-		if ( x is Polynomial )
-		{
-			return ( new Rational( this, ( Polynomial ) x ) ).reduce();
-		}
+        if ( x is Rational )
+        {
+            return ( ( Rational ) x ).den.mult( this ).div( ( ( Rational ) x ).nom );
+        }
 
-		if ( x is Rational )
-		{
-			return ( ( Rational ) x ).den.mult( this ).div( ( ( Rational ) x ).nom );
-		}
+        if ( !x.scalarq() )
+        {
+            return new Matrix( this ).div( x );
+        }
 
-		if ( !x.scalarq() )
-		{
-			return new Matrix( this ).div(x);
-		}
-
-		throw new JasymcaException( "Can not divide " + this + " through " + x );
-	}
+        throw new JasymcaException( "Can not divide " + this + " through " + x );
+    }
 
 	public virtual Algebraic pow_n( int n )
 	{
@@ -50,6 +84,7 @@ public abstract class Algebraic
 			}
 
 			x = Zahl.ONE.div(x);
+
 			n = -n;
 		}
 
@@ -73,29 +108,19 @@ public abstract class Algebraic
 		return pow;
 	}
 
-	public abstract Algebraic cc();
+    public virtual Algebraic realpart()
+    {
+        return add( cc() ).div( Zahl.TWO );
+    }
 
-	public virtual Algebraic realpart()
-	{
-		return add( cc() ).div( Zahl.TWO );
-	}
-
-	public virtual Algebraic imagpart()
-	{
-		return sub( cc() ).div( Zahl.TWO ).div( Zahl.IONE );
-	}
-
-	public abstract Algebraic deriv( Variable var );
-
-	public abstract Algebraic integrate( Variable var );
-
-	public abstract double norm();
-
-	public abstract Algebraic map( LambdaAlgebraic f );
+    public virtual Algebraic imagpart()
+    {
+        return sub( cc() ).div( Zahl.TWO ).div( Zahl.IONE );
+    }
 
 	public virtual Algebraic rat()
 	{
-		return map(new LambdaRAT());
+		return map( new LambdaRAT() );
 	}
 
 	public virtual Algebraic reduce()
@@ -127,8 +152,6 @@ public abstract class Algebraic
 	{
 		return false;
 	}
-
-	public abstract override bool Equals( object x );
 
 	public virtual bool komplexq()
 	{
@@ -182,7 +205,7 @@ public abstract class Algebraic
 			}
 		}
 
-		throw new JasymcaException("Wrong argument type.");
+		throw new JasymcaException( "Wrong argument type." );
 	}
 
 	public virtual void print( PrintStream p )
@@ -190,14 +213,10 @@ public abstract class Algebraic
 		p.print( StringFmt.compact( ToString() ) );
 	}
 
-	internal static void debug( string s )
-	{
-		Lambda.debug(s);
-	}
 
-    public virtual Algebraic map_lambda( LambdaAlgebraic lambda, Algebraic arg2 )
+    public virtual Algebraic map( LambdaAlgebraic lambda, Algebraic arg )
     {
-        if ( arg2 == null )
+        if ( arg == null )
 		{
 		    var r = lambda.f_exakt( this );
 
@@ -206,7 +225,6 @@ public abstract class Algebraic
 				return r;
 			}
 			
-            // TODO: Check this
             var fname = lambda.GetType().Name;
 
 		    if ( fname.StartsWith( "Lambda", StringComparison.Ordinal ) )
@@ -220,6 +238,11 @@ public abstract class Algebraic
 		    throw new JasymcaException( "Wrong type of arguments." );
 		}
 
-        return lambda.f_exakt( this, arg2 );
+        return lambda.f_exakt( this, arg );
     }
+
+    #endregion
+
+    #endregion
+
 }

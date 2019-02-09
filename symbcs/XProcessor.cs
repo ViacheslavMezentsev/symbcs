@@ -186,9 +186,9 @@ public class XProcessor : Processor
             {
                 string vname;
 
-                if ( ( ( Algebraic ) x ).name != null )
+                if ( ( ( Algebraic ) x ).Name != null )
                 {
-                    vname = ( ( Algebraic ) x ).name;
+                    vname = ( ( Algebraic ) x ).Name;
                 }
                 else
                 {

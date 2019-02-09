@@ -223,7 +223,7 @@ public class Unexakt : Zahl
         return ( temp );
     }
 
-    public override Algebraic map_lambda( LambdaAlgebraic lambda, Algebraic arg2 )
+    public override Algebraic map( LambdaAlgebraic lambda, Algebraic arg2 )
     {
         if ( arg2 == null )
         {
@@ -235,7 +235,7 @@ public class Unexakt : Zahl
             }
         }
 
-        return base.map_lambda( lambda, arg2 );
+        return base.map( lambda, arg2 );
     }
 
     public override Algebraic rat()

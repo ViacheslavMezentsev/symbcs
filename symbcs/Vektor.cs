@@ -182,7 +182,7 @@ public class Vektor : Algebraic
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public Algebraic map_lambda(LambdaAlgebraic f, Algebraic arg2) throws ParseException,JasymcaException
-	public override Algebraic map_lambda(LambdaAlgebraic f, Algebraic arg2)
+	public override Algebraic map(LambdaAlgebraic f, Algebraic arg2)
 	{
 		Algebraic[] b = new Algebraic[a.Length];
 		if (arg2 is Vektor && ((Vektor)arg2).length() == a.Length)
@@ -190,7 +190,7 @@ public class Vektor : Algebraic
 			for (int i = 0; i < b.Length; i++)
 			{
 				Algebraic c = ((Vektor)arg2).get(i);
-				object r = a[i].map_lambda(f, c);
+				object r = a[i].map(f, c);
 				if (r is Algebraic)
 				{
 					b[i] = (Algebraic)r;
@@ -205,7 +205,7 @@ public class Vektor : Algebraic
 		{
 			for (int i = 0; i < b.Length; i++)
 			{
-				object r = a[i].map_lambda(f, arg2);
+				object r = a[i].map(f, arg2);
 				if (r is Algebraic)
 				{
 					b[i] = (Algebraic)r;

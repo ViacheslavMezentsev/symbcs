@@ -357,12 +357,12 @@ internal class ADD : LambdaAlgebraic
 
     internal override Algebraic f_exakt( Algebraic x, Algebraic y )
     {
-        return x.add( y );
+        return x.add(y);
     }
 
     internal override Zahl f( Zahl x )
     {
-        return ( Zahl ) f_exakt( x );
+        return ( Zahl ) f_exakt(x);
     }
 }
 

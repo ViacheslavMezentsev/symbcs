@@ -29,7 +29,7 @@ public abstract class Parser : Constants
 
     internal virtual List compile_command_args( List expr )
     {
-        var s = Comp.vec2list( new ArrayList() );
+        var s = new List();
 
         for ( int n = expr.Count - 1; n >= 0; n-- )
         {
@@ -94,7 +94,7 @@ public abstract class Parser : Constants
 			return null;
 		}
 
-	    var s = compile_command_args( expr.subList( 1, expr.Count ) );
+	    var s = compile_command_args( expr.take( 1, expr.Count ) );
 
 	    s.Add( s.Count );
 
@@ -323,7 +323,7 @@ internal class ParserState
 	{
 		this.sub = sub;
 		this.prev = null;
-	    this.tokens = Comp.vec2list( new ArrayList() );
+	    this.tokens = new List();
 		this.inList = inList;
 	}
 }

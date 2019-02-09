@@ -3,7 +3,8 @@ using System.Collections;
 
 public class Exakt : Zahl
 {
-	internal BigInteger[] real; internal BigInteger[] imag = null;
+	internal BigInteger[] real; 
+    internal BigInteger[] imag;
 
 	public Exakt(BigInteger[] real) : this(real, null)
 	{
@@ -128,25 +129,25 @@ public class Exakt : Zahl
 
 	private double[] cfs(double x, double tol)
 	{
-		ArrayList a = new ArrayList();
+		var a = new ArrayList();
 
-	    double[] y = new double[2];
+	    var y = new double[2];
 
 		tol = Math.Abs(x * tol);
 
-		double aa = Math.Floor(x);
+		var aa = Math.Floor(x);
 
-		a.Add(new double?(aa));
+		a.Add( aa );
 
-		double ra = x;
+		var ra = x;
 
-		cfsd(a,y);
+		cfsd( a, y );
 
 		while (Math.Abs(x - y[0] / y[1]) > tol)
 		{
 			ra = 1.0 / (ra - aa);
 			aa = Math.Floor(ra);
-			a.Add(new double?(aa));
+			a.Add(aa);
 			cfsd(a,y);
 		}
 
@@ -480,7 +481,7 @@ public class Exakt : Zahl
 			return x[0].ToString();
 		}
 
-		return x[0].ToString() + "/" + x[1].ToString();
+		return x[0] + "/" + x[1];
 	}
 
 	public override string ToString()

@@ -364,7 +364,7 @@ case '.':
 //ORIGINAL LINE: List compile_unary(Operator op, List expr)throws ParseException
 	internal virtual List compile_unary(Operator op, List expr)
 	{
-		List arg_in = (op.left_right() ? expr.subList(1, expr.Count) : expr.subList(0, expr.Count - 1));
+		List arg_in = (op.left_right() ? expr.take(1, expr.Count) : expr.take(0, expr.Count - 1));
 		List arg = (op.lvalue() ? compile_lval(arg_in) : compile_expr(arg_in));
 		if (arg == null)
 		{
@@ -383,19 +383,19 @@ case '.':
 		{
 			if (op.symbol.Equals(expr[k0]))
 			{
-				List left_in = expr.subList(0, k);
+				List left_in = expr.take(0, k);
 				List left = compile_expr(left_in);
 				if (left == null)
 				{
 					continue;
 				}
-				List mid_in = expr.subList(k + 1, k0);
+				List mid_in = expr.take(k + 1, k0);
 				List mid = compile_expr(mid_in);
 				if (mid == null)
 				{
 					continue;
 				}
-				List right_in = expr.subList(k0 + 1, expr.Count);
+				List right_in = expr.take(k0 + 1, expr.Count);
 				List right = compile_expr(right_in);
 				if (right == null)
 				{
@@ -414,14 +414,14 @@ case '.':
 //ORIGINAL LINE: List compile_binary(Operator op, List expr, int k)throws ParseException
 	internal virtual List compile_binary(Operator op, List expr, int k)
 	{
-		List left_in = expr.subList(0, k);
+		List left_in = expr.take(0, k);
 		List left = (op.lvalue() ? compile_lval(left_in) : compile_expr(left_in));
 		if (left == null)
 		{
 			return null;
 		}
 		;
-		List right_in = expr.subList(k + 1, expr.Count);
+		List right_in = expr.take(k + 1, expr.Count);
 		List right = compile_expr(right_in);
 		if (right == null)
 		{
@@ -504,8 +504,8 @@ case '.':
 		{
 			return null;
 		}
-		expr = expr.subList(1, expr.Count);
-		List r = Comp.vec2list(new ArrayList());
+		expr = expr.take(1, expr.Count);
+		List r = new List();
 		int nrow = 1;
 		List x = expr;
 		List xs = compile_list(x);
@@ -527,7 +527,7 @@ case '.':
 		{
 			return null;
 		}
-		List r = Comp.vec2list(new ArrayList());
+		List r = new List();
 		if (expr.Count == 0)
 		{
 			r.Add(new int?(0));
@@ -536,7 +536,7 @@ case '.':
 		int i , ip = 0, n = 1;
 		while ((i = nextIndexOf(",",ip,expr)) != -1)
 		{
-			List x = expr.subList(ip, i);
+			List x = expr.take(ip, i);
 			List xs = compile_expr(x);
 			if (xs == null)
 			{
@@ -547,7 +547,7 @@ case '.':
 			n++;
 			ip = i + 1;
 		}
-		List x1 = expr.subList(ip, expr.Count);
+		List x1 = expr.take(ip, expr.Count);
 		List xs1 = compile_expr(x1);
 		if (xs1 == null)
 		{
@@ -586,12 +586,12 @@ case '.':
 		{
 			return null;
 		}
-		expr = expr.subList(1, expr.Count);
-		r = Comp.vec2list(new ArrayList());
+		expr = expr.take(1, expr.Count);
+		r = new List();
 		int i , n = 1;
 		while ((i = expr.IndexOf(",")) != -1)
 		{
-			List x = expr.subList(0, i);
+			List x = expr.take(0, i);
 			List xs = compile_lval1(x);
 			if (xs == null)
 			{
@@ -599,7 +599,7 @@ case '.':
 			}
 			xs.AddRange(r);
 			r = xs;
-			expr = expr.subList(i + 1, expr.Count);
+			expr = expr.take(i + 1, expr.Count);
 			n++;
 		}
 		List xs1 = compile_lval1(expr);
@@ -629,7 +629,7 @@ case '.':
 				}
 				if (symbolq(expr[0]))
 				{
-					List s = Comp.vec2list(new ArrayList());
+					List s = new List();
 					s.Add("$" + expr[0]);
 					return s;
 				}
@@ -662,7 +662,7 @@ case '.':
 		{
 			return null;
 		}
-		return compile_list(expr.subList(1,expr.Count));
+		return compile_list(expr.take(1,expr.Count));
 	}
 	internal override bool commandq(object x)
 	{
@@ -678,9 +678,9 @@ case '.':
 		}
 		if (expr_in.Count == 0)
 		{
-			return Comp.vec2list(new ArrayList());
+			return new List();
 		}
-		List expr = Comp.clonelist(expr_in);
+		List expr = expr_in.clone();
 		object first = expr[0];
 		for (int i = 0; i < rules.Length; i++)
 		{
@@ -688,11 +688,11 @@ case '.':
 			if (r.rule_in[0].Equals(first) && expr.Count >= r.rule_in.Count)
 			{
 				Compiler c = new Compiler(r.rule_in, r.rule_out, this);
-				List expr_sub = expr.subList(0, r.rule_in.Count);
+				List expr_sub = expr.take(0, r.rule_in.Count);
 				List s = c.compile(expr_sub);
 				if (s != null)
 				{
-					Comp.clear(expr,0,expr_sub.Count);
+					expr.clear( 0, expr_sub.Count );
 					if (expr.Count == 0)
 					{
 						return s;
@@ -725,17 +725,17 @@ case '.':
 		}
 		if (ic == 0)
 		{
-			Comp.clear(expr,0,1);
+			expr.clear(0,1);
 			return compile_statement(expr);
 		}
 		if (lend != null)
 		{
-			List expr_sub = expr.subList(0, ic);
+			List expr_sub = expr.take(0, ic);
 			List s = compile_expr(expr_sub);
 			if (s != null)
 			{
 				s.Add(lend);
-				Comp.clear(expr,0,ic + 1);
+				expr.clear(0,ic + 1);
 				if (expr.Count == 0)
 				{
 					return s;
@@ -808,7 +808,7 @@ case '.':
 			object x = expr[0];
 			if (x is Algebraic)
 			{
-				List s = Comp.vec2list(new ArrayList());
+				List s = new List();
 				s.Add(x);
 				return s;
 			}
@@ -817,13 +817,13 @@ case '.':
 				object y = compile_keyword(x);
 				if (y != null)
 				{
-					List s = Comp.vec2list(new ArrayList());
+					List s = new List();
 					s.Add(y);
 					return s;
 				}
 				if (stringq(x) || symbolq(x))
 				{
-					List s = Comp.vec2list(new ArrayList());
+					List s = new List();
 					s.Add(x);
 					return s;
 				}
@@ -850,7 +850,7 @@ case '.':
 					List list = compile_statement((List)ref_in);
 					if (list != null)
 					{
-						List s = Comp.vec2list(new ArrayList());
+						List s = new List();
 						s.Add(list);
 						s.Add(ONE);
 						s.Add("BLOCK");
@@ -874,7 +874,7 @@ case '.':
 		{
 			return res;
 		}
-		List left_in = expr.subList(0,expr.Count - 1);
+		List left_in = expr.take(0,expr.Count - 1);
 		List left = compile_expr(left_in);
 		if (left == null)
 		{

@@ -133,9 +133,7 @@ public abstract class Lambda : Constants
 
             if ( sandbox == null )
             {
-                //sandbox = new Environment();
-                // TODO: Check this
-                sandbox = global.copy();
+                sandbox = new Environment();
 
                 sandbox.putValue( "x", new Polynomial( new SimpleVariable( "x" ) ) );
                 sandbox.putValue( "X", new Polynomial( new SimpleVariable( "X" ) ) );
@@ -156,7 +154,7 @@ public abstract class Lambda : Constants
         }
         catch ( Exception e )
         {
-            throw new JasymcaException( "Could not evaluate expression " + rule + ": " + e.ToString() );
+            throw new JasymcaException( string.Format( "Could not evaluate expression {0}: {1}", rule, e ) );
         }
     }
 }
@@ -171,17 +169,17 @@ public abstract class LambdaAlgebraic : Lambda
             case 0:
                 throw new JasymcaException( "Lambda functions expect argument." );
             case 1:
-                Algebraic arg = getAlgebraic( st );
-                st.Push( arg.map_lambda( this, null ) );
+                var arg = getAlgebraic( st );
+                st.Push( arg.map( this, null ) );
                 break;
             case 2:
-                Algebraic arg2 = getAlgebraic( st );
-                Algebraic arg1 = getAlgebraic( st );
+                var arg2 = getAlgebraic( st );
+                var arg1 = getAlgebraic( st );
                 arg1 = arg1.promote( arg2 );
-                st.Push( arg1.map_lambda( this, arg2 ) );
+                st.Push( arg1.map( this, arg2 ) );
                 break;
             default:
-                Algebraic[] args = new Algebraic[ narg ];
+                var args = new Algebraic[ narg ];
                 for ( int i = narg - 1; i >= 0; i-- )
                 {
                     args[ i ] = getAlgebraic( st );
@@ -245,7 +243,7 @@ internal class LambdaFUNC : Lambda
             throw new ParseException( "Wrong function definition." );
         }
         string fname = ( ( string ) prot[ prot.Count - 1 ] ).Substring( 1 );
-        List vars_in = prot.subList( 0, prot.Count - 1 );
+        List vars_in = prot.take( 0, prot.Count - 1 );
         List code_in = getList( st );
         SimpleVariable[] vars = null;
         if ( vars_in.Count != 0 )
@@ -325,7 +323,7 @@ internal class UserProgram : Lambda
             object y = ( result != null ? env.getValue( result.name ) : ups.Pop() );
             if ( y is Algebraic && result != null )
             {
-                ( ( Algebraic ) y ).name = result.name;
+                ( ( Algebraic ) y ).Name = result.name;
             }
             if ( y != null )
             {
@@ -1808,7 +1806,7 @@ internal class ASS : Lambda
                 pc.env.putValue( name, val[ i ] );
                 if ( val[ i ] is Algebraic )
                 {
-                    ( ( Algebraic ) val[ i ] ).name = name;
+                    ( ( Algebraic ) val[ i ] ).Name = name;
                 }
             }
             else
@@ -1836,19 +1834,16 @@ internal class ASS : Lambda
         int narg = getNarg( st );
         object y = st.Pop();
         string name = getSymbol( st );
+
         if ( !name.StartsWith( "$", StringComparison.Ordinal ) )
         {
             throw new JasymcaException( "Illegal lvalue: " + name );
         }
-        List t = Comp.vec2list( new ArrayList() );
-        t.Add( name );
-        t.Add( name.Substring( 1 ) );
-        t.Add( y );
-        t.Add( new int?( 2 ) );
-        t.Add( op );
-        t.Add( new int?( 1 ) );
-        t.Add( Operator.get( "=" ).Lambda );
+
+        var t = new List { name, name.Substring(1), y, 2, op, 1, Operator.get( "=" ).Lambda };
+
         pc.process_list( t, true );
+
         return 0;
     }
     internal static int lambdai( Stack st, bool sign, bool pre )
@@ -1864,20 +1859,16 @@ internal class ASS : Lambda
         {
             p = pc.env.getValue( name.Substring( 1 ) );
         }
-        List t = Comp.vec2list( new ArrayList() );
-        t.Add( name );
-        t.Add( name.Substring( 1 ) );
-        t.Add( Zahl.ONE );
-        t.Add( new int?( 2 ) );
-        t.Add( sign ? Operator.get( "+" ).Lambda : Operator.get( "-" ).Lambda );
-        t.Add( new int?( 1 ) );
-        t.Add( Operator.get( "=" ).Lambda );
+
+        var t = new List { name, name.Substring(1), Zahl.ONE, 2, Operator.get( sign ? "+" : "-" ).Lambda, 1, Operator.get( "=" ).Lambda };
+
         pc.process_list( t, true );
+
         if ( !pre && p != null )
         {
             if ( p is Algebraic )
             {
-                ( ( Algebraic ) p ).name = null;
+                ( ( Algebraic ) p ).Name = null;
             }
             st.Pop();
             st.Push( p );

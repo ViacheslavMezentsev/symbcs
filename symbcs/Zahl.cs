@@ -26,11 +26,12 @@ public abstract class Zahl : Algebraic
 
     public override Algebraic integrate( Variable item )
     {
-        if ( this.Equals( Zahl.ZERO ) )
+        if ( Equals( ZERO ) )
         {
             return this;
         }
-        return ( new Polynomial( item ) ).mult( this );
+
+        return new Polynomial( item ).mult( this );
     }
 
     public abstract int intval();
@@ -44,7 +45,7 @@ public abstract class Zahl : Algebraic
 
     public override Algebraic cc()
     {
-        return realpart().add( imagpart().mult( Zahl.IMINUS ) );
+        return realpart().add( imagpart().mult( IMINUS ) );
     }
 
     public abstract Zahl abs();
@@ -59,9 +60,9 @@ public abstract class Zahl : Algebraic
         return this is Unexakt ? ( Unexakt ) this : ( ( Exakt ) this ).tofloat();
     }
 
-    public override Algebraic map( LambdaAlgebraic f )
+    public override Algebraic map( LambdaAlgebraic lambda )
     {
-        return f.f( this );
+        return lambda.f( this );
     }
 
     public virtual Zahl gcd( Zahl x )

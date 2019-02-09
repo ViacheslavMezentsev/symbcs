@@ -13,6 +13,15 @@ public class Compiler
 	internal List rule_in, rule_out;
 	internal Hashtable vars;
 
+    public Compiler( List rule_in, List rule_out, Parser p )
+    {
+        vars = new Hashtable();
+
+        this.rule_in = rule_in;
+        this.rule_out = rule_out;
+        this.p = p;
+    }
+
     internal virtual bool variableq( object x )
     {
         return p.oneof( x, expr_vars ) || p.oneof( x, stmnt_vars ) || p.oneof( x, lval_vars ) || p.oneof( x, func_vars ) || p.oneof( x, list_vars );
@@ -20,39 +29,38 @@ public class Compiler
 
     internal virtual object match( object v, List expr )
     {
-        object r = null;
+        object result = null;
 
         if ( p.oneof( v, expr_vars ) )
         {
-            r = p.compile_expr( expr );
+            result = p.compile_expr( expr );
         }
         else if ( p.oneof( v, stmnt_vars ) )
         {
-            r = p.compile_statement( expr );
+            result = p.compile_statement( expr );
         }
         else if ( p.oneof( v, lval_vars ) )
         {
-            r = p.compile_lval( expr );
+            result = p.compile_lval( expr );
         }
         else if ( p.oneof( v, func_vars ) )
         {
-            r = p.compile_func( expr );
+            result = p.compile_func( expr );
         }
         else if ( p.oneof( v, list_vars ) )
         {
-            r = p.compile_list( expr );
+            result = p.compile_list( expr );
         }
-        return r;
+
+        return result;
     }
 
     internal virtual List change()
     {
-        var r = Comp.vec2list( new ArrayList() );
+        var r = new List();
 
-        for ( int i = 0; i < rule_out.Count; i++ )
+        foreach ( var x in rule_out )
         {
-            object x = rule_out[i];
-
             if ( variableq(x) )
             {
                 r.Add( vars[x] );
@@ -61,7 +69,7 @@ public class Compiler
             {
                 int xi = ( ( Zahl ) x ).intval();
 
-                r.Add( new int?( xi ) );
+                r.Add( xi );
             }
             else
             {
@@ -74,15 +82,15 @@ public class Compiler
 
     internal virtual string ToString( Hashtable h )
     {
-        string s = "";
+        var s = "";
         var k = vars.Keys.GetEnumerator();
 
         while ( k.MoveNext() )
         {
-            object key = k.Current;
-            object val = h[ key ];
+            var key = k.Current;
+            var val = h[ key ];
 
-            s = s + "key:" + key + "   val:" + val + "\n";
+            s = string.Format( "{0}key:{1}   val:{2}\n", s, key, val );
         }
 
         return s;
@@ -94,14 +102,8 @@ public class Compiler
         {
             return null;
         }
-        if ( matcher( rule_in, expr ) )
-        {
-            return change();
-        }
-        else
-        {
-            return null;
-        }
+
+        return matcher( rule_in, expr ) ? change() : null;
     }
 
     internal virtual bool matcher( List rule, List expr )
@@ -116,49 +118,39 @@ public class Compiler
             return false;
         }
 
-        object x = rule[0];
+        var x = rule[0];
 
-        if ( variableq( x ) )
+        if ( variableq(x) )
         {
             int start = expr.Count + 1 - rule.Count;
 
             for ( int i = start; i >= 1; i-- )
             {
-                object xv = match( x, expr.subList( 0, i ) );
+                var xv = match( x, expr.take( 0, i ) );
 
-                if ( xv != null && matcher( rule.subList( 1, rule.Count ), expr.subList( i, expr.Count ) ) )
-                {
-                    vars[x] = xv;
+                if ( xv == null || !matcher( rule.take( 1, rule.Count ), expr.take( i, expr.Count ) ) ) continue;
 
-                    return true;
-                }
+                vars[x] = xv;
+
+                return true;
             }
 
             return false;
         }
 
-        object y = expr[0];
+        var y = expr[0];
 
         if ( x is List )
         {
-            return ( y is List ) && matcher( ( List ) x, ( List ) y ) && matcher( rule.subList( 1, rule.Count ), expr.subList( 1, expr.Count ) );
+            return ( y is List ) && matcher( ( List ) x, ( List ) y ) && matcher( rule.take( 1, rule.Count ), expr.take( 1, expr.Count ) );
         }
 
         if ( x.Equals(y) )
         {
-            return matcher( rule.subList( 1, rule.Count ), expr.subList( 1, expr.Count ) );
+            return matcher( rule.take( 1, rule.Count ), expr.take( 1, expr.Count ) );
         }
 
         return false;
-    }
-
-    public Compiler( List rule_in, List rule_out, Parser p )
-    {
-        vars = new Hashtable();
-
-        this.rule_in = rule_in;
-        this.rule_out = rule_out;
-        this.p = p;
     }
 }
 

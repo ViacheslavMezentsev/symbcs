@@ -102,14 +102,14 @@ internal class LambdaFOR : Lambda
 		List cond = getList(st);
 		List body = getList(st);
 		pc.process_list(cond, true);
-		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Vektor) || ((Algebraic)pc.stack.Peek()).name == null)
+		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Vektor) || ((Algebraic)pc.stack.Peek()).Name == null)
 		{
 			throw new ParseException("Wrong format in for-loop.");
 		}
 		Vektor vals = (Vektor)pc.stack.Pop();
 		for (int i = 0; i < vals.length() ; i++)
 		{
-			pc.env.putValue(vals.name, vals.get(i));
+			pc.env.putValue(vals.Name, vals.get(i));
 			int ret = pc.process_list(body, true);
 			switch (ret)
 			{
@@ -135,12 +135,12 @@ internal class LambdaXFOR : Lambda
 		List thru_in = getList(st);
 		List body = getList(st);
 		pc.process_list(cond, true);
-		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Zahl) || ((Algebraic)pc.stack.Peek()).name == null)
+		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Zahl) || ((Algebraic)pc.stack.Peek()).Name == null)
 		{
 			throw new ParseException("Non-constant initializer in for loop.");
 		}
 		Zahl x = (Zahl)pc.stack.Pop();
-		string xname = x.name;
+		string xname = x.Name;
 		pc.process_list(step_in, true);
 		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Zahl))
 		{

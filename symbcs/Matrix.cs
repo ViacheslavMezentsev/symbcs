@@ -422,7 +422,7 @@ public class Matrix : Algebraic
 		}
 				return true;
 	}
-	public override Algebraic map_lambda(LambdaAlgebraic f, Algebraic arg2)
+	public override Algebraic map(LambdaAlgebraic f, Algebraic arg2)
 	{
 //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
 //ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][a[0].Length];
@@ -434,7 +434,7 @@ public class Matrix : Algebraic
 				for (int k = 0; k < a[0].Length; k++)
 				{
 					Algebraic c = ((Matrix)arg2).get(i,k);
-					object r = a[i][k].map_lambda(f, c);
+					object r = a[i][k].map(f, c);
 					if (r is Algebraic)
 					{
 						b[i][k] = (Algebraic)r;
@@ -452,7 +452,7 @@ public class Matrix : Algebraic
 			{
 				for (int k = 0; k < a[0].Length; k++)
 				{
-					object r = a[i][k].map_lambda(f, arg2);
+					object r = a[i][k].map(f, arg2);
 					if (r is Algebraic)
 					{
 						b[i][k] = (Algebraic)r;
