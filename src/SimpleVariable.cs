@@ -8,15 +8,15 @@
         this.name = name;
     }
 
-    public override Algebraic deriv( Variable x )
+    public override Algebraic Derive( Variable x )
     {
         if ( Equals(x) )
         {
-            return Zahl.ONE;
+            return Symbolic.ONE;
         }
         else
         {
-            return Zahl.ZERO;
+            return Symbolic.ZERO;
         }
     }
 
@@ -35,7 +35,7 @@
         return name;
     }
 
-    public override bool smaller( Variable v )
+    public override bool Smaller( Variable v )
     {
         if ( v == top )
         {
@@ -60,9 +60,7 @@
         return name.CompareTo( ( ( SimpleVariable ) v ).name ) < 0;
     }
 
-    //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-    //ORIGINAL LINE: public Algebraic value(Variable var, Algebraic x) throws JasymcaException
-    public override Algebraic value( Variable item, Algebraic x )
+    public override Algebraic Value( Variable item, Algebraic x )
     {
         if ( item.Equals( this ) )
         {

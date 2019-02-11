@@ -17,32 +17,32 @@ public class Operator : Constants
 
     public virtual bool unary()
     {
-        return ( type & Fields.UNARY ) != 0;
+        return ( type & Flags.UNARY ) != 0;
     }
 
     public virtual bool binary()
     {
-        return ( type & Fields.BINARY ) != 0;
+        return ( type & Flags.BINARY ) != 0;
     }
 
     public virtual bool ternary()
     {
-        return ( type & Fields.TERNARY ) != 0;
+        return ( type & Flags.TERNARY ) != 0;
     }
 
     public virtual bool lvalue()
     {
-        return ( type & Fields.LVALUE ) != 0;
+        return ( type & Flags.LVALUE ) != 0;
     }
 
     public virtual bool list()
     {
-        return ( type & Fields.LIST ) != 0;
+        return ( type & Flags.LIST ) != 0;
     }
 
     public virtual bool left_right()
     {
-        return associativity == Fields.LEFT_RIGHT;
+        return associativity == Flags.LEFT_RIGHT;
     }
 
     public Operator( string mnemonic, string symbol, int precedence, int associativity, int type )
@@ -87,21 +87,21 @@ public class Operator : Constants
             {
                 switch ( pos )
                 {
-                    case Fields.START:
+                    case Flags.START:
                         if ( op.unary() && op.left_right() )
                         {
                             return op;
                         }
                         continue;
 
-                    case Fields.END:
+                    case Flags.END:
                         if ( op.unary() && !op.left_right() )
                         {
                             return op;
                         }
                         continue;
 
-                    case Fields.MID:
+                    case Flags.MID:
                         if ( op.binary() || op.ternary() )
                         {
                             return op;
@@ -122,9 +122,9 @@ public class Operator : Constants
             {
                 try
                 {
-                    var c = Type.GetType( mnemonic );
+                    var type = Type.GetType( mnemonic );
 
-                    func = ( Lambda ) Activator.CreateInstance(c);
+                    func = ( Lambda ) Activator.CreateInstance( type );
                 }
                 catch ( Exception )
                 {
@@ -138,13 +138,13 @@ public class Operator : Constants
 
 internal class ADJ : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( st );
 
-        var m = new Matrix( getAlgebraic( st ) );
+        var m = new Matrix( GetAlgebraic( st ) );
 
-        st.Push( m.adjunkt().reduce() );
+        st.Push( m.adjunkt().Reduce() );
 
         return 0;
     }
@@ -152,60 +152,60 @@ internal class ADJ : Lambda
 
 internal class TRN : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
-        var m = new Matrix( getAlgebraic( st ) );
-        st.Push( m.transpose().reduce() );
+        int narg = GetNarg( st );
+        var m = new Matrix( GetAlgebraic( st ) );
+        st.Push( m.transpose().Reduce() );
         return 0;
     }
 }
 
 internal class FCT : LambdaAlgebraic
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
-        var arg = getAlgebraic( st );
+        int narg = GetNarg( st );
+        var arg = GetAlgebraic( st );
 
-        if ( arg is Zahl )
+        if ( arg is Symbolic )
         {
-            st.Push( f( ( Zahl ) arg ) );
+            st.Push( PreEval( ( Symbolic ) arg ) );
         }
         else
         {
-            st.Push( FunctionVariable.create( "factorial", arg ) );
+            st.Push( FunctionVariable.Create( "factorial", arg ) );
         }
 
         return 0;
     }
 
-    internal override Algebraic f_exakt( Algebraic x )
+    internal override Algebraic SymEval( Algebraic x )
     {
-        if ( x is Zahl )
+        if ( x is Symbolic )
         {
-            return f( ( Zahl ) x );
+            return PreEval( ( Symbolic ) x );
         }
 
         return null;
     }
 
-    internal override Zahl f( Zahl x )
+    internal override Symbolic PreEval( Symbolic x )
     {
-        if ( !x.integerq() || x.smaller( Zahl.ZERO ) )
+        if ( !x.IsInteger() || x.Smaller( Symbolic.ZERO ) )
         {
             throw new JasymcaException( "Argument to factorial must be a positive integer, is " + x );
         }
 
-        Algebraic r = Zahl.ONE;
+        Algebraic r = Symbolic.ONE;
 
-        while ( Zahl.ONE.smaller(x) )
+        while ( Symbolic.ONE.Smaller(x) )
         {
-            r = r.mult(x);
-            x = ( Zahl ) x.sub( Zahl.ONE );
+            r = r * x;
+            x = ( Symbolic ) ( x - Symbolic.ONE );
         }
 
-        return ( Zahl ) r;
+        return ( Symbolic ) r;
     }
 }
 
@@ -215,19 +215,19 @@ internal class LambdaFACTORIAL : FCT
 
 internal class FCN : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
-        var code_in = getList( st );
+        int narg = GetNarg( st );
+        var code_in = GetList( st );
 
-        var fname = getSymbol( st ).Substring( 1 );
-        int nvar = getNarg( st );
+        var fname = GetSymbol( st ).Substring( 1 );
+        int nvar = GetNarg( st );
 
         var vars = new SimpleVariable[ nvar ];
 
         for ( int i = 0; i < nvar; i++ )
         {
-            vars[i] = new SimpleVariable( getSymbol( st ) );
+            vars[i] = new SimpleVariable( GetSymbol( st ) );
         }
 
         Lambda func = null;
@@ -264,29 +264,29 @@ internal class FCN : Lambda
 
 internal class POW : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x, Algebraic y )
+    internal override Algebraic SymEval( Algebraic x, Algebraic y )
     {
-        if ( x.Equals( Zahl.ZERO ) )
+        if ( x.Equals( Symbolic.ZERO ) )
         {
-            if ( y.Equals( Zahl.ZERO ) )
+            if ( y.Equals( Symbolic.ZERO ) )
             {
-                return Zahl.ONE;
+                return Symbolic.ONE;
             }
 
-            return Zahl.ZERO;
+            return Symbolic.ZERO;
         }
-        if ( y is Zahl && ( ( Zahl ) y ).integerq() )
+        if ( y is Symbolic && ( ( Symbolic ) y ).IsInteger() )
         {
-            return x.pow_n( ( ( Zahl ) y ).intval() );
+            return x.Pow( ( ( Symbolic ) y ).ToInt() );
         }
 
-        return FunctionVariable.create( "exp", FunctionVariable.create( "log", x ).mult( y ) );
+        return FunctionVariable.Create( "exp", FunctionVariable.Create( "log", x ) * y );
     }
 }
 
 internal class PPR : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
         return ASS.lambdai( st, true, false );
     }
@@ -294,7 +294,7 @@ internal class PPR : Lambda
 
 internal class MMR : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
         return ASS.lambdai( st, false, false );
     }
@@ -302,7 +302,7 @@ internal class MMR : Lambda
 
 internal class PPL : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
         return ASS.lambdai( st, true, true );
     }
@@ -310,7 +310,7 @@ internal class PPL : Lambda
 
 internal class MML : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
         return ASS.lambdai( st, false, true );
     }
@@ -318,7 +318,7 @@ internal class MML : Lambda
 
 internal class ADE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
         return ASS.lambdap( st, Operator.get( "+" ).Lambda );
     }
@@ -326,7 +326,7 @@ internal class ADE : Lambda
 
 internal class SUE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
         return ASS.lambdap( st, Operator.get( "-" ).Lambda );
     }
@@ -334,7 +334,7 @@ internal class SUE : Lambda
 
 internal class MUE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
         return ASS.lambdap( st, Operator.get( "*" ).Lambda );
     }
@@ -342,7 +342,7 @@ internal class MUE : Lambda
 
 internal class DIE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
         return ASS.lambdap( st, Operator.get( "/" ).Lambda );
     }
@@ -350,77 +350,77 @@ internal class DIE : Lambda
 
 internal class ADD : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x )
+    internal override Algebraic SymEval( Algebraic x )
     {
         return x;
     }
 
-    internal override Algebraic f_exakt( Algebraic x, Algebraic y )
+    internal override Algebraic SymEval( Algebraic x, Algebraic y )
     {
-        return x.add(y);
+        return x + y;
     }
 
-    internal override Zahl f( Zahl x )
+    internal override Symbolic PreEval( Symbolic x )
     {
-        return ( Zahl ) f_exakt(x);
+        return ( Symbolic ) SymEval(x);
     }
 }
 
 internal class SUB : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x )
+    internal override Algebraic SymEval( Algebraic x )
     {
-        return x.mult( Zahl.MINUS );
+        return -x;
     }
 
-    internal override Algebraic f_exakt( Algebraic x, Algebraic y )
+    internal override Algebraic SymEval( Algebraic x, Algebraic y )
     {
-        return x.add( y.mult( Zahl.MINUS ) );
+        return x - y;
     }
 
-    internal override Zahl f( Zahl x )
+    internal override Symbolic PreEval( Symbolic x )
     {
-        return ( Zahl ) f_exakt(x);
+        return ( Symbolic ) SymEval(x);
     }
 }
 
 internal class MUL : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x, Algebraic y )
+    internal override Algebraic SymEval( Algebraic x, Algebraic y )
     {
-        return x.mult(y);
+        return x * y;
     }
 }
 
 internal class MMU : LambdaAlgebraic
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
 
         if ( narg != 2 )
         {
             throw new ParseException( "Wrong number of arguments for \"*\"." );
         }
 
-        var b = getAlgebraic( st );
-        var a = getAlgebraic( st );
+        var b = GetAlgebraic( stack );
+        var a = GetAlgebraic( stack );
 
-        if ( b.scalarq() )
+        if ( b.IsScalar() )
         {
-            st.Push( a.mult( b ) );
+            stack.Push( a * b );
         }
-        else if ( a.scalarq() )
+        else if ( a.IsScalar() )
         {
-            st.Push( b.mult( a ) );
+            stack.Push( b * a );
         }
-        else if ( a is Vektor && b is Vektor )
+        else if ( a is Vector && b is Vector )
         {
-            st.Push( a.mult( b ) );
+            stack.Push( a * b );
         }
         else
         {
-            st.Push( ( new Matrix(a) ).mult( new Matrix(b) ).reduce() );
+            stack.Push( ( new Matrix(a) * new Matrix(b) ).Reduce() );
         }
 
         return 0;
@@ -429,26 +429,26 @@ internal class MMU : LambdaAlgebraic
 
 internal class MPW : LambdaAlgebraic
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
 
-        var a = getAlgebraic( st );
-        var b = getAlgebraic( st );
+        var a = GetAlgebraic( stack );
+        var b = GetAlgebraic( stack );
 
-        if ( a.scalarq() && b.scalarq() )
+        if ( a.IsScalar() && b.IsScalar() )
         {
-            st.Push( ( new POW() ).f_exakt( b, a ) );
+            stack.Push( new POW().SymEval( b, a ) );
 
             return 0;
         }
 
-        if ( !( a is Zahl ) || !( ( Zahl ) a ).integerq() )
+        if ( !( a is Symbolic ) || !( ( Symbolic ) a ).IsInteger() )
         {
             throw new JasymcaException( "Wrong arguments to function Matrixpow." );
         }
 
-        st.Push( ( new Matrix( b ) ).mpow( ( ( Zahl ) a ).intval() ) );
+        stack.Push( ( new Matrix(b) ).mpow( ( ( Symbolic ) a ).ToInt() ) );
 
         return 0;
     }
@@ -456,28 +456,28 @@ internal class MPW : LambdaAlgebraic
 
 internal class DIV : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x, Algebraic y )
+    internal override Algebraic SymEval( Algebraic x, Algebraic y )
     {
-        return x.div( y );
+        return x / y;
     }
 }
 
 internal class MDR : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
 
         if ( narg != 2 )
         {
             throw new ParseException( "Wrong number of arguments for \"/\"." );
         }
 
-        var b = getAlgebraic( st );
+        var b = GetAlgebraic( stack );
 
-        var a = new Matrix( getAlgebraic( st ) );
+        var a = new Matrix( GetAlgebraic( stack ) );
 
-        st.Push( a.div( b ).reduce() );
+        stack.Push( ( a / b ).Reduce() );
 
         return 0;
     }
@@ -485,19 +485,19 @@ internal class MDR : Lambda
 
 internal class MDL : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
 
         if ( narg != 2 )
         {
             throw new ParseException( "Wrong number of arguments for \"\\\"." );
         }
 
-        var b = new Matrix( getAlgebraic( st ) );
-        var a = new Matrix( getAlgebraic( st ) );
+        var b = new Matrix( GetAlgebraic( stack ) );
+        var a = new Matrix( GetAlgebraic( stack ) );
 
-        st.Push( ( ( Matrix ) b.transpose().div( a.transpose() ) ).transpose().reduce() );
+        stack.Push( ( ( Matrix ) ( b.transpose() / a.transpose() ) ).transpose().Reduce() );
 
         return 0;
     }
@@ -505,112 +505,88 @@ internal class MDL : Lambda
 
 internal class EQU : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1, Algebraic y1 )
+    internal override Algebraic SymEval( Symbolic x, Symbolic y )
     {
-        var x = ensure_Zahl( x1 );
-        var y = ensure_Zahl( y1 );
-
-        return y.Equals( x ) ? Zahl.ONE : Zahl.ZERO;
+        return y == x ? Symbolic.ONE : Symbolic.ZERO;
     }
 }
 
 internal class NEQ : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1, Algebraic y1 )
+    internal override Algebraic SymEval( Symbolic x, Symbolic y )
     {
-        var x = ensure_Zahl( x1 );
-        var y = ensure_Zahl( y1 );
-
-        return y.Equals( x ) ? Zahl.ZERO : Zahl.ONE;
+        return y == x ? Symbolic.ZERO : Symbolic.ONE;
     }
 }
 
 internal class GEQ : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1, Algebraic y1 )
+    internal override Algebraic SymEval( Symbolic x, Symbolic y )
     {
-        var x = ensure_Zahl( x1 );
-        var y = ensure_Zahl( y1 );
-
-        return x.smaller( y ) ? Zahl.ZERO : Zahl.ONE;
+        return x < y ? Symbolic.ZERO : Symbolic.ONE;
     }
 }
 
 internal class GRE : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1, Algebraic y1 )
+    internal override Algebraic SymEval( Symbolic x, Symbolic y )
     {
-        var x = ensure_Zahl( x1 );
-        var y = ensure_Zahl( y1 );
-
-        return y.smaller( x ) ? Zahl.ONE : Zahl.ZERO;
+        return y < x ? Symbolic.ONE : Symbolic.ZERO;
     }
 }
 
 internal class LEQ : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1, Algebraic y1 )
+    internal override Algebraic SymEval( Symbolic x, Symbolic y )
     {
-        var x = ensure_Zahl( x1 );
-        var y = ensure_Zahl( y1 );
-
-        return y.smaller( x ) ? Zahl.ZERO : Zahl.ONE;
+        return y < x ? Symbolic.ZERO : Symbolic.ONE;
     }
 }
 
 internal class LES : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1, Algebraic y1 )
+    internal override Algebraic SymEval( Symbolic x, Symbolic y )
     {
-        var x = ensure_Zahl( x1 );
-        var y = ensure_Zahl( y1 );
-
-        return x.smaller( y ) ? Zahl.ONE : Zahl.ZERO;
+        return x < y ? Symbolic.ONE : Symbolic.ZERO;
     }
 }
 
 internal class NOT : LambdaAlgebraic
 {
-    internal override Zahl f( Zahl x )
+    internal override Symbolic PreEval( Symbolic x )
     {
-        return x.Equals( Zahl.ZERO ) ? Zahl.ONE : Zahl.ZERO;
+        return Equals(x, Symbolic.ZERO) ? Symbolic.ONE : Symbolic.ZERO;
     }
 }
 
 internal class OR : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1, Algebraic y1 )
+    internal override Algebraic SymEval( Symbolic x, Symbolic y )
     {
-        var x = ensure_Zahl( x1 );
-        var y = ensure_Zahl( y1 );
-
-        return x.Equals( Zahl.ONE ) || y.Equals( Zahl.ONE ) ? Zahl.ONE : Zahl.ZERO;
+        return Equals(x, Symbolic.ONE) || Equals(y, Symbolic.ONE) ? Symbolic.ONE : Symbolic.ZERO;
     }
 }
 
 internal class AND : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1, Algebraic y1 )
+    internal override Algebraic SymEval( Symbolic x, Symbolic y )
     {
-        var x = ensure_Zahl( x1 );
-        var y = ensure_Zahl( y1 );
-
-        return x.Equals( Zahl.ONE ) && y.Equals( Zahl.ONE ) ? Zahl.ONE : Zahl.ZERO;
+        return Equals(x, Symbolic.ONE) && Equals(y, Symbolic.ONE) ? Symbolic.ONE : Symbolic.ZERO;
     }
 }
 
 internal class LambdaGAMMA : LambdaAlgebraic
 {
-    internal override Zahl f( Zahl x )
+    internal override Symbolic PreEval( Symbolic x )
     {
-        return new Unexakt( Sfun.gamma( x.unexakt().real ) );
+        return new Complex( Sfun.gamma( x.ToComplex().Re ) );
     }
 }
 
 internal class LambdaGAMMALN : LambdaAlgebraic
 {
-    internal override Zahl f( Zahl x )
+    internal override Symbolic PreEval( Symbolic x )
     {
-        return new Unexakt( Sfun.logGamma( x.unexakt().real ) );
+        return new Complex( Sfun.logGamma( x.ToComplex().Re ) );
     }
 }

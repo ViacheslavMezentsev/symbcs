@@ -1,7 +1,11 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
 
 public class Compiler
 {
+
+    #region Internal fields
+
 	internal Parser p;
 
     internal static string[] expr_vars = { "u", "v", "w", "z" };
@@ -13,6 +17,10 @@ public class Compiler
 	internal List rule_in, rule_out;
 	internal Hashtable vars;
 
+    #endregion
+
+    #region Constructors
+
     public Compiler( List rule_in, List rule_out, Parser p )
     {
         vars = new Hashtable();
@@ -21,6 +29,10 @@ public class Compiler
         this.rule_out = rule_out;
         this.p = p;
     }
+
+    #endregion
+
+    #region Internal methods
 
     internal virtual bool variableq( object x )
     {
@@ -65,9 +77,9 @@ public class Compiler
             {
                 r.Add( vars[x] );
             }
-            else if ( x is Zahl )
+            else if ( x is Symbolic )
             {
-                int xi = ( ( Zahl ) x ).intval();
+                int xi = ( ( Symbolic ) x ).ToInt();
 
                 r.Add( xi );
             }
@@ -126,9 +138,9 @@ public class Compiler
 
             for ( int i = start; i >= 1; i-- )
             {
-                var xv = match( x, expr.take( 0, i ) );
+                var xv = match( x, expr.Take( 0, i ) );
 
-                if ( xv == null || !matcher( rule.take( 1, rule.Count ), expr.take( i, expr.Count ) ) ) continue;
+                if ( xv == null || !matcher( rule.Take( 1, rule.Count ), expr.Take( i, expr.Count ) ) ) continue;
 
                 vars[x] = xv;
 
@@ -142,20 +154,23 @@ public class Compiler
 
         if ( x is List )
         {
-            return ( y is List ) && matcher( ( List ) x, ( List ) y ) && matcher( rule.take( 1, rule.Count ), expr.take( 1, expr.Count ) );
+            return ( y is List ) && matcher( ( List ) x, ( List ) y ) && matcher( rule.Take( 1, rule.Count ), expr.Take( 1, expr.Count ) );
         }
 
         if ( x.Equals(y) )
         {
-            return matcher( rule.take( 1, rule.Count ), expr.take( 1, expr.Count ) );
+            return matcher( rule.Take( 1, rule.Count ), expr.Take( 1, expr.Count ) );
         }
 
         return false;
     }
+
+    #endregion
+
 }
 
 internal class Rule
 {
-	internal List rule_in;
-	internal List rule_out;
+	internal List Input;
+	internal List Comp;
 }

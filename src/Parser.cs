@@ -7,12 +7,28 @@ using System.Text;
 
 public abstract class Parser : Constants
 {
+
+    #region Internal fields
+    
 	internal static readonly int? ONE = 1, TWO = 2, THREE = 3;
-	internal ParserState pst;
+	internal ParserState State;
+    internal static string[] listsep = { ",", ";" };
+    internal static string[] stringops = { "=", "," };
+    internal ArrayList nonsymbols = new ArrayList();
+
+    #endregion
+
+    #region Constructors
 
     internal Parser( Environment env )
 	{
 	}
+
+    #endregion
+
+    #region Internal methods
+
+    #region Abstract
 
     internal abstract void translate( string s );
     internal abstract bool ready();
@@ -26,6 +42,10 @@ public abstract class Parser : Constants
     internal abstract List compile_list( List expr );
     internal abstract List compile_func( List expr );
     internal abstract bool commandq( object expr );
+
+    #endregion
+
+    #region Virtual
 
     internal virtual List compile_command_args( List expr )
     {
@@ -58,63 +78,63 @@ public abstract class Parser : Constants
 
 	internal virtual void reset()
 	{
-	    pst = new ParserState( null, 0 );
+	    State = new ParserState( null, 0 );
 	}
 
     internal virtual Rule[] compile_rules( string[][] s )
 	{
-	    var r = new Rule[ s.Length ];
+	    var rules = new Rule[ s.Length ];
 
 	    for ( int i = 0; i < s.Length; i++ )
 		{
-			var r1 = new Rule();
+			var rule = new Rule();
 
 			reset();
 
-			translate(s[i][0]);
+			translate( s[i][0] );
 
-			r1.rule_in = pst.tokens;
+			rule.Input = State.Tokens;
 
 			reset();
 
-			translate(s[i][1]);
+			translate( s[i][1] );
 
-			r1.rule_out = pst.tokens;
+			rule.Comp = State.Tokens;
 
-			r[i] = r1;
+			rules[i] = rule;
 		}
 
-		return r;
+		return rules;
 	}
 
     internal virtual List compile_command( List expr )
 	{
-		if (expr == null || expr.Count == 0 || !(commandq(expr[0])))
+	    if ( expr == null || expr.Count == 0 || !commandq( expr[0] ) )
 		{
 			return null;
 		}
 
-	    var s = compile_command_args( expr.take( 1, expr.Count ) );
+	    var list = compile_command_args( expr.Take( 1, expr.Count ) );
 
-	    s.Add( s.Count );
+	    list.Add( list.Count );
+
+        var command = ( string ) expr[0];
+
+		var type = Type.GetType( "Lambda" + command.ToUpper() );
+
+	    if ( type == null ) return null;
 
 		try
 		{
-			var command = ( string ) expr[0];
+			list.Add( ( Lambda ) Activator.CreateInstance( type ) );
 
-			var c = Type.GetType( "Lambda" + command.ToUpper() );
-
-			s.Add( ( Lambda ) Activator.CreateInstance(c) );
-
-			return s;
+			return list;
 		}
 		catch
 		{
 			return null;
 		}
-	}
-
-	internal ArrayList nonsymbols = new ArrayList();
+	}	
 
     internal virtual bool symbolq( object expr )
 	{
@@ -126,6 +146,10 @@ public abstract class Parser : Constants
 	    return expr is string && ( ( string ) expr ).Length > 0 && ( ( string ) expr )[0] == ' ';
 	}
 
+    #endregion
+
+    #region Static
+
     internal static bool oneof( char c, string s )
 	{
 		return s.IndexOf(c) != -1;
@@ -134,12 +158,7 @@ public abstract class Parser : Constants
     internal static bool oneof( object c, string s )
 	{
 	    return c is string && ( ( string ) c ).Length > 0 && oneof( ( ( string ) c )[0], s );
-	}
-
-    internal bool oneof( object c, object[] d )
-	{
-	    return d.Contains(c);
-	}
+	}    
 
     internal static bool whitespace( char c )
     {
@@ -158,7 +177,7 @@ public abstract class Parser : Constants
 	    s.Remove( 0, i );
 	}
 
-	internal static int nextIndexOf(object x, int idx, List list)
+    internal static int nextIndexOf( object x, int idx, List list )
 	{
         int n = list.Count;
 
@@ -175,7 +194,7 @@ public abstract class Parser : Constants
         return -1;
 	}
 
-    internal static Zahl readNumber( StringBuilder s )
+    internal static Symbolic readNumber( StringBuilder s )
 	{
         int kmax = 0;
 
@@ -217,14 +236,14 @@ public abstract class Parser : Constants
                     {
                         var bi = new BigInteger( ts, 10 );
 
-                        return imag ? ( Zahl ) ( new Exakt( bi ) ).mult( Zahl.IONE ) : new Exakt( bi );
+                        return imag ? ( Symbolic ) ( new Number( bi ) * Symbolic.IONE ) : new Number( bi );
                     }
                     catch ( Exception )
                     {
                     }
                 }
 
-                return imag ? new Unexakt( 0, x ) : new Unexakt( x );
+                return imag ? new Complex( 0, x ) : new Complex(x);
             }
             catch ( Exception )
             {
@@ -272,20 +291,12 @@ public abstract class Parser : Constants
         return s;
 	}
 
-	internal static string[] listsep = { ",", ";" };
-	internal static string[] stringops = { "=", "," };
-
-    internal bool stringopq( object x )
-	{
-	    return oneof( x, stringops );
-	}
-
     internal static bool number( char c )
 	{
 	    return oneof( c, "0123456789" );
 	}
 
-	internal static string readLine( Stream stream )
+	internal static string ReadLine( Stream stream )
 	{
 		var sb = new StringBuilder();
 
@@ -297,33 +308,47 @@ public abstract class Parser : Constants
 
 			sb.Append(c);
 
-			if (c == '\n' || c == '\r')
+			if ( c == '\n' || c == '\r' )
 			{
 				return sb.ToString();
 			}
 		}
 
-		if (sb.Length > 0)
-		{
-			return sb.ToString();
-		}
+		return sb.Length > 0 ? sb.ToString() : null;
+    }
 
-		return null;
-	}
+    #endregion
+
+    #region Others
+        
+    internal bool oneof( object c, object[] d )
+    {
+        return d.Contains(c);
+    }
+
+    internal bool stringopq( object x )
+    {
+        return oneof( x, stringops );
+    }
+
+    #endregion
+
+    #endregion
+
 }
 
 internal class ParserState
 {
-	internal object sub;
-	internal object prev;
-	internal List tokens;
-	internal int inList;
+	internal object Sub;
+	internal object Prev;
+	internal List Tokens;
+	internal int InList;
 
     internal ParserState( object sub, int inList )
 	{
-		this.sub = sub;
-		this.prev = null;
-	    this.tokens = new List();
-		this.inList = inList;
+		Sub = sub;
+		Prev = null;
+	    Tokens = new List();
+		InList = inList;
 	}
 }

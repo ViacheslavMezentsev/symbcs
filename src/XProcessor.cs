@@ -15,7 +15,7 @@ public class XProcessor : Processor
         {
             return LIST;
         }
-        if ( x is Matrix || x is Vektor )
+        if ( x is Matrix || x is Vector )
         {
             return MATRIX;
         }
@@ -72,11 +72,11 @@ public class XProcessor : Processor
         return 0;
     }
 
-    public override int process_instruction( object x, bool canon )
+    public override int ProcessInstruction( object x, bool canon )
     {
         if ( interrupt_flag )
         {
-            set_interrupt( false );
+            SetInterrupt( false );
 
             throw new JasymcaException( "Interrupted." );
         }
@@ -103,7 +103,7 @@ public class XProcessor : Processor
                     x = env.getValue( ( string ) x );
                 }
 
-                return ( ( Lambda ) x ).lambda( stack );
+                return ( ( Lambda ) x ).Eval( stack );
 
             case SYMBOL:
 
@@ -111,7 +111,7 @@ public class XProcessor : Processor
 
                 if ( val != null )
                 {
-                    return process_instruction( val, canon );
+                    return ProcessInstruction( val, canon );
                 }
                 else if ( canon )
                 {
@@ -202,7 +202,7 @@ public class XProcessor : Processor
 
                     ps.print(s);
 
-                    ( ( Algebraic ) x ).print( ps );
+                    ( ( Algebraic ) x ).Print( ps );
 
                     ps.println( "" );
                 }

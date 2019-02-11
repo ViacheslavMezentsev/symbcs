@@ -7,131 +7,157 @@ using System.Text;
 
 public abstract class Lambda : Constants
 {
+    internal static int length = 1;
+    internal static bool DEBUG = false;
     internal static Processor pc;
     internal static Parser pr;
-    internal const bool DEBUG = false;
-    internal static void debug( string s )
+    internal static Environment sandbox;
+    internal string diffrule = null, intrule = null, trigrule = null;
+
+    internal static void Debug( string text )
     {
-        if ( DEBUG )
-        {
-            Console.WriteLine( s );
-        }
+        if ( !DEBUG ) return;
+
+        Console.WriteLine( text );
     }
-    internal static int length = 1;
-    public virtual int lambda( Stack x )
+
+    public virtual int Eval( Stack stack )
     {
         return 0;
     }
-    internal static Algebraic getAlgebraic( Stack st )
+
+    internal static Algebraic GetAlgebraic( Stack stack )
     {
-        object arg_in = st.Pop();
-        if ( !( arg_in is Algebraic ) )
+        var arg = stack.Pop();
+
+        if ( !( arg is Algebraic ) )
         {
-            pc.process_instruction( arg_in, true );
-            arg_in = st.Pop();
+            pc.ProcessInstruction( arg, true );
+
+            arg = stack.Pop();
         }
-        if ( !( arg_in is Algebraic ) )
+
+        if ( !( arg is Algebraic ) )
         {
-            throw new JasymcaException( "Expected algebraic, got: " + arg_in );
+            throw new JasymcaException( "Expected algebraic, got: " + arg );
         }
-        return ( Algebraic ) arg_in;
+
+        return ( Algebraic ) arg;
     }
-    internal static Zahl getNumber( Stack st )
+
+    internal static Symbolic GetNumber( Stack stack )
     {
-        object arg = st.Pop();
+        var arg = stack.Pop();
+
         if ( arg is Algebraic )
         {
-            arg = ( new ExpandConstants() ).f_exakt( ( Algebraic ) arg );
+            arg = new ExpandConstants().SymEval( ( Algebraic ) arg );
         }
-        if ( !( arg is Zahl ) )
+
+        if ( !( arg is Symbolic ) )
         {
             throw new ParseException( "Expected number, got " + arg );
         }
-        return ( Zahl ) arg;
+
+        return ( Symbolic ) arg;
     }
-    internal static int getNarg( Stack st )
+
+    internal static int GetNarg( Stack stack )
     {
-        object arg_in = st.Pop();
-        if ( !( arg_in is int? ) )
+        var arg = stack.Pop();
+
+        if ( !( arg is int? ) )
         {
-            throw new JasymcaException( "Expected Integer, got: " + arg_in );
+            throw new JasymcaException( "Expected Integer, got: " + arg );
         }
-        return ( int ) ( ( int? ) arg_in );
+
+        return ( int ) ( int? ) arg;
     }
-    internal static string getSymbol( Stack st )
+
+    internal static string GetSymbol( Stack stack )
     {
-        object arg_in = st.Pop();
-        if ( !( arg_in is string ) || ( ( string ) arg_in ).Length == 0 || ( ( string ) arg_in )[ 0 ] == ' ' )
+        var arg = stack.Pop();
+
+        if ( !( arg is string ) || ( ( string ) arg ).Length == 0 || ( ( string ) arg )[0] == ' ' )
         {
-            throw new JasymcaException( "Expected Symbol, got: " + arg_in );
+            throw new JasymcaException( "Expected Symbol, got: " + arg );
         }
-        return ( string ) arg_in;
+
+        return ( string ) arg;
     }
-    internal static Polynomial getPolynomial( Stack st )
+
+    internal static Polynomial GetPolynomial( Stack stack )
     {
-        object arg = getAlgebraic( st );
+        object arg = GetAlgebraic( stack );
+
         if ( !( arg is Polynomial ) )
         {
             throw new ParseException( "Expected polynomial, got " + arg );
         }
+
         return ( Polynomial ) arg;
     }
-    internal static Vektor getVektor( Stack st )
+
+    internal static Vector GetVektor( Stack stack )
     {
-        object arg = st.Pop();
-        if ( !( arg is Vektor ) )
+        var arg = stack.Pop();
+
+        if ( !( arg is Vector ) )
         {
             throw new ParseException( "Expected vector, got " + arg );
         }
-        return ( Vektor ) arg;
+
+        return ( Vector ) arg;
     }
-    internal static Variable getVariable( Stack st )
+
+    internal static Variable GetVariable( Stack stack )
     {
-        Polynomial p = getPolynomial( st );
-        return p.v;
+        var p = GetPolynomial( stack );
+
+        return p._v;
     }
-    internal static int getInteger( Stack st )
+
+    internal static int GetInteger( Stack stack )
     {
-        object arg = st.Pop();
-        if ( !( arg is Zahl ) || !( ( Zahl ) arg ).integerq() )
+        var arg = stack.Pop();
+
+        if ( !( arg is Symbolic ) || !( ( Symbolic ) arg ).IsInteger() )
         {
             throw new ParseException( "Expected integer, got " + arg );
         }
-        return ( ( Zahl ) arg ).intval();
+
+        return ( ( Symbolic ) arg ).ToInt();
     }
-    internal static int getInteger( Algebraic arg )
+
+    internal static int GetInteger( Algebraic arg )
     {
-        if ( !( arg is Zahl ) || !( ( Zahl ) arg ).integerq() )
+        if ( !( arg is Symbolic ) || !( ( Symbolic ) arg ).IsInteger() )
         {
             throw new ParseException( "Expected integer, got " + arg );
         }
-        return ( ( Zahl ) arg ).intval();
+
+        return ( ( Symbolic ) arg ).ToInt();
     }
-    internal static List getList( Stack st )
+
+    internal static List GetList( Stack stack )
     {
-        object arg = st.Pop();
+        var arg = stack.Pop();
+
         if ( !( arg is List ) )
         {
             throw new ParseException( "Expected list, got " + arg );
         }
+
         return ( List ) arg;
-    }
-    internal static Zahl ensure_Zahl( object x )
-    {
-        if ( !( x is Zahl ) )
-        {
-            throw new JasymcaException( "Expected number, got " + x );
-        }
-        return ( Zahl ) x;
-    }
-    internal static Environment sandbox = null;
+    }    
+
     internal static Algebraic evalx( string rule, Algebraic x )
     {
         try
         {
             var pgm = pr.compile( rule );
 
-            var global = pc.Environment;
+            var save = pc.Environment;
 
             if ( sandbox == null )
             {
@@ -146,82 +172,108 @@ public abstract class Lambda : Constants
 
             pc.Environment = sandbox;
             pc.process_list( pgm, true );
-            pc.Environment = global;
+            pc.Environment = save;
 
-            var y = getAlgebraic( pc.stack );
+            var y = GetAlgebraic( pc.stack );
 
-            y = y.value( new SimpleVariable( "x" ), x );
+            y = y.Value( new SimpleVariable( "x" ), x );
 
             return y;
         }
-        catch ( Exception e )
+        catch ( Exception ex )
         {
-            throw new JasymcaException( string.Format( "Could not evaluate expression {0}: {1}", rule, e ) );
+            throw new JasymcaException( string.Format( "Could not evaluate expression {0}: {1}", rule, ex.Message ) );
         }
     }
 }
-/*internal*/
+
 public abstract class LambdaAlgebraic : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         switch ( narg )
         {
             case 0:
                 throw new JasymcaException( "Lambda functions expect argument." );
+
             case 1:
-                var arg = getAlgebraic( st );
-                st.Push( arg.map( this, null ) );
+                var arg = GetAlgebraic( stack );
+
+                stack.Push( arg.Map( this, null ) );
+
                 break;
+
             case 2:
-                var arg2 = getAlgebraic( st );
-                var arg1 = getAlgebraic( st );
-                arg1 = arg1.promote( arg2 );
-                st.Push( arg1.map( this, arg2 ) );
+                var arg2 = GetAlgebraic( stack );
+                var arg1 = GetAlgebraic( stack );
+
+                arg1 = arg1.Promote( arg2 );
+
+                stack.Push( arg1.Map( this, arg2 ) );
+
                 break;
+
             default:
+
                 var args = new Algebraic[ narg ];
+
                 for ( int i = narg - 1; i >= 0; i-- )
                 {
-                    args[ i ] = getAlgebraic( st );
+                    args[i] = GetAlgebraic( stack );
                 }
-                st.Push( f_exakt( args ) );
+
+                stack.Push( SymEval( args ) );
+
                 break;
         }
+
         return 0;
     }
-    internal virtual Zahl f( Zahl x )
+
+    internal virtual Symbolic PreEval( Symbolic x )
     {
         return x;
     }
-    internal virtual Algebraic f_exakt( Algebraic x )
+
+    internal virtual Algebraic SymEval( Algebraic x )
     {
         return null;
     }
-    internal virtual Algebraic f_exakt( Algebraic x, Algebraic y )
+
+    internal virtual Algebraic SymEval( Symbolic x, Symbolic y )
+    {
+        return SymEval( x as Algebraic, y );
+    }
+
+    internal virtual Algebraic SymEval( Algebraic x, Algebraic y )
     {
         return null;
     }
-    internal virtual Algebraic f_exakt( Algebraic[] x )
+
+    internal virtual Algebraic SymEval( Algebraic[] x )
     {
         return null;
-    }
-    internal string diffrule = null, intrule = null, trigrule = null;
-    public virtual Algebraic integrate( Algebraic arg, Variable x )
+    }    
+
+    public virtual Algebraic Integrate( Algebraic arg, Variable x )
     {
-        if ( !( arg.depends( x ) ) )
+        if ( !arg.Depends(x) )
         {
             throw new JasymcaException( "Expression in function does not depend on Variable." );
         }
-        if ( !( arg is Polynomial ) || ( ( Polynomial ) arg ).degree() != 1 || !( ( Polynomial ) arg ).ratfunc( x ) || intrule == null )
+
+        if ( !( arg is Polynomial ) || ( ( Polynomial ) arg ).Degree() != 1 || !( ( Polynomial ) arg ).IsRat(x) || intrule == null )
         {
             throw new JasymcaException( "Can not integrate function " );
         }
+
         try
         {
-            Algebraic y = evalx( intrule, arg );
-            return y.div( ( ( Polynomial ) arg ).a[ 1 ] );
+            var y = evalx( intrule, arg );
+
+            return y / ( ( Polynomial ) arg )[1];
         }
         catch ( Exception )
         {
@@ -229,51 +281,69 @@ public abstract class LambdaAlgebraic : Lambda
         }
     }
 }
+
 internal class LambdaFUNC : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg != 3 )
         {
             throw new ParseException( "Wrong function definition." );
         }
-        List ret = getList( st );
-        List prot = getList( st );
+
+        var ret = GetList( stack );
+        var prot = GetList( stack );
+
         if ( prot.Count < 1 || !( prot[ prot.Count - 1 ] is string ) )
         {
             throw new ParseException( "Wrong function definition." );
         }
-        string fname = ( ( string ) prot[ prot.Count - 1 ] ).Substring( 1 );
-        List vars_in = prot.take( 0, prot.Count - 1 );
-        List code_in = getList( st );
+
+        var fname = ( ( string ) prot[ prot.Count - 1 ] ).Substring( 1 );
+
+        var vars_in = prot.Take( 0, prot.Count - 1 );
+        var code_in = GetList( stack );
+
         SimpleVariable[] vars = null;
+
         if ( vars_in.Count != 0 )
         {
             int fnarg = ( int ) ( ( int? ) vars_in[ vars_in.Count - 1 ] );
+
             vars = new SimpleVariable[ fnarg ];
+
             for ( int i = 0; i < vars.Length; i++ )
             {
                 vars[ i ] = new SimpleVariable( ( string ) vars_in[ vars.Length - i - 1 ] );
             }
         }
-        SimpleVariable result = new SimpleVariable( ( ( string ) ret[ 0 ] ).Substring( 1 ) );
+
+        var result = new SimpleVariable( ( ( string ) ret[ 0 ] ).Substring( 1 ) );
+
         Lambda func = null;
-        Environment env = new Environment();
-        Stack ups = new Stack();
-        for ( int i = 0; i < vars.Length; i++ )
+
+        var env = new Environment();
+        var ups = new Stack();
+
+        foreach (var t in vars)
         {
-            env.putValue( vars[ i ].name, new Polynomial( vars[ i ] ) );
+            env.putValue( t.name, new Polynomial( t ) );
         }
+
         object y = null;
+
         if ( vars.Length == 1 )
         {
             int res = UserProgram.process_block( code_in, ups, env, true );
+
             if ( res != Processor.ERROR )
             {
                 y = env.getValue( result.name );
             }
         }
+
         if ( y is Algebraic )
         {
             func = new UserFunction( fname, vars, ( Algebraic ) y, result, env );
@@ -282,65 +352,83 @@ internal class LambdaFUNC : Lambda
         {
             func = new UserProgram( fname, vars, code_in, result, env, ups );
         }
+
         pc.env.putValue( fname, func );
-        st.Push( func );
+        stack.Push( func );
+
         return 0;
     }
 }
+
 internal class UserProgram : Lambda
 {
     internal string fname;
     internal List body;
-    internal SimpleVariable[] @var;
+    internal SimpleVariable[] args;
     internal SimpleVariable result;
     internal Environment env = null;
     internal Stack ups = null;
+
     public UserProgram()
     {
     }
-    public UserProgram( string fname, SimpleVariable[] @var, List body, SimpleVariable result, Environment env, Stack ups )
+
+    public UserProgram( string fname, SimpleVariable[] args, List body, SimpleVariable result, Environment env, Stack ups )
     {
         this.fname = fname;
-        this.@var = @var;
+        this.args = args;
         this.body = body;
         this.result = result;
         this.env = env;
         this.ups = ups;
     }
-    public override int lambda( Stack st )
+
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
-        if ( @var.Length != narg )
+        int narg = GetNarg( st );
+
+        if ( args.Length != narg )
         {
-            throw new JasymcaException( fname + " requires " + @var.Length + " Arguments." );
+            throw new JasymcaException( fname + " requires " + args.Length + " Arguments." );
         }
-        for ( int i = 0; i < @var.Length; i++ )
+
+        foreach (var t in args)
         {
-            object a = st.Pop();
-            env.putValue( @var[ i ].name, a );
+            var a = st.Pop();
+
+            env.putValue( t.name, a );
         }
+
         int ret = process_block( body, ups, env, result != null );
+
         if ( ret != Processor.ERROR )
         {
-            object y = ( result != null ? env.getValue( result.name ) : ups.Pop() );
+            var y = result != null ? env.getValue( result.name ) : ups.Pop();
+
             if ( y is Algebraic && result != null )
             {
                 ( ( Algebraic ) y ).Name = result.name;
             }
+
             if ( y != null )
             {
                 st.Push( y );
             }
         }
+
         return 0;
     }
+
     internal static int process_block( List code, Stack st, Environment env, bool clear_stack )
     {
-        Environment global = pc.Environment;
-        Stack old_stack = pc.stack;
+        var global = pc.Environment;
+        var old_stack = pc.stack;
+
         pc.Environment = env;
         pc.stack = st;
+
         int ret;
+
         try
         {
             ret = pc.process_list( code, true );
@@ -349,8 +437,10 @@ internal class UserProgram : Lambda
         {
             ret = Processor.ERROR;
         }
+
         pc.stack = old_stack;
         pc.Environment = global;
+
         if ( clear_stack )
         {
             while ( st.Count > 0 )
@@ -358,464 +448,607 @@ internal class UserProgram : Lambda
                 st.Pop();
             }
         }
+
         return ret;
     }
 }
+
 internal class UserFunction : LambdaAlgebraic
 {
     internal string fname;
     internal Algebraic body;
-    internal SimpleVariable[] @var;
+    internal SimpleVariable[] sv;
     internal SimpleVariable result;
     internal Environment env = null;
+
     public UserFunction()
     {
     }
-    public UserFunction( string fname, SimpleVariable[] @var, Algebraic body, SimpleVariable result, Environment env )
+
+    public UserFunction( string fname, SimpleVariable[] sv, Algebraic body, SimpleVariable result, Environment env )
     {
         this.fname = fname;
-        this.@var = @var;
+        this.sv = sv;
         this.body = body;
         this.result = result;
         this.env = env;
     }
-    internal override Zahl f( Zahl x )
+
+    internal override Symbolic PreEval( Symbolic x )
     {
-        Algebraic y = f_exakt( x );
-        if ( y is Zahl )
+        var y = SymEval( x );
+
+        if ( y is Symbolic )
         {
-            return ( Zahl ) y;
+            return ( Symbolic ) y;
         }
-        y = ( new ExpandConstants() ).f_exakt( y );
-        if ( y is Zahl )
+
+        y = ( new ExpandConstants() ).SymEval( y );
+
+        if ( y is Symbolic )
         {
-            return ( Zahl ) y;
+            return ( Symbolic ) y;
         }
+
         throw new JasymcaException( "Can not evaluate Function " + fname + " to number, got " + y + " for " + x );
     }
-    internal override Algebraic f_exakt( Algebraic x )
+
+    internal override Algebraic SymEval( Algebraic x )
     {
-        if ( @var.Length != 1 )
+        if ( sv.Length != 1 )
         {
             throw new JasymcaException( "Wrong number of arguments." );
         }
-        Algebraic y = body.value( @var[ 0 ], x );
+
+        var y = body.Value( sv[ 0 ], x );
+
         return y;
     }
-    internal override Algebraic f_exakt( Algebraic x, Algebraic y )
+
+    internal override Algebraic SymEval( Algebraic x, Algebraic y )
     {
-        if ( @var.Length != 2 )
+        if ( sv.Length != 2 )
         {
             throw new JasymcaException( "Wrong number of arguments." );
         }
-        Algebraic z = body.value( @var[ 0 ], y );
-        z = z.value( @var[ 1 ], x );
+
+        var z = body.Value( sv[ 0 ], y );
+
+        z = z.Value( sv[ 1 ], x );
+
         return z;
     }
-    internal override Algebraic f_exakt( Algebraic[] x )
+
+    internal override Algebraic SymEval( Algebraic[] x )
     {
-        if ( @var.Length != x.Length )
+        if ( sv.Length != x.Length )
         {
             throw new JasymcaException( "Wrong number of arguments." );
         }
-        Algebraic y = body;
+
+        var y = body;
+
         for ( int i = 0; i < x.Length; i++ )
         {
-            y = y.value( @var[ x.Length - i - 1 ], x[ i ] );
+            y = y.Value( sv[ x.Length - i - 1 ], x[ i ] );
         }
+
         return y;
     }
-    internal virtual Algebraic fv( Vektor x )
+
+    internal virtual Algebraic fv( Vector x )
     {
-        Environment global = pc.env;
+        var env = pc.env;
+
         pc.env = env;
-        Algebraic r = body;
-        pc.env = global;
-        for ( int i = 0; i < @var.Length; i++ )
+
+        var r = body;
+
+        pc.env = env;
+
+        for ( int i = 0; i < sv.Length; i++ )
         {
-            r = r.value( @var[ i ], x.get( i ) );
+            r = r.Value( sv[i], x[i] );
         }
+
         return r;
     }
-    public override Algebraic integrate( Algebraic arg, Variable x )
+
+    public override Algebraic Integrate( Algebraic arg, Variable x )
     {
         if ( !( body is Algebraic ) )
         {
             throw new JasymcaException( "Can not integrate function " + fname );
         }
-        if ( !( arg.depends( x ) ) )
+
+        if ( !( arg.Depends(x) ) )
         {
             throw new JasymcaException( "Expression in function does not depend on Variable." );
         }
-        if ( @var.Length == 1 )
+
+        if ( sv.Length == 1 )
         {
-            return ( ( Algebraic ) body ).value( @var[ 0 ], arg ).integrate( x );
+            return body.Value( sv[0], arg ).Integrate( x );
         }
-        if ( arg is Vektor && ( ( Vektor ) arg ).length() == @var.Length )
+
+        if ( arg is Vector && ( ( Vector ) arg ).Length() == sv.Length )
         {
-            return fv( ( Vektor ) arg ).integrate( x );
+            return fv( ( Vector ) arg ).Integrate(x);
         }
+
         throw new JasymcaException( "Wrong argument to function " + fname );
     }
 }
+
 internal class LambdaFLOAT : LambdaAlgebraic
 {
     internal double eps = 1.0e-8;
-    public override int lambda( Stack st )
+
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Algebraic exp = getAlgebraic( st );
-        Zahl a = pc.env.getnum( "algepsilon" );
+        int narg = GetNarg( stack );
+
+        var exp = GetAlgebraic( stack );
+
+        var a = pc.env.getnum( "algepsilon" );
+
         if ( a != null )
         {
-            double epstry = a.unexakt().real;
+            var epstry = a.ToComplex().Re;
+
             if ( epstry > 0 )
             {
                 eps = epstry;
             }
         }
-        exp = ( new ExpandConstants() ).f_exakt( exp );
-        st.Push( exp.map( this ) );
+
+        exp = new ExpandConstants().SymEval( exp );
+
+        stack.Push( exp.Map( this ) );
+
         return 0;
     }
-    internal override Zahl f( Zahl x )
+
+    internal override Symbolic PreEval( Symbolic x )
     {
-        Unexakt f = x.unexakt();
-        if ( f.Equals( Zahl.ZERO ) )
+        var f = x.ToComplex();
+
+        if ( f.Equals( Symbolic.ZERO ) )
         {
             return f;
         }
-        double abs = ( ( Unexakt ) f.abs() ).real;
-        double r = f.real;
+
+        var abs = ( ( Complex ) f.Abs() ).Re;
+        var r = f.Re;
+
         if ( Math.Abs( r / abs ) < eps )
         {
             r = 0.0;
         }
-        double i = f.imag;
+
+        var i = f.Im;
+
         if ( Math.Abs( i / abs ) < eps )
         {
             i = 0.0;
         }
-        return new Unexakt( r, i );
+
+        return new Complex( r, i );
     }
-    internal override Algebraic f_exakt( Algebraic x )
+
+    internal override Algebraic SymEval( Algebraic x )
     {
-        return x.map( this );
+        return x.Map( this );
     }
 }
+
 internal class LambdaMATRIX : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Algebraic[][] a = new Algebraic[ narg ][];
+        int narg = GetNarg( stack );
+
+        var a = new Algebraic[ narg ][];
+
         for ( int i = 0; i < narg; i++ )
         {
-            Algebraic b = getAlgebraic( st );
-            if ( b is Vektor )
+            var b = GetAlgebraic( stack );
+
+            if ( b is Vector )
             {
-                a[ i ] = ( ( Vektor ) b ).get();
+                a[ i ] = ( ( Vector ) b ).ToArray();
             }
             else
             {
                 a[ i ] = new Algebraic[ 1 ];
                 a[ i ][ 0 ] = b;
             }
+
             if ( a[ i ].GetLength( 0 ) != a[ 0 ].GetLength( 0 ) )
             {
                 throw new JasymcaException( "Matrix rows must have equal length." );
             }
         }
-        st.Push( ( new Matrix( a ) ).reduce() );
+
+        stack.Push( ( new Matrix( a ) ).Reduce() );
+
         return 0;
     }
 }
+
 internal class LambdaFORMAT : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int nargs = getNarg( st );
+        int nargs = GetNarg( stack );
+
         if ( nargs == 1 )
         {
-            object arg = st.Pop();
+            var arg = stack.Pop();
+
             if ( "$short".Equals( arg.ToString() ) )
             {
                 Jasymca.fmt = new NumFmtVar( 10, 5 );
+
                 return 0;
             }
             else if ( "$long".Equals( arg.ToString() ) )
             {
                 Jasymca.fmt = new NumFmtJava();
+
                 return 0;
             }
+
             throw new JasymcaException( "Usage: format long | short | base significant" );
         }
         else if ( nargs == 2 )
         {
-            int @base = getInteger( st );
-            int nsign = getInteger( st );
-            if ( @base < 2 || nsign < 1 )
+            int bas = GetInteger( stack );
+            int nsign = GetInteger( stack );
+
+            if ( bas < 2 || nsign < 1 )
             {
                 throw new JasymcaException( "Invalid variables." );
             }
-            Jasymca.fmt = new NumFmtVar( @base, nsign );
+
+            Jasymca.fmt = new NumFmtVar( bas, nsign );
+
             return 0;
         }
+
         throw new JasymcaException( "Usage: format long | short | base significant" );
     }
 }
+
 internal class LambdaSYMS : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int nargs = getNarg( st );
+        int nargs = GetNarg( stack );
+
         while ( nargs-- > 0 )
         {
-            object arg = st.Pop();
+            var arg = stack.Pop();
+
             if ( arg is string )
             {
-                string s = ( ( string ) arg ).Substring( 1 );
+                var s = ( ( string ) arg ).Substring( 1 );
+
                 pc.env.putValue( s, new Polynomial( new SimpleVariable( s ) ) );
             }
         }
+
         return 0;
     }
 }
+
 internal class LambdaCLEAR : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int nargs = getNarg( st );
+        int nargs = GetNarg( stack );
+
         while ( nargs-- > 0 )
         {
-            object arg = st.Pop();
+            var arg = stack.Pop();
+
             if ( arg is string )
             {
-                string s = ( ( string ) arg ).Substring( 1 );
-                pc.env.Remove( s );
+                var s = ( ( string ) arg ).Substring(1);
+
+                pc.env.Remove(s);
             }
         }
+
         return 0;
     }
 }
+
 internal class CreateVector : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int nr = getNarg( st );
+        int nr = GetNarg( stack );
         int nrow = 1, ncol = 1;
-        Matrix m = new Matrix( nr, 1 );
+
+        var m = new Matrix( nr, 1 );
+
         while ( nr-- > 0 )
         {
-            Algebraic row = crv( st );
-            Index idx = new Index( nrow, ncol, row );
-            m.insert( new Matrix( row ), idx );
+            var row = crv( stack );
+
+            var idx = new Index( nrow, ncol, row );
+
+            m.Insert( new Matrix( row ), idx );
+
             nrow = idx.row_max + 1;
         }
-        st.Push( m.reduce() );
+
+        stack.Push( m.Reduce() );
+
         return 0;
     }
-    internal static Algebraic crv( Stack st )
+
+    internal static Algebraic crv( Stack stack )
     {
-        int nc = getNarg( st );
+        int nc = GetNarg( stack );
+
         if ( nc == 1 )
         {
-            return getAlgebraic( st );
+            return GetAlgebraic( stack );
         }
-        Matrix m = new Matrix( 1, nc );
+
+        var m = new Matrix( 1, nc );
+
         int nrow = 1, ncol = 1;
+
         while ( nc-- > 0 )
         {
-            Algebraic x = getAlgebraic( st );
-            Index idx = new Index( nrow, ncol, x );
-            m.insert( new Matrix( x ), idx );
+            var x = GetAlgebraic( stack );
+
+            var idx = new Index( nrow, ncol, x );
+
+            m.Insert( new Matrix( x ), idx );
+
             ncol = idx.col_max + 1;
         }
-        return m.reduce();
+
+        return m.Reduce();
     }
 }
+
 internal class CR1 : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Algebraic a, b, c = getAlgebraic( st );
+        int narg = GetNarg( stack );
+
+        Algebraic a, b, c = GetAlgebraic( stack );
+
         if ( narg == 2 )
         {
-            b = Zahl.ONE;
-            a = getAlgebraic( st );
+            b = Symbolic.ONE;
+            a = GetAlgebraic( stack );
         }
         else
         {
-            b = getAlgebraic( st );
-            a = getAlgebraic( st );
+            b = GetAlgebraic( stack );
+            a = GetAlgebraic( stack );
         }
-        Algebraic na = c.sub( a ).div( b );
-        if ( !( na is Zahl ) )
+
+        var na = ( c - a ) / b;
+
+        if ( !( na is Symbolic ) )
         {
-            na = ( new ExpandConstants() ).f_exakt( na );
+            na = ( new ExpandConstants() ).SymEval( na );
         }
-        if ( !( na is Zahl ) )
+
+        if ( !( na is Symbolic ) )
         {
             throw new ParseException( "CreateVector requires numbers." );
         }
-        int n = ( int ) ( ( ( Zahl ) na ).unexakt().real + 1.0 );
-        Algebraic[] coord = new Algebraic[ n ];
+
+        int n = ( int ) ( ( ( Symbolic ) na ).ToComplex().Re + 1.0 );
+
+        var coord = new Algebraic[ n ];
+
         for ( int i = 0; i < n; i++ )
         {
-            coord[ i ] = a.add( b.mult( new Unexakt( ( double ) i ) ) );
+            coord[i] = a + b * new Complex(i);
         }
-        st.Push( new Vektor( coord ) );
+
+        stack.Push( new Vector( coord ) );
+
         return 0;
     }
 }
+
 internal class LambdaEYE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg < 1 )
         {
             throw new JasymcaException( "Usage: EYE( nrow, ncol )." );
         }
-        int nrow = getInteger( st );
+
+        int nrow = GetInteger( stack );
         int ncol = nrow;
+
         if ( narg > 1 )
         {
-            ncol = getInteger( st );
+            ncol = GetInteger( stack );
         }
-        st.Push( Matrix.eye( nrow, ncol ).reduce() );
+
+        stack.Push( Matrix.Eye( nrow, ncol ).Reduce() );
+
         return 0;
     }
 }
+
 internal class LambdaZEROS : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg < 1 )
         {
             throw new JasymcaException( "Usage: ZEROS( nrow, ncol )." );
         }
-        int nrow = getInteger( st );
+
+        int nrow = GetInteger( stack );
         int ncol = nrow;
+
         if ( narg > 1 )
         {
-            ncol = getInteger( st );
+            ncol = GetInteger( stack );
         }
-        st.Push( ( new Matrix( nrow, ncol ) ).reduce() );
+
+        stack.Push( ( new Matrix( nrow, ncol ) ).Reduce() );
+
         return 0;
     }
 }
+
 internal class LambdaONES : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg < 1 )
         {
             throw new JasymcaException( "Usage: ONES( nrow, ncol )." );
         }
-        int nrow = getInteger( st );
+
+        int nrow = GetInteger( stack );
         int ncol = nrow;
+
         if ( narg > 1 )
         {
-            ncol = getInteger( st );
+            ncol = GetInteger( stack );
         }
-        st.Push( ( new Matrix( Zahl.ONE, nrow, ncol ) ).reduce() );
+
+        stack.Push( ( new Matrix( Symbolic.ONE, nrow, ncol ) ).Reduce() );
+
         return 0;
     }
 }
+
 internal class LambdaRAND : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg < 1 )
         {
             throw new JasymcaException( "Usage: RAND( nrow, ncol )." );
         }
-        int nrow = getInteger( st );
+
+        int nrow = GetInteger( stack );
         int ncol = nrow;
+
         if ( narg > 1 )
         {
-            ncol = getInteger( st );
+            ncol = GetInteger( stack );
         }
-        //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-        //ORIGINAL LINE: Algebraic[][] a = new Algebraic[nrow][ncol];
-        Algebraic[][] a = RectangularArrays.ReturnRectangularAlgebraicArray( nrow, ncol );
+
+        var a = Matrix.CreateRectangularArray<Algebraic>( nrow, ncol );
+
         for ( int i = 0; i < nrow; i++ )
         {
             for ( int k = 0; k < ncol; k++ )
             {
-                a[ i ][ k ] = new Unexakt( JMath.random() );
+                a[i][k] = new Complex( JMath.random() );
             }
         }
-        st.Push( ( new Matrix( a ) ).reduce() );
+
+        stack.Push( new Matrix(a).Reduce() );
+
         return 0;
     }
 }
 internal class LambdaDIAG : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg < 1 )
         {
             throw new JasymcaException( "Usage: DIAG( matrix, k )." );
         }
-        Algebraic x = getAlgebraic( st ).reduce();
+
+        var x = GetAlgebraic( stack ).Reduce();
+
         int k = 0;
+
         if ( narg > 1 )
         {
-            k = getInteger( st );
+            k = GetInteger( stack );
         }
-        if ( x.scalarq() )
+
+        if ( x.IsScalar() )
         {
-            x = new Vektor( new Algebraic[] { x } );
+            x = new Vector( new[] { x } );
         }
-        if ( x is Vektor )
+
+        if ( x is Vector )
         {
-            Vektor xv = ( Vektor ) x;
+            var xv = ( Vector ) x;
+
             if ( k >= 0 )
             {
-                Matrix m = new Matrix( xv.length() + k, xv.length() + k );
-                for ( int i = 0; i < xv.length(); i++ )
+                var m = new Matrix( xv.Length() + k, xv.Length() + k );
+
+                for ( int i = 0; i < xv.Length(); i++ )
                 {
-                    m.set( i, i + k, xv.get( i ) );
+                    m[ i, i + k ] = xv[i];
                 }
-                st.Push( m );
+
+                stack.Push( m );
             }
             else
             {
-                Matrix m = new Matrix( xv.length() - k, xv.length() - k );
-                for ( int i = 0; i < xv.length(); i++ )
+                var m = new Matrix( xv.Length() - k, xv.Length() - k );
+
+                for ( int i = 0; i < xv.Length(); i++ )
                 {
-                    m.set( i - k, i, xv.get( i ) );
+                    m[ i - k, i ] = xv[i];
                 }
-                st.Push( m );
+
+                stack.Push(m);
             }
         }
         else if ( x is Matrix )
         {
-            Matrix xm = ( Matrix ) x;
-            if ( k >= 0 && k < xm.ncol() )
+            var xm = ( Matrix ) x;
+
+            if ( k >= 0 && k < xm.Cols() )
             {
-                Algebraic[] a = new Algebraic[ xm.ncol() - k ];
+                var a = new Algebraic[ xm.Cols() - k ];
+
                 for ( int i = 0; i < a.Length; i++ )
                 {
-                    a[ i ] = xm.get( i, i + k );
+                    a[i] = xm[ i, i + k ];
                 }
-                st.Push( new Vektor( a ) );
+
+                stack.Push( new Vector(a) );
             }
-            else if ( k < 0 && ( -k ) < xm.nrow() )
+            else if ( k < 0 && ( -k ) < xm.Rows() )
             {
-                Algebraic[] a = new Algebraic[ xm.nrow() + k ];
+                var a = new Algebraic[ xm.Rows() + k ];
+
                 for ( int i = 0; i < a.Length; i++ )
                 {
-                    a[ i ] = xm.get( i - k, i );
+                    a[i] = xm[ i - k, i ];
                 }
-                st.Push( new Vektor( a ) );
+
+                stack.Push( new Vector(a) );
             }
             else
             {
@@ -826,416 +1059,533 @@ internal class LambdaDIAG : Lambda
         {
             throw new JasymcaException( "Argument to DIAG must be vector or matrix." );
         }
+
         return 0;
     }
 }
+
 internal class LambdaGCD : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
 
         if ( narg < 2 )
         {
             throw new ParseException( "GCD requires at least 2 arguments." );
         }
 
-        var _gcd = getAlgebraic( st );
+        var _gcd = GetAlgebraic( stack );
 
         for ( int i = 1; i < narg; i++ )
         {
-            _gcd = gcd( _gcd, getAlgebraic( st ) );
+            _gcd = gcd( _gcd, GetAlgebraic( stack ) );
         }
 
-        st.Push( _gcd );
+        stack.Push( _gcd );
 
         return 0;
     }
+
     internal virtual Algebraic gcd( Algebraic x, Algebraic y )
     {
-        if ( !x.exaktq() )
+        if ( !x.IsNumber() )
         {
-            x = ( new LambdaRAT() ).f_exakt( x );
+            x = ( new LambdaRAT() ).SymEval( x );
         }
-        if ( !y.exaktq() )
+
+        if ( !y.IsNumber() )
         {
-            y = ( new LambdaRAT() ).f_exakt( y );
+            y = ( new LambdaRAT() ).SymEval( y );
         }
-        if ( x is Zahl && y is Zahl )
+
+        if ( x is Symbolic && y is Symbolic )
         {
-            return ( ( Zahl ) x ).gcd( ( Zahl ) y );
+            return ( ( Symbolic ) x ).gcd( ( Symbolic ) y );
         }
+
         if ( x is Polynomial )
         {
-            Zahl gcd_x = ( ( Polynomial ) x ).gcd_coeff();
+            var gcd_x = ( ( Polynomial ) x ).gcd_coeff();
+
             if ( y is Polynomial )
             {
-                Zahl gcd_y = ( ( Polynomial ) y ).gcd_coeff();
-                return Poly.poly_gcd( x, y ).mult( gcd_x.gcd( gcd_y ) );
+                var gcd_y = ( ( Polynomial ) y ).gcd_coeff();
+
+                return Poly.poly_gcd( x, y ) * gcd_x.gcd( gcd_y );
             }
-            if ( y is Zahl )
+
+            if ( y is Symbolic )
             {
-                return gcd_x.gcd( ( Zahl ) y );
+                return gcd_x.gcd( ( Symbolic ) y );
             }
         }
-        if ( y is Polynomial && x is Zahl )
+
+        if ( y is Polynomial && x is Symbolic )
         {
             return gcd( y, x );
         }
+
         throw new JasymcaException( "Not implemented." );
     }
 }
+
 internal class LambdaEXPAND : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        object x = st.Pop();
+        int narg = GetNarg( stack );
+
+        object x = stack.Pop();
+
         if ( x is List )
         {
             pc.process_list( ( List ) x, true );
+
             x = pc.stack.Pop();
         }
+
         if ( x is Algebraic )
         {
-            x = ( new SqrtExpand() ).f_exakt( ( Algebraic ) x );
+            x = ( new SqrtExpand() ).SymEval( ( Algebraic ) x );
         }
-        st.Push( x );
+
+        stack.Push( x );
+
         return 0;
     }
 }
+
 internal class LambdaREALPART : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        st.Push( getAlgebraic( st ).realpart() );
+        int narg = GetNarg( stack );
+
+        stack.Push( GetAlgebraic( stack ).RealPart() );
+
         return 0;
     }
 }
+
 internal class LambdaIMAGPART : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        st.Push( getAlgebraic( st ).imagpart() );
+        int narg = GetNarg( stack );
+
+        stack.Push( GetAlgebraic( stack ).ImagPart() );
+
         return 0;
     }
 }
+
 internal class LambdaCONJ : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        st.Push( getAlgebraic( st ).cc() );
+        int narg = GetNarg( stack );
+
+        stack.Push( GetAlgebraic( stack ).Conj() );
+
         return 0;
     }
 }
+
 internal class LambdaANGLE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Algebraic x = getAlgebraic( st );
+        int narg = GetNarg( stack );
+
+        var x = GetAlgebraic( stack );
+
         object atan2 = pc.env.getValue( "atan2" );
+
         if ( !( atan2 is LambdaAlgebraic ) )
         {
             throw new JasymcaException( "Function ATAN2 not installed." );
         }
-        st.Push( ( ( LambdaAlgebraic ) atan2 ).f_exakt( x.imagpart(), x.realpart() ) );
+
+        stack.Push( ( ( LambdaAlgebraic ) atan2 ).SymEval( x.ImagPart(), x.RealPart() ) );
+
         return 0;
     }
 }
+
 internal class LambdaCFS : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Algebraic y = getAlgebraic( st ).rat();
-        if ( !( y is Exakt ) )
+        int narg = GetNarg( stack );
+
+        var y = GetAlgebraic( stack ).Rat();
+
+        if ( !( y is Number ) )
         {
             throw new ParseException( "Argument must be exact number" );
         }
+
         double eps = 1.0e-5;
+
         if ( narg > 1 )
         {
-            eps = getNumber( st ).unexakt().real;
+            eps = GetNumber( stack ).ToComplex().Re;
         }
-        st.Push( ( ( Exakt ) y ).cfs( eps ) );
+
+        stack.Push( ( ( Number ) y ).cfs( eps ) );
+
         return 0;
     }
 }
+
 internal class LambdaDIFF : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg == 0 )
         {
             throw new ParseException( "Argument to diff missing." );
         }
-        Algebraic f = getAlgebraic( st );
+
+        var f = GetAlgebraic( stack );
+
         Variable v;
+
         if ( narg > 1 )
         {
-            v = getVariable( st );
+            v = GetVariable( stack );
         }
         else
         {
             if ( f is Polynomial )
             {
-                v = ( ( Polynomial ) f ).v;
+                v = ( ( Polynomial ) f )._v;
             }
             else if ( f is Rational )
             {
-                v = ( ( Rational ) f ).den.v;
+                v = ( ( Rational ) f ).den._v;
             }
             else
             {
                 throw new ParseException( "Could not determine Variable." );
             }
         }
-        Algebraic df = f.deriv( v );
-        if ( df is Rational && !df.exaktq() )
+
+        var df = f.Derive( v );
+
+        if ( df is Rational && !df.IsNumber() )
         {
-            df = ( new LambdaRAT() ).f_exakt( df );
+            df = ( new LambdaRAT() ).SymEval( df );
         }
-        st.Push( df );
+
+        stack.Push( df );
+
         return 0;
     }
 }
+
 internal class LambdaSUBST : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg != 3 )
         {
             throw new ParseException( "Usage: SUBST (a, b, c), substitutes a for b in c" );
         }
-        Algebraic a = getAlgebraic( st );
-        Polynomial b = getPolynomial( st );
-        Algebraic c = getAlgebraic( st );
-        Variable bx = b.v;
+
+        var a = GetAlgebraic( stack );
+        var b = GetPolynomial( stack );
+        var c = GetAlgebraic( stack );
+
+        var bx = b._v;
+
         while ( bx is FunctionVariable )
         {
-            Algebraic arg = ( ( FunctionVariable ) bx ).arg;
+            var arg = ( ( FunctionVariable ) bx ).Var;
+
             if ( !( arg is Polynomial ) )
             {
                 throw new JasymcaException( "Can not solve " + b + " for a variable." );
             }
-            bx = ( ( Polynomial ) arg ).v;
+
+            bx = ( ( Polynomial ) arg )._v;
         }
-        Vektor sol = LambdaSOLVE.solve( a.sub( b ), bx );
-        Algebraic[] res = new Algebraic[ sol.length() ];
-        for ( int i = 0; i < sol.length(); i++ )
+
+        var sol = LambdaSOLVE.solve( a - b, bx );
+
+        var res = new Algebraic[ sol.Length() ];
+
+        for ( int i = 0; i < sol.Length(); i++ )
         {
-            Algebraic y = sol.get( i );
-            res[ i ] = c.value( bx, y );
+            var y = sol[i];
+
+            res[ i ] = c.Value( bx, y );
         }
-        st.Push( ( new Vektor( res ) ).reduce() );
+
+        stack.Push( ( new Vector( res ) ).Reduce() );
+
         return 0;
     }
 }
+
 internal class LambdaCOEFF : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg != 3 )
         {
             throw new ParseException( "Usage: COEFF (a, b, c), find coeff of b^c in a" );
         }
-        Polynomial a = getPolynomial( st );
-        Variable b = getVariable( st );
-        Algebraic c_in = getAlgebraic( st );
-        if ( c_in.scalarq() )
+
+        var a = GetPolynomial( stack );
+        var b = GetVariable( stack );
+        var c_in = GetAlgebraic( stack );
+
+        if ( c_in.IsScalar() )
         {
-            st.Push( a.coefficient( b, getInteger( c_in ) ) );
+            stack.Push( a.coefficient( b, GetInteger( c_in ) ) );
         }
-        else if ( c_in is Vektor )
+        else if ( c_in is Vector )
         {
-            Vektor c = ( Vektor ) c_in;
-            Algebraic[] v = new Algebraic[ c.length() ];
+            var c = ( Vector ) c_in;
+
+            var v = new Algebraic[ c.Length() ];
+
             for ( int i = 0; i < v.Length; i++ )
             {
-                v[ i ] = a.coefficient( b, getInteger( c.get( i ) ) );
+                v[ i ] = a.coefficient( b, GetInteger( c[i] ) );
             }
-            st.Push( new Vektor( v ) );
+
+            stack.Push( new Vector( v ) );
         }
         else
         {
             throw new ParseException( "Usage: COEFF (a, b, c), find coeff of b^c in a" );
         }
+
         return 0;
     }
 }
+
 internal class LambdaSUM : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg == 1 )
         {
-            Algebraic x = getAlgebraic( st );
-            if ( x.scalarq() && !x.constantq() )
+            var x = GetAlgebraic( stack );
+
+            if ( x.IsScalar() && !x.IsConstant() )
             {
                 throw new JasymcaException( "Unknown variable dimension: " + x );
             }
-            Matrix m = new Matrix( x );
-            bool addcols = ( m.ncol() > 1 );
+
+            var m = new Matrix( x );
+
+            bool addcols = ( m.Cols() > 1 );
+
             if ( narg > 1 )
             {
-                if ( getInteger( st ) == 2 )
+                if ( GetInteger( stack ) == 2 )
                 {
                     addcols = false;
                 }
             }
             if ( addcols )
             {
-                Algebraic s = m.col( 1 );
-                for ( int i = 2; i <= m.ncol(); i++ )
+                var s = m.col( 1 );
+
+                for ( int i = 2; i <= m.Cols(); i++ )
                 {
-                    s = s.add( m.col( i ) );
+                    s = s + m.col(i);
                 }
-                st.Push( s );
+
+                stack.Push( s );
             }
             else
             {
-                Algebraic s = m.row( 1 );
-                for ( int i = 2; i <= m.nrow(); i++ )
+                var s = m.row( 1 );
+
+                for ( int i = 2; i <= m.Rows(); i++ )
                 {
-                    s = s.add( m.row( i ) );
+                    s = s + m.row(i);
                 }
-                st.Push( s );
+
+                stack.Push( s );
             }
+
             return 0;
         }
+
         if ( narg != 4 )
         {
             throw new ParseException( "Usage: SUM (exp, ind, lo, hi)" );
         }
-        Algebraic exp = getAlgebraic( st );
-        Variable v = getVariable( st );
-        int lo = getInteger( st );
-        int hi = getInteger( st );
-        Algebraic sum = Zahl.ZERO;
+
+        var exp = GetAlgebraic( stack );
+        var v = GetVariable( stack );
+
+        int lo = GetInteger( stack );
+        int hi = GetInteger( stack );
+
+        Algebraic sum = Symbolic.ZERO;
+
         for ( ; lo <= hi; lo++ )
         {
-            sum = sum.add( exp.value( v, new Unexakt( ( double ) lo ) ) );
+            sum = sum + exp.Value( v, new Complex( lo ) );
         }
-        st.Push( sum );
+
+        stack.Push( sum );
+
         return 0;
     }
 }
+
 internal class LambdaLSUM : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg != 3 )
         {
             throw new ParseException( "Usage: LSUM (exp, ind, list)" );
         }
-        Algebraic exp = getAlgebraic( st );
-        Variable v = getVariable( st );
-        Vektor list = getVektor( st );
-        Algebraic sum = Zahl.ZERO;
-        for ( int i = 0; i < list.length(); i++ )
+
+        var exp = GetAlgebraic( stack );
+        var v = GetVariable( stack );
+        var list = GetVektor( stack );
+
+        Algebraic sum = Symbolic.ZERO;
+
+        for ( int i = 0; i < list.Length(); i++ )
         {
-            sum = sum.add( exp.value( v, list.get( i ) ) );
+            sum = sum + exp.Value( v, list[i] );
         }
-        st.Push( sum );
+
+        stack.Push( sum );
+
         return 0;
     }
 }
+
 internal class LambdaDIVIDE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int size = getNarg( st );
+        int size = GetNarg( stack );
+
         if ( size != 3 && size != 2 )
         {
             throw new ParseException( "Usage: DIVIDE (p1, p2, var)" );
         }
-        Algebraic p1 = getAlgebraic( st );
-        if ( !p1.exaktq() )
+
+        var p1 = GetAlgebraic( stack );
+
+        if ( !p1.IsNumber() )
         {
-            p1 = ( new LambdaRAT() ).f_exakt( p1 );
+            p1 = ( new LambdaRAT() ).SymEval( p1 );
         }
-        Algebraic p2 = getAlgebraic( st );
-        if ( !p2.exaktq() )
+
+        var p2 = GetAlgebraic( stack );
+
+        if ( !p2.IsNumber() )
         {
-            p2 = ( new LambdaRAT() ).f_exakt( p2 );
+            p2 = ( new LambdaRAT() ).SymEval( p2 );
         }
-        Algebraic[] a = new Algebraic[] { p1, p2 };
+
+        Algebraic[] a = { p1, p2 };
+
         if ( size == 3 )
         {
-            Variable v = getVariable( st );
+            var v = GetVariable( stack );
+
             Poly.polydiv( a, v );
         }
         else
         {
-            if ( p1 is Zahl && p2 is Zahl )
+            if ( p1 is Symbolic && p2 is Symbolic )
             {
-                a = ( ( Zahl ) p1 ).div( p2, a );
+                a = ( ( Symbolic ) p1 ).Div( p2, a );
             }
             else
             {
                 a[ 0 ] = Poly.polydiv( p1, p2 );
-                a[ 1 ] = p1.sub( a[ 0 ].mult( p2 ) );
+                a[ 1 ] = ( p1 - a[0] ) * p2;
             }
         }
-        st.Push( new Vektor( a ) );
+
+        stack.Push( new Vector( a ) );
+
         return 0;
     }
 }
+
 internal class LambdaTAYLOR : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         if ( narg != 4 )
         {
             throw new ParseException( "Usage: TAYLOR (exp, var, pt, pow)" );
         }
-        Algebraic exp = getAlgebraic( st );
-        Variable v = getVariable( st );
-        Algebraic pt = getAlgebraic( st );
-        int n = getInteger( st );
-        Algebraic r = exp.value( v, pt );
-        Algebraic t = ( new Polynomial( v ) ).sub( pt );
+
+        var exp = GetAlgebraic( stack );
+        var v = GetVariable( stack );
+        var pt = GetAlgebraic( stack );
+
+        int n = GetInteger( stack );
+
+        var r = exp.Value( v, pt );
+        var t = ( new Polynomial( v ) ) - pt;
+
         double nf = 1.0;
+
         for ( int i = 1; i <= n; i++ )
         {
-            exp = exp.deriv( v );
+            exp = exp.Derive(v);
+
             nf *= i;
-            r = r.add( exp.value( v, pt ).mult( t.pow_n( i ) ).div( new Unexakt( nf ) ) );
+            r = r + ( exp.Value( v, pt ) * t^i ) / new Complex( nf );
         }
-        st.Push( r );
+
+        stack.Push( r );
+
         return 0;
     }
 }
+
 internal class LambdaSAVE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int size = getNarg( st );
+        int size = GetNarg( stack );
 
         if ( size < 2 )
         {
             throw new ParseException( "Usage: SAVE (filename,arg1, arg2,...,argi)" );
         }
 
-        var filename = st.Pop();
+        var filename = stack.Pop();
 
         try
         {
-            var f = Jasymca.GetFileOutputStream( ( string ) filename, true );
+            var stream = Jasymca.GetFileOutputStream( ( string ) filename, true );
 
             for ( var i = 1; i < size; i++ )
             {
-                var name = ( string ) st.Pop();
+                var name = ( string ) stack.Pop();
 
                 if ( "ALL".Equals( name, StringComparison.CurrentCultureIgnoreCase ) )
                 {
@@ -1251,26 +1601,26 @@ internal class LambdaSAVE : Lambda
 
                         if ( val is Lambda ) continue;
 
-                        var line = key + ":" + val + ";\n";
+                        var line = string.Format( "{0}:{1};\n", key, val );
 
                         var bytes = Encoding.UTF8.GetBytes( line );
 
-                        f.Write( bytes, 0, bytes.Length );
+                        stream.Write( bytes, 0, bytes.Length );
                     }
                 }
                 else
                 {
                     var val = pc.env.getValue( name );
 
-                    var line = name + ":" + val + ";\n";
+                    var line = string.Format( "{0}:{1};\n", name, val );
 
                     var bytes = Encoding.UTF8.GetBytes( line );
 
-                    f.Write( bytes, 0, bytes.Length );
+                    stream.Write( bytes, 0, bytes.Length );
                 }
             }
 
-            f.Close();
+            stream.Close();
 
             Console.WriteLine( "Wrote variables to " + filename );
         }
@@ -1285,16 +1635,16 @@ internal class LambdaSAVE : Lambda
 
 internal class LambdaLOADFILE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
 
         if ( narg != 1 )
         {
             throw new ParseException( "Usage: LOADFILE (filename)" );
         }
 
-        var filename = st.Pop();
+        var filename = stack.Pop();
 
         if ( !( filename is string ) )
         {
@@ -1331,14 +1681,18 @@ internal class LambdaLOADFILE : Lambda
             return;
         }
 
-        if ( File.Exists( Path.Combine( Jasymca.AssemblyDirectory, fname ) ) )
+        foreach ( string path in Environment.Paths )
         {
-            Stream stream = new FileStream( Path.GetFullPath( fname ), FileMode.Open );
+            var full = Path.GetFullPath( Path.Combine( path, fname ) );
+
+            if ( !File.Exists( full ) ) continue;
+
+            Stream stream = new FileStream( full, FileMode.Open );
 
             Read( stream );
 
             return;
-        }
+        }    
 
         throw new IOException( "Could not find " + fname + "." );
     }
@@ -1378,188 +1732,238 @@ internal class LambdaLOADFILE : Lambda
 
 internal class LambdaRAT : LambdaAlgebraic
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
 
-        var arg = getAlgebraic( st ).reduce();
+        var arg = GetAlgebraic( stack ).Reduce();
 
-        if ( arg is Unexakt )
+        if ( arg is Complex )
         {
-            st.Push( f( ( Zahl ) arg ) );
+            stack.Push( PreEval( ( Symbolic ) arg ) );
         }
-        else if ( arg is Exakt )
+        else if ( arg is Number )
         {
-            st.Push( arg );
+            stack.Push( arg );
         }
         else
         {
-            st.Push( FunctionVariable.create( GetType().Name.Substring( "Lambda".Length ).ToLower(), arg ) );
+            stack.Push( FunctionVariable.Create( GetType().Name.Substring( "Lambda".Length ).ToLower(), arg ) );
         }
+
         return 0;
     }
-    internal override Algebraic f_exakt( Algebraic x )
+
+    internal override Algebraic SymEval( Algebraic a )
     {
-        if ( x is Zahl )
+        if ( a is Symbolic )
         {
-            return ( Zahl ) x.rat();
+            return ( Symbolic ) a.Rat();
         }
-        return x.map( this );
+
+        return a.Map( this );
     }
-    internal override Zahl f( Zahl x )
+
+    internal override Symbolic PreEval( Symbolic s )
     {
-        return ( Zahl ) x.rat();
+        return ( Symbolic ) s.Rat();
     }
 }
+
 internal class LambdaSQFR : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Algebraic f = getAlgebraic( st );
-        if ( f is Zahl )
+        int narg = GetNarg( stack );
+
+        var f = GetAlgebraic( stack );
+
+        if ( f is Symbolic )
         {
-            st.Push( f );
+            stack.Push( f );
             return 0;
         }
+
         if ( !( f is Polynomial ) )
         {
             throw new ParseException( "Argument to sqfr() must be polynomial." );
         }
-        f = ( ( Polynomial ) f ).rat();
-        Algebraic[] fs = ( ( Polynomial ) f ).square_free_dec( ( ( Polynomial ) f ).v );
+
+        f = ( ( Polynomial ) f ).Rat();
+
+        var fs = ( ( Polynomial ) f ).square_free_dec( ( ( Polynomial ) f )._v );
+
         if ( fs == null )
         {
-            st.Push( f );
+            stack.Push( f );
             return 0;
         }
-        st.Push( new Vektor( fs ) );
+
+        stack.Push( new Vector( fs ) );
+
         return 0;
     }
 }
+
 internal class LambdaALLROOTS : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Algebraic x = getAlgebraic( st );
-        if ( x is Vektor )
+        int narg = GetNarg( stack );
+        var x = GetAlgebraic( stack );
+
+        if ( x is Vector )
         {
-            x = new Polynomial( new SimpleVariable( "x" ), ( Vektor ) x );
+            x = new Polynomial( new SimpleVariable( "x" ), ( Vector ) x );
         }
+
         if ( !( x is Polynomial ) )
         {
             throw new JasymcaException( "Argument to allroots must be polynomial." );
         }
-        Polynomial p = ( Polynomial ) ( ( Polynomial ) x ).rat();
-        Algebraic[] ps = p.square_free_dec( p.v );
-        Vektor r;
-        ArrayList v = new ArrayList();
+
+        var p = ( Polynomial ) ( ( Polynomial ) x ).Rat();
+        var ps = p.square_free_dec( p._v );
+
+        Vector r;
+        var v = new ArrayList();
+
         for ( int i = 0; i < ps.Length; i++ )
         {
             if ( ps[ i ] is Polynomial )
             {
-                r = ( ( Polynomial ) ps[ i ] ).monic().roots();
-                for ( int k = 0; r != null && k < r.length(); k++ )
+                r = ( ( Polynomial ) ps[ i ] ).Monic().roots();
+
+                for ( int k = 0; r != null && k < r.Length(); k++ )
                 {
                     for ( int j = 0; j <= i; j++ )
                     {
-                        v.Add( r.get( k ) );
+                        v.Add( r[k] );
                     }
                 }
             }
         }
-        st.Push( Vektor.create( v ) );
+
+        stack.Push( Vector.Create( v ) );
+
         return 0;
     }
 }
+
 internal class LambdaDET : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Matrix m = new Matrix( getAlgebraic( st ) );
-        st.Push( m.det() );
+        int narg = GetNarg( stack );
+
+        var m = new Matrix( GetAlgebraic( stack ) );
+
+        stack.Push( m.det() );
+
         return 0;
     }
 }
+
 internal class LambdaEIG : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Matrix m = new Matrix( getAlgebraic( st ) );
-        st.Push( m.eigenvalues() );
+        int narg = GetNarg( stack );
+
+        var m = new Matrix( GetAlgebraic( stack ) );
+
+        stack.Push( m.EigenValues() );
+
         return 0;
     }
 }
+
 internal class LambdaINV : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Matrix m = new Matrix( getAlgebraic( st ) );
-        st.Push( m.invert() );
+        int narg = GetNarg( stack );
+
+        var m = new Matrix( GetAlgebraic( stack ) );
+
+        stack.Push( m.invert() );
+
         return 0;
     }
 }
+
 internal class LambdaPINV : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Matrix m = new Matrix( getAlgebraic( st ) );
-        st.Push( m.pseudoinverse() );
+        int narg = GetNarg( stack );
+
+        var m = new Matrix( GetAlgebraic( stack ) );
+
+        stack.Push( m.pseudoinverse() );
+
         return 0;
     }
 }
 
 internal class LambdaHILB : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        int n = getInteger( st );
-        //JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-        //ORIGINAL LINE: Algebraic[][] a = new Algebraic[n][n];
-        Algebraic[][] a = RectangularArrays.ReturnRectangularAlgebraicArray( n, n );
+        int narg = GetNarg( stack );
+        int n = GetInteger( stack );
+
+        var a = Matrix.CreateRectangularArray<Algebraic>( n, n );
+
         for ( int i = 0; i < n; i++ )
         {
             for ( int k = 0; k < n; k++ )
             {
-                a[ i ][ k ] = new Exakt( 1L, ( long ) ( i + k + 1 ) );
+                a[ i ][ k ] = new Number( 1L, ( long ) ( i + k + 1 ) );
             }
         }
-        st.Push( new Matrix( a ) );
+
+        stack.Push( new Matrix( a ) );
+
         return 0;
     }
 }
+
 internal class LambdaLU : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        Matrix m = ( new Matrix( getAlgebraic( st ) ) ).copy();
-        Matrix B = new Matrix( 1, 1 );
-        Matrix P = new Matrix( 1, 1 );
+        int narg = GetNarg( stack );
+
+        var m = ( new Matrix( GetAlgebraic( stack ) ) ).copy();
+
+        var B = new Matrix( 1, 1 );
+        var P = new Matrix( 1, 1 );
+
         m.rank_decompose( B, P );
+
         if ( length != 2 && length != 3 )
         {
             throw new JasymcaException( "Usage: [l,u,p] = LU( Matrix )." );
         }
+
         if ( length >= 2 )
         {
-            st.Push( B );
-            st.Push( m );
+            stack.Push( B );
+            stack.Push( m );
+
             if ( length == 3 )
             {
-                st.Push( P );
+                stack.Push( P );
             }
         }
+
         length = 1;
+
         return 0;
     }
 }
+
 internal class LambdaSQRT : LambdaAlgebraic
 {
     public LambdaSQRT()
@@ -1567,134 +1971,183 @@ internal class LambdaSQRT : LambdaAlgebraic
         diffrule = "1/(2*sqrt(x))";
         intrule = "2/3*x*sqrt(x)";
     }
+
     internal static string intrule2 = "(2*a*x+b)*sqrt(X)/(4*a)+(4*a*c-b*b)/(8*a*sqrt(a))*log(2*sqrt(a*X)+2*a*x+b)";
-    public override Algebraic integrate( Algebraic arg, Variable x )
+
+    public override Algebraic Integrate( Algebraic arg, Variable x )
     {
         try
         {
-            return base.integrate( arg, x );
+            return base.Integrate( arg, x );
         }
         catch ( JasymcaException )
         {
-            if ( !( arg.depends( x ) ) )
+            if ( !( arg.Depends( x ) ) )
             {
                 throw new JasymcaException( "Expression in function does not depend on Variable." );
             }
-            if ( !( arg is Polynomial ) || ( ( Polynomial ) arg ).degree() != 2 || !( ( Polynomial ) arg ).ratfunc( x ) )
+
+            if ( !( arg is Polynomial ) || ( ( Polynomial ) arg ).Degree() != 2 || !( ( Polynomial ) arg ).IsRat( x ) )
             {
                 throw new JasymcaException( "Can not integrate function " );
             }
+
             Algebraic xp = new Polynomial( x );
-            Polynomial X = ( Polynomial ) arg;
-            Algebraic y = evalx( intrule2, xp );
-            y = y.value( new SimpleVariable( "X" ), X );
-            y = y.value( new SimpleVariable( "a" ), X.a[ 2 ] );
-            y = y.value( new SimpleVariable( "b" ), X.a[ 1 ] );
-            y = y.value( new SimpleVariable( "c" ), X.a[ 0 ] );
-            y = ( new SqrtExpand() ).f_exakt( y );
+
+            var X = ( Polynomial ) arg;
+            var y = evalx( intrule2, xp );
+
+            y = y.Value( new SimpleVariable( "X" ), X );
+            y = y.Value( new SimpleVariable( "a" ), X[ 2 ] );
+            y = y.Value( new SimpleVariable( "b" ), X[ 1 ] );
+            y = y.Value( new SimpleVariable( "c" ), X[ 0 ] );
+
+            y = ( new SqrtExpand() ).SymEval( y );
+
             return y;
         }
     }
-    internal override Zahl f( Zahl x )
+
+    internal override Symbolic PreEval( Symbolic x )
     {
-        Unexakt z = x.unexakt();
-        if ( z.imag == 0.0 )
+        var z = x.ToComplex();
+
+        if ( z.Im == 0.0 )
         {
-            if ( z.real < 0.0 )
+            if ( z.Re < 0.0 )
             {
-                return new Unexakt( 0, Math.Sqrt( -z.real ) );
+                return new Complex( 0, Math.Sqrt( -z.Re ) );
             }
-            return new Unexakt( Math.Sqrt( z.real ) );
+
+            return new Complex( Math.Sqrt( z.Re ) );
         }
-        double sr = Math.Sqrt( Math.Sqrt( z.real * z.real + z.imag * z.imag ) );
-        double phi = JMath.atan2( z.imag, z.real ) / 2.0;
-        return new Unexakt( sr * Math.Cos( phi ), sr * Math.Sin( phi ) );
+
+        var sr = Math.Sqrt( Math.Sqrt( z.Re * z.Re + z.Im * z.Im ) );
+
+        var phi = JMath.atan2( z.Im, z.Re ) / 2.0;
+
+        return new Complex( sr * Math.Cos( phi ), sr * Math.Sin( phi ) );
     }
-    internal override Algebraic f_exakt( Algebraic x )
+
+    internal override Algebraic SymEval( Algebraic x )
     {
-        if ( x.Equals( Zahl.ONE ) || x.Equals( Zahl.ZERO ) )
+        if ( x.Equals( Symbolic.ONE ) || x.Equals( Symbolic.ZERO ) )
         {
             return x;
         }
-        if ( x.Equals( Zahl.MINUS ) )
+
+        if ( x.Equals( Symbolic.MINUS ) )
         {
-            return Zahl.IONE;
+            return Symbolic.IONE;
         }
-        if ( x is Zahl )
+
+        if ( x is Symbolic )
         {
-            return fzexakt( ( Zahl ) x );
+            return fzexakt( ( Symbolic ) x );
         }
-        if ( x is Polynomial && ( ( Polynomial ) x ).degree() == 1 && ( ( Polynomial ) x ).a[ 0 ].Equals( Zahl.ZERO ) && ( ( Polynomial ) x ).a[ 1 ].Equals( Zahl.ONE ) && ( ( Polynomial ) x ).v is FunctionVariable && ( ( FunctionVariable ) ( ( Polynomial ) x ).v ).fname.Equals( "exp" ) )
+
+        if ( x is Polynomial 
+            && ( ( Polynomial ) x ).Degree() == 1 
+            && ( ( Polynomial ) x )[0].Equals( Symbolic.ZERO ) 
+            && ( ( Polynomial ) x )[1].Equals( Symbolic.ONE ) 
+            && ( ( Polynomial ) x )._v is FunctionVariable 
+            && ( ( FunctionVariable ) ( ( Polynomial ) x )._v ).Name.Equals( "exp" ) )
         {
-            return FunctionVariable.create( "exp", ( ( FunctionVariable ) ( ( Polynomial ) x ).v ).arg.div( Zahl.TWO ) );
+            return FunctionVariable.Create( "exp", ( ( FunctionVariable ) ( ( Polynomial ) x )._v ).Var / Symbolic.TWO );
         }
+
         return null;
     }
-    internal virtual Algebraic fzexakt( Zahl x )
+
+    internal virtual Algebraic fzexakt( Symbolic x )
     {
-        if ( x is Exakt && !x.komplexq() )
+        if ( x is Number && !x.IsComplex() )
         {
-            if ( x.smaller( Zahl.ZERO ) )
+            if ( x < Symbolic.ZERO )
             {
-                Algebraic r = fzexakt( ( Zahl ) x.mult( Zahl.MINUS ) );
+                var r = fzexakt( ( Symbolic ) ( -x ) );
+
                 if ( r != null )
                 {
-                    return Zahl.IONE.mult( r );
+                    return Symbolic.IONE * r;
                 }
+
                 return r;
             }
-            long nom = ( long ) ( ( Exakt ) x ).real[ 0 ].longValue();
-            long den = ( long ) ( ( Exakt ) x ).real[ 1 ].longValue();
+
+            var nom = ( ( Number ) x ).real[ 0 ].longValue();
+            var den = ( ( Number ) x ).real[ 1 ].longValue();
+
             long a0 = introot( nom ), a1 = nom / ( a0 * a0 );
             long b0 = introot( den ), b1 = den / ( b0 * b0 );
-            BigInteger[] br = new BigInteger[] { BigInteger.valueOf( a0 ), BigInteger.valueOf( b0 * b1 ) };
-            Exakt r1 = new Exakt( br );
+
+            var br = new[] { BigInteger.valueOf( a0 ), BigInteger.valueOf( b0 * b1 ) };
+
+            var r1 = new Number( br );
+
             a0 = a1 * b1;
+
             if ( a0 == 1L )
             {
                 return r1;
             }
-            return r1.mult( new Polynomial( new FunctionVariable( "sqrt", new Exakt( BigInteger.valueOf( a0 ) ), this ) ) );
+
+            return r1 * new Polynomial( new FunctionVariable( "sqrt", new Number( BigInteger.valueOf( a0 ) ), this ) );
         }
+
         return null;
     }
+
     internal virtual long introot( long x )
     {
-        long s = 1L; long f; long g; long[] t = new long[] { 2L, 3L, 5L };
-        for ( int i = 0; i < t.Length; i++ )
+        long s = 1L; 
+        long f; 
+        long g;
+         
+        long[] t = { 2L, 3L, 5L };
+
+        foreach (long t1 in t)
         {
-            g = t[ i ];
+            g = t1;
             f = g * g;
+
             while ( x % f == 0L && x != 1L )
             {
                 s *= g;
                 x /= f;
             }
         }
+
         for ( long i = 6L; x != 1L; i += 6L )
         {
             g = i + 1;
             f = g * g;
+
             while ( x % f == 0L && x != 1L )
             {
                 s *= g;
                 x /= f;
             }
+
             g = i + 5;
             f = g * g;
+
             while ( x % f == 0L && x != 1L )
             {
                 s *= g;
                 x /= f;
             }
+
             if ( f > x )
             {
                 break;
             }
         }
+
         return s;
     }
 }
+
 internal class LambdaSIGN : LambdaAlgebraic
 {
     public LambdaSIGN()
@@ -1702,19 +2155,23 @@ internal class LambdaSIGN : LambdaAlgebraic
         diffrule = "x-x";
         intrule = "x*sign(x)";
     }
-    internal override Algebraic f_exakt( Algebraic x )
+
+    internal override Algebraic SymEval( Algebraic a )
     {
-        if ( x is Zahl )
+        if ( a is Symbolic )
         {
-            return f( ( Zahl ) x );
+            return PreEval( ( Symbolic ) a );
         }
+
         return null;
     }
-    internal override Zahl f( Zahl x )
+
+    internal override Symbolic PreEval( Symbolic s )
     {
-        return x.smaller( Zahl.ZERO ) ? Zahl.MINUS : Zahl.ONE;
+        return s.Smaller( Symbolic.ZERO ) ? Symbolic.MINUS : Symbolic.ONE;
     }
 }
+
 internal class LambdaABS : LambdaAlgebraic
 {
     public LambdaABS()
@@ -1722,91 +2179,117 @@ internal class LambdaABS : LambdaAlgebraic
         diffrule = "sign(x)";
         intrule = "sign(x)*x^2/2";
     }
-    internal override Algebraic f_exakt( Algebraic x )
+
+    internal override Algebraic SymEval( Algebraic a )
     {
-        if ( x is Zahl )
+        if ( a is Symbolic )
         {
-            return f( ( Zahl ) x );
+            return PreEval( ( Symbolic ) a );
         }
-        return FunctionVariable.create( "sqrt", x.mult( x.cc() ) );
+
+        return FunctionVariable.Create( "sqrt", a * a.Conj() );
     }
-    internal override Zahl f( Zahl x )
+
+    internal override Symbolic PreEval( Symbolic x )
     {
-        return new Unexakt( x.norm() );
+        return new Complex( x.Norm() );
     }
 }
+
 internal class ExpandUser : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic x1 )
+    internal override Algebraic SymEval( Algebraic x1 )
     {
         if ( !( x1 is Polynomial ) )
         {
-            return x1.map( this );
+            return x1.Map( this );
         }
-        Polynomial p = ( Polynomial ) x1;
-        if ( p.v is SimpleVariable )
+
+        var p = ( Polynomial ) x1;
+
+        if ( p._v is SimpleVariable )
         {
-            return p.map( this );
+            return p.Map( this );
         }
-        FunctionVariable f = ( FunctionVariable ) p.v;
-        object lx = pc.env.getValue( f.fname );
+
+        var f = ( FunctionVariable ) p._v;
+
+        var lx = pc.env.getValue( f.Name );
+
         if ( !( lx is UserFunction ) )
         {
-            return p.map( this );
+            return p.Map( this );
         }
-        UserFunction la = ( UserFunction ) lx;
+
+        var la = ( UserFunction ) lx;
+
         if ( !( la.body is Algebraic ) )
         {
             return x1;
         }
-        Algebraic body = ( Algebraic ) la.body;
+
+        var body = la.body;
+
         Algebraic x;
-        if ( la.@var.Length == 1 )
+
+        if ( la.sv.Length == 1 )
         {
-            x = body.value( la.@var[ 0 ], f.arg );
+            x = body.Value( la.sv[ 0 ], f.Var );
         }
-        else if ( f.arg is Vektor && ( ( Vektor ) f.arg ).length() == la.@var.Length )
+        else if ( f.Var is Vector && ( ( Vector ) f.Var ).Length() == la.sv.Length )
         {
-            x = la.fv( ( Vektor ) f.arg );
+            x = la.fv( ( Vector ) f.Var );
         }
         else
         {
             throw new JasymcaException( "Wrong argument to function " + la.fname );
         }
-        Algebraic r = Zahl.ZERO;
-        for ( int i = p.a.Length - 1; i > 0; i-- )
+
+        Algebraic r = Symbolic.ZERO;
+
+        for ( int i = p.Coeffs.Length - 1; i > 0; i-- )
         {
-            r = r.add( f_exakt( p.a[ i ] ) ).mult( x );
+            r = ( r + SymEval( p[i] ) ) * x;
         }
-        if ( p.a.Length > 0 )
+        if ( p.Coeffs.Length > 0 )
         {
-            r = r.add( f_exakt( p.a[ 0 ] ) );
+            r = r + SymEval( p[0] );
         }
+
         return r;
     }
 }
+
 internal class ASS : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
-        object[] val = new object[ narg ];
+        int narg = GetNarg( stack );
+
+        var val = new object[ narg ];
+
         for ( int i = 0; i < narg; i++ )
         {
-            val[ i ] = st.Pop();
+            val[ i ] = stack.Pop();
         }
+
         for ( int i = narg - 1; i >= 0; i-- )
         {
-            string name = getSymbol( st );
+            var name = GetSymbol( stack );
+
             if ( !name.StartsWith( "$", StringComparison.Ordinal ) )
             {
                 throw new JasymcaException( "Illegal lvalue: " + name );
             }
+
             name = name.Substring( 1 );
-            bool idxq = st.Count > 0 && st.Peek() is int?;
+
+            bool idxq = stack.Count > 0 && stack.Peek() is int?;
+
             if ( !idxq )
             {
                 pc.env.putValue( name, val[ i ] );
+
                 if ( val[ i ] is Algebraic )
                 {
                     ( ( Algebraic ) val[ i ] ).Name = name;
@@ -1818,25 +2301,35 @@ internal class ASS : Lambda
                 {
                     throw new JasymcaException( "No index allowed here: " + val[ i ] );
                 }
-                Matrix rhs = new Matrix( ( Algebraic ) val[ i ] );
-                Matrix lhs = new Matrix( ( Algebraic ) pc.env.getValue( name ) );
-                Index idx = Index.createIndex( st, lhs );
-                lhs.insert( rhs, idx );
-                val[ i ] = lhs.reduce();
+
+                var rhs = new Matrix( ( Algebraic ) val[ i ] );
+                var lhs = new Matrix( ( Algebraic ) pc.env.getValue( name ) );
+
+                var idx = Index.createIndex( stack, lhs );
+
+                lhs.Insert( rhs, idx );
+
+                val[ i ] = lhs.Reduce();
+
                 pc.env.putValue( name, val[ i ] );
             }
         }
+
         for ( int i = 0; i < narg; i++ )
         {
-            st.Push( val[ i ] );
+            stack.Push( val[ i ] );
         }
+
         return 0;
     }
-    internal static int lambdap( Stack st, Lambda op )
+
+    internal static int lambdap( Stack stack, Lambda op )
     {
-        int narg = getNarg( st );
-        object y = st.Pop();
-        string name = getSymbol( st );
+        int narg = GetNarg( stack );
+
+        var y = stack.Pop();
+
+        var name = GetSymbol( stack );
 
         if ( !name.StartsWith( "$", StringComparison.Ordinal ) )
         {
@@ -1849,21 +2342,26 @@ internal class ASS : Lambda
 
         return 0;
     }
+
     internal static int lambdai( Stack st, bool sign, bool pre )
     {
-        int narg = getNarg( st );
-        string name = getSymbol( st );
+        int narg = GetNarg( st );
+
+        var name = GetSymbol( st );
+
         if ( !name.StartsWith( "$", StringComparison.Ordinal ) )
         {
             throw new JasymcaException( "Illegal lvalue: " + name );
         }
+
         object p = null;
+
         if ( !pre )
         {
             p = pc.env.getValue( name.Substring( 1 ) );
         }
 
-        var t = new List { name, name.Substring(1), Zahl.ONE, 2, Operator.get( sign ? "+" : "-" ).Lambda, 1, Operator.get( "=" ).Lambda };
+        var t = new List { name, name.Substring(1), Symbolic.ONE, 2, Operator.get( sign ? "+" : "-" ).Lambda, 1, Operator.get( "=" ).Lambda };
 
         pc.process_list( t, true );
 
@@ -1873,60 +2371,55 @@ internal class ASS : Lambda
             {
                 ( ( Algebraic ) p ).Name = null;
             }
+
             st.Pop();
             st.Push( p );
         }
+
         return 0;
     }
 }
+
 internal class LambdaWHO : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
         if ( pc.ps != null )
         {
             pc.ps.println( pc.env.ToString() );
         }
+
         return 0;
     }
 }
+
 internal class LambdaADDPATH : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( stack );
+
         while ( narg-- > 0 )
         {
-            object s = st.Pop();
+            var s = stack.Pop();
+
             if ( !( s is string ) )
             {
                 throw new JasymcaException( "Usage: ADDPATH( dir1, dir2, ... )" );
             }
-            pc.env.addPath( ( ( string ) s ).Substring( 1 ) );
+
+            pc.env.addPath( ( ( string ) s ).Substring(1) );
         }
+
         return 0;
     }
 }
+
 internal class LambdaPATH : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack stack )
     {
-        // TODO: Check this
-        int n = Environment.path.Count;
-
-        var s = "";
-
-        while ( n-- > 0 )
-        {
-            var p = Environment.path[n];
-
-            s = s + p;
-
-            if ( n != 0 )
-            {
-                s = s + ":";
-            }
-        }
+        var s = string.Join( ":", Environment.Paths.Cast<string>().ToArray() );
 
         if ( pc.ps != null )
         {

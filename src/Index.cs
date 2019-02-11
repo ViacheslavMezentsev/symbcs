@@ -1,160 +1,144 @@
 ﻿using System.Collections;
+using System.Linq;
 
 public class Index
 {
+
+    #region Internal fields
+
+    internal int row_max, col_max;
     internal int[] row;
     internal int[] col;
-    internal int row_max, col_max;
 
+    #endregion
+
+    #region Constructors
+    
     public Index( int[] row, int[] col )
     {
         this.row = row;
         this.col = col;
 
-        row_max = maxint( row );
-        col_max = maxint( col );
+        row_max = row.Max();
+        col_max = col.Max();
     }
 
     public Index( int row, int col, Algebraic x )
     {
         int width = 1, height = 1;
 
-        if ( x is Vektor )
+        if ( x is Vector )
         {
-            width = ( ( Vektor ) x ).length();
+            width = ( ( Vector ) x ).Length();
         }
         else if ( x is Matrix )
         {
-            width = ( ( Matrix ) x ).nrow();
-            height = ( ( Matrix ) x ).ncol();
+            width = ( ( Matrix ) x ).Rows();
+            height = ( ( Matrix ) x ).Cols();
         }
 
         this.row = series( row, row + height - 1 );
         this.col = series( col, col + width - 1 );
 
-        row_max = maxint( this.row );
-        col_max = maxint( this.col );
+        row_max = this.row.Max();
+        col_max = this.col.Max();
     }
 
-    private int maxint( int[] c )
-    {
-        int max = c[ 0 ];
-
-        for ( int i = 1; i < c.Length; i++ )
-        {
-            if ( c[ i ] > max )
-            {
-                max = c[ i ];
-            }
-        }
-
-        return max;
-    }
+    #endregion
 
     public override string ToString()
     {
-        string s = "Index = \nRows: ";
-
-        for ( int i = 0; i < row.Length; i++ )
-        {
-            s += "  " + row[ i ];
-        }
+        var s = row.Aggregate( "Index = \nRows: ", ( current, t ) => current + ( "  " + t ) );
 
         s += "\nColumns: ";
 
-        for ( int k = 0; k < col.Length; k++ )
-        {
-            s += "  " + col[ k ];
-        }
-
-        return s;
+        return col.Aggregate( s, ( current, t ) => current + ( "  " + t ) );
     }
 
-    public static Index createIndex( Algebraic idx_in, Matrix x )
+    public static Index createIndex( Algebraic indx, Matrix x )
     {
-        if ( !idx_in.constantq() )
+        if ( !indx.IsConstant() )
         {
-            throw new JasymcaException( "Index not constant: " + idx_in );
+            throw new JasymcaException( "Index not constant: " + indx );
         }
 
-        idx_in = idx_in.reduce();
+        indx = indx.Reduce();
 
-        if ( idx_in is Zahl && ( ( Zahl ) idx_in ).integerq() )
+        if ( indx is Symbolic && ( ( Symbolic ) indx ).IsInteger() )
         {
-            int[] row = new int[] { 1 };
-            int[] col = new int[] { ( ( Zahl ) idx_in ).intval() };
+            int[] row = { 1 };
+            int[] col = { ( ( Symbolic ) indx ).ToInt() };
 
             return new Index( row, col );
         }
-        else if ( idx_in is Vektor && ( ( Vektor ) idx_in ).length() == 2 )
+        else if ( indx is Vector && ( ( Vector ) indx ).Length() == 2 )
         {
-            Algebraic r = ( ( Vektor ) idx_in ).get( 0 );
-            Algebraic c = ( ( Vektor ) idx_in ).get( 1 );
+            var r = ( ( Vector ) indx )[0];
+            var c = ( ( Vector ) indx )[1];
 
-            if ( r is Zahl && ( ( Zahl ) r ).integerq() && c is Zahl && ( ( Zahl ) c ).integerq() )
+            if ( r is Symbolic && ( ( Symbolic ) r ).IsInteger() && c is Symbolic && ( ( Symbolic ) c ).IsInteger() )
             {
-                int[] row = new int[] { ( ( Zahl ) r ).intval() };
-                int[] col = new int[] { ( ( Zahl ) c ).intval() };
+                int[] row = { ( ( Symbolic ) r ).ToInt() };
+                int[] col = { ( ( Symbolic ) c ).ToInt() };
 
                 return new Index( row, col );
             }
         }
 
-        throw new JasymcaException( "Not a legel index: " + idx_in );
+        throw new JasymcaException( "Not a legel index: " + indx );
     }
 
-    public static Index createIndex( Stack st, Matrix x )
+    public static Index createIndex( Stack stack, Matrix x )
     {
         int[] row, col;
-        int length = Lambda.getNarg( st );
+
+        int length = Lambda.GetNarg( stack );
+
         object rdx, cdx;
+
         if ( length > 1 )
         {
-            rdx = st.Pop();
-            if ( ":".Equals( rdx ) )
-            {
-                row = series( 1, x.nrow() );
-            }
-            else
-            {
-                row = setseries( ( Algebraic ) rdx );
-            }
-            cdx = st.Pop();
+            rdx = stack.Pop();
+
+            row = ":".Equals( rdx ) ? series( 1, x.Rows() ) : setseries( ( Algebraic ) rdx );
+
+            cdx = stack.Pop();
         }
         else
         {
-            cdx = st.Pop();
-            row = new int[ 1 ];
-            row[ 0 ] = 1;
+            cdx = stack.Pop();
+
+            row = new int[1];
+
+            row[0] = 1;
         }
-        if ( ":".Equals( cdx ) )
-        {
-            col = series( 1, x.ncol() );
-        }
-        else
-        {
-            col = setseries( ( Algebraic ) cdx );
-        }
+
+        col = ":".Equals( cdx ) ? series( 1, x.Cols() ) : setseries( ( Algebraic ) cdx );
+
         return new Index( row, col );
     }
 
     internal static int[] setseries( Algebraic c )
     {
         int[] s;
-        if ( c is Zahl && ( ( Zahl ) c ).integerq() )
+
+        if ( c is Symbolic && ( ( Symbolic ) c ).IsInteger() )
         {
-            s = new int[ 1 ];
-            s[ 0 ] = ( ( Zahl ) c ).intval();
+            s = new int[1];
+
+            s[0] = ( ( Symbolic ) c ).ToInt();
         }
-        else if ( c is Vektor )
+        else if ( c is Vector )
         {
-            s = new int[ ( ( Vektor ) c ).length() ];
+            s = new int[ ( ( Vector ) c ).Length() ];
+
             for ( int i = 0; i < s.Length; i++ )
             {
-                Algebraic a = ( ( Vektor ) c ).get( i );
-                if ( a is Zahl && ( ( Zahl ) a ).integerq() )
+                var a = ( ( Vector ) c )[i];
+
+                if ( a is Symbolic && ( ( Symbolic ) a ).IsInteger() )
                 {
-                    s[ i ] = ( ( Zahl ) a ).intval();
+                    s[i] = ( ( Symbolic ) a ).ToInt();
                 }
                 else
                 {
@@ -185,22 +169,22 @@ public class Index
 
 internal class REFX : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( st );
 
-        Algebraic x = getAlgebraic( st );
+        Algebraic x = GetAlgebraic( st );
 
         Algebraic index_in = CreateVector.crv( st );
 
-        if ( index_in.constantq() )
+        if ( index_in.IsConstant() )
         {
             Matrix mx = new Matrix( ( Algebraic ) x );
 
             Index idx = Index.createIndex( index_in, mx );
 
-            mx = mx.extract( idx );
-            x = mx.reduce();
+            mx = mx.Extract( idx );
+            x = mx.Reduce();
         }
         else
         {
@@ -217,14 +201,14 @@ internal class REFX : Lambda
 
 internal class REFM : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
-        Algebraic x = getAlgebraic( st );
+        int narg = GetNarg( st );
+        Algebraic x = GetAlgebraic( st );
         Matrix mx = new Matrix( ( Algebraic ) x );
         Index idx = Index.createIndex( st, mx );
-        mx = mx.extract( idx );
-        st.Push( mx.reduce() );
+        mx = mx.Extract( idx );
+        st.Push( mx.Reduce() );
         return 0;
     }
 }
@@ -238,14 +222,14 @@ internal class MatRef : LambdaAlgebraic
         this.mx = new Matrix( x );
     }
 
-    internal override Algebraic f_exakt( Algebraic x )
+    internal override Algebraic SymEval( Algebraic x )
     {
-        if ( x.constantq() )
+        if ( x.IsConstant() )
         {
             Index idx = Index.createIndex( x, mx );
-            Matrix m = mx.extract( idx );
+            Matrix m = mx.Extract( idx );
 
-            return m.reduce();
+            return m.Reduce();
         }
 
         return null;

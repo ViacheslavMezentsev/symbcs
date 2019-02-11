@@ -13,12 +13,11 @@ public class BigInteger
         {
             return '\u0000';
         }
-        if ( digit < 10 )
-        {
-            return ( char ) ( digit + '0' );
-        }
-        return ( char ) ( digit - 10 + 'a' );
+
+        return digit + digit < 10 ? '0' : ( char ) ( 'a' - 10 );
     }
+
+    #region Private fields
 
     [NonSerialized]
     private int ival;
@@ -53,6 +52,10 @@ public class BigInteger
     private static readonly int[] primes = { 2, 3, 5, 7 };
     private static readonly int[] k = { 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1250, int.MaxValue };
     private static readonly int[] t = { 27, 18, 15, 12, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+    #endregion
+
+    #region Constructors
 
     static BigInteger()
     {
@@ -94,7 +97,7 @@ public class BigInteger
             throw new NumberFormatException();
         }
 
-        words = byteArrayToIntArray( val, val[ 0 ] < 0 ? -1 : 0 );
+        words = byteArrayToIntArray( val, val[0] < 0 ? -1 : 0 );
 
         var result = make( words, words.Length );
 
@@ -138,6 +141,8 @@ public class BigInteger
             setNegative();
         }
     }
+
+    #endregion
 
     public static BigInteger valueOf( long val )
     {
@@ -258,7 +263,7 @@ public class BigInteger
         }
     }
 
-    private bool Negative
+    private bool IsNegative
     {
         get { return ( words == null ? ival : words[ ival - 1 ] ) < 0; }
     }
@@ -282,8 +287,8 @@ public class BigInteger
             return x.ival < y.ival ? -1 : x.ival > y.ival ? 1 : 0;
         }
 
-        bool x_negative = x.Negative;
-        bool y_negative = y.Negative;
+        bool x_negative = x.IsNegative;
+        bool y_negative = y.IsNegative;
 
         if ( x_negative != y_negative )
         {
@@ -316,20 +321,14 @@ public class BigInteger
         return compareTo( this, val ) > 0 ? this : val;
     }
 
-    private bool Zero
+    private bool IsZeroOrNull
     {
-        get
-        {
-            return words == null && ival == 0;
-        }
+        get { return words == null && ival == 0; }
     }
 
-    private bool One
+    private bool IsOneOrNull
     {
-        get
-        {
-            return words == null && ival == 1;
-        }
+        get { return words == null && ival == 1; }
     }
 
     private static int wordsNeeded( int[] words, int len )
@@ -436,10 +435,7 @@ public class BigInteger
 
     private int Add
     {
-        set
-        {
-            setAdd( this, value );
-        }
+        set { setAdd( this, value ); }
     }
 
     private void set( long y )
@@ -630,7 +626,7 @@ public class BigInteger
         int[] xwords;
         int[] ywords;
 
-        if ( x.Negative )
+        if ( x.IsNegative )
         {
             negative = true;
             xwords = new int[ xlen ];
@@ -643,7 +639,7 @@ public class BigInteger
             xwords = x.words;
         }
 
-        if ( y.Negative )
+        if ( y.IsNegative )
         {
             negative = !negative;
             ywords = new int[ ylen ];
@@ -808,8 +804,8 @@ public class BigInteger
             }
         }
 
-        bool xNegative = x.Negative;
-        bool yNegative = y.Negative;
+        bool xNegative = x.IsNegative;
+        bool yNegative = y.IsNegative;
         bool qNegative = xNegative ^ yNegative;
 
         int ylen = y.words == null ? 1 : y.ival;
@@ -972,7 +968,7 @@ public class BigInteger
                 if ( y.words == null )
                 {
                     tmp = remainder;
-                    tmp.set( yNegative ? ywords[ 0 ] + y.ival : ywords[ 0 ] - y.ival );
+                    tmp.set( yNegative ? ywords[0] + y.ival : ywords[0] - y.ival );
                 }
                 else
                 {
@@ -1000,7 +996,7 @@ public class BigInteger
 
     public virtual BigInteger divide( BigInteger val )
     {
-        if ( val.Zero )
+        if ( val.IsZeroOrNull )
         {
             throw new ArithmeticException( "divisor is zero" );
         }
@@ -1014,7 +1010,7 @@ public class BigInteger
 
     public virtual BigInteger remainder( BigInteger val )
     {
-        if ( val.Zero )
+        if ( val.IsZeroOrNull )
         {
             throw new ArithmeticException( "divisor is zero" );
         }
@@ -1028,7 +1024,7 @@ public class BigInteger
 
     public virtual BigInteger[] divideAndRemainder( BigInteger val )
     {
-        if ( val.Zero )
+        if ( val.IsZeroOrNull )
         {
             throw new ArithmeticException( "divisor is zero" );
         }
@@ -1048,7 +1044,7 @@ public class BigInteger
 
     public virtual BigInteger mod( BigInteger m )
     {
-        if ( m.Negative || m.Zero )
+        if ( m.IsNegative || m.IsZeroOrNull )
         {
             throw new ArithmeticException( "non-positive modulus" );
         }
@@ -1072,7 +1068,7 @@ public class BigInteger
             throw new ArithmeticException( "negative exponent" );
         }
 
-        if ( Zero )
+        if ( IsZeroOrNull )
         {
             return this;
         }
@@ -1080,7 +1076,7 @@ public class BigInteger
         int plen = words == null ? 1 : ival;
         int blen = ( ( bitLength() * exponent ) >> 5 ) + 2 * plen;
 
-        bool negative = Negative && ( exponent & 1 ) != 0;
+        bool negative = IsNegative && ( exponent & 1 ) != 0;
 
         int[] pow2 = new int[ blen ];
         int[] rwords = new int[ blen ];
@@ -1169,12 +1165,12 @@ public class BigInteger
 
     private static void euclidInv( BigInteger a, BigInteger b, BigInteger prevDiv, BigInteger[] xy )
     {
-        if ( b.Zero )
+        if ( b.IsZeroOrNull )
         {
             throw new ArithmeticException( "not invertible" );
         }
 
-        if ( b.One )
+        if ( b.IsOneOrNull )
         {
             xy[0] = neg( prevDiv );
             xy[1] = ONE;
@@ -1210,17 +1206,17 @@ public class BigInteger
 
     public virtual BigInteger modInverse( BigInteger y )
     {
-        if ( y.Negative || y.Zero )
+        if ( y.IsNegative || y.IsZeroOrNull )
         {
             throw new ArithmeticException( "non-positive modulo" );
         }
 
-        if ( y.One )
+        if ( y.IsOneOrNull )
         {
             return ZERO;
         }
 
-        if ( One )
+        if ( IsOneOrNull )
         {
             return ONE;
         }
@@ -1231,7 +1227,7 @@ public class BigInteger
 
         if ( y.words == null )
         {
-            int xval = ( words != null || Negative ) ? mod( y ).ival : ival;
+            int xval = ( words != null || IsNegative ) ? mod( y ).ival : ival;
             int yval = y.ival;
 
             if ( yval > xval )
@@ -1251,7 +1247,7 @@ public class BigInteger
         }
         else
         {
-            var x = Negative ? this.mod(y) : this;
+            var x = IsNegative ? this.mod(y) : this;
 
             if ( x.compareTo( y ) < 0 )
             {
@@ -1275,7 +1271,7 @@ public class BigInteger
 
             result = swapped ? xy[0] : xy[1];
 
-            if ( result.Negative )
+            if ( result.IsNegative )
             {
                 result = add( result, swapped ? x : y, 1 );
             }
@@ -1286,17 +1282,17 @@ public class BigInteger
 
     public virtual BigInteger modPow( BigInteger exponent, BigInteger m )
     {
-        if ( m.Negative || m.Zero )
+        if ( m.IsNegative || m.IsZeroOrNull )
         {
             throw new ArithmeticException( "non-positive modulo" );
         }
 
-        if ( exponent.Negative )
+        if ( exponent.IsNegative )
         {
             return modInverse(m);
         }
 
-        if ( exponent.One )
+        if ( exponent.IsOneOrNull )
         {
             return mod(m);
         }
@@ -1305,9 +1301,9 @@ public class BigInteger
         var t = this;
         var u = exponent;
 
-        while ( !u.Zero )
+        while ( !u.IsZeroOrNull )
         {
-            if ( u.and( ONE ).One )
+            if ( u.and( ONE ).IsOneOrNull )
             {
                 s = times( s, t ).mod(m);
             }
@@ -1336,6 +1332,7 @@ public class BigInteger
             {
                 return a;
             }
+
             if ( b == 1 )
             {
                 return b;
@@ -1404,7 +1401,7 @@ public class BigInteger
             words = xwords
         };
 
-        if ( result.Negative && len < xwords.Length )
+        if ( result.IsNegative && len < xwords.Length )
         {
             xwords[ len ] = 0;
             result.ival++;
@@ -1433,7 +1430,7 @@ public class BigInteger
 
             divide( this, smallFixNums[ primes[i] - minFixNum ], null, rem, TRUNCATE );
 
-            if ( rem.canonicalize().Zero )
+            if ( rem.canonicalize().IsZeroOrNull )
             {
                 return false;
             }
@@ -1468,14 +1465,14 @@ public class BigInteger
         {
             z = smallFixNums[ primes[k] - minFixNum ].modPow( m, this );
 
-            if ( z.One || z.Equals( pMinus1 ) )
+            if ( z.IsOneOrNull || z.Equals( pMinus1 ) )
             {
                 continue;
             }
 
             for ( i = 0; i < b; )
             {
-                if ( z.One )
+                if ( z.IsOneOrNull )
                 {
                     return false;
                 }
@@ -1528,7 +1525,7 @@ public class BigInteger
             }
 
             xwords = new int[1];
-            xwords[ 0 ] = x.ival;
+            xwords[0] = x.ival;
             xlen = 1;
         }
         else
@@ -1583,7 +1580,7 @@ public class BigInteger
         }
         else
         {
-            bool neg = x.Negative;
+            bool neg = x.IsNegative;
             int word_count = count >> 5;
             count &= 31;
 
@@ -1673,7 +1670,7 @@ public class BigInteger
         }
         else
         {
-            bool neg = Negative;
+            bool neg = IsNegative;
             int[] work;
 
             if ( neg || radix != 16 )
@@ -1799,10 +1796,10 @@ public class BigInteger
 
         if ( ival == 1 )
         {
-            return words[ 0 ];
+            return words[0];
         }
 
-        return ( ( long ) words[ 1 ] << 32 ) + ( ( long ) words[ 0 ] & 0xffffffffL );
+        return ( ( long ) words[1] << 32 ) + ( ( long ) words[0] & 0xffffffffL );
     }
 
     public override int GetHashCode()
@@ -1868,7 +1865,6 @@ public class BigInteger
             }
             else if ( ch == '_' || ( byte_len == 0 && ( ch == ' ' || ch == '\t' ) ) )
             {
-                continue;
             }
             else
             {
@@ -1912,7 +1908,7 @@ public class BigInteger
         return make( words, size );
     }
 
-    public virtual double doubleValue()
+    public virtual double ToDouble()
     {
         if ( words == null )
         {
@@ -1924,7 +1920,7 @@ public class BigInteger
             return ( double ) longValue();
         }
 
-        if ( Negative )
+        if ( IsNegative )
         {
             return neg( this ).roundToDouble( 0, true, false );
         }
@@ -1932,9 +1928,9 @@ public class BigInteger
         return roundToDouble( 0, false, false );
     }
 
-    public virtual float floatValue()
+    public virtual float ToFloat()
     {
-        return ( float ) doubleValue();
+        return ( float ) ToDouble();
     }
 
     private bool checkBits( int n )
@@ -2029,6 +2025,7 @@ public class BigInteger
         long bits_exp = ( exp <= 0 ) ? 0 : ( ( long ) exp ) << 52;
         long bits_mant = m & ~( 1L << 52 );
 
+        // TODO: Check this
         return BitConverter.Int64BitsToDouble( bits_sign | bits_exp | bits_mant );
     }
 
@@ -2047,7 +2044,7 @@ public class BigInteger
 
             for ( int i = len; --i >= 0; )
             {
-                words[ i ] = this.words[ i ];
+                words[i] = this.words[i];
             }
         }
 
@@ -2058,7 +2055,7 @@ public class BigInteger
 
         for ( int i = words.Length; --i > len; )
         {
-            words[ i ] = 0;
+            words[i] = 0;
         }
     }
 
@@ -2112,7 +2109,7 @@ public class BigInteger
 
     private static BigInteger abs( BigInteger x )
     {
-        return x.Negative ? neg( x ) : x;
+        return x.IsNegative ? neg(x) : x;
     }
 
     public virtual BigInteger abs()
@@ -2188,7 +2185,7 @@ public class BigInteger
             case 0:
                 return ZERO;
             case 1:
-                return x.and( y );
+                return x.and(y);
             case 3:
                 return x;
             case 5:
@@ -2220,6 +2217,7 @@ public class BigInteger
         int xi;
         int yi;
         int xlen, ylen;
+
         if ( y.words == null )
         {
             yi = y.ival;
@@ -2227,9 +2225,10 @@ public class BigInteger
         }
         else
         {
-            yi = y.words[ 0 ];
+            yi = y.words[0];
             ylen = y.ival;
         }
+
         if ( x.words == null )
         {
             xi = x.ival;
@@ -2240,14 +2239,17 @@ public class BigInteger
             xi = x.words[ 0 ];
             xlen = x.ival;
         }
+
         if ( xlen > 1 )
         {
             result.realloc( xlen );
         }
+
         int[] w = result.words;
         int i = 0;
         int finish = 0;
         int ni;
+
         switch ( op )
         {
             case 0:
@@ -2457,10 +2459,12 @@ public class BigInteger
                 ni = -1;
                 break;
         }
+
         if ( i + 1 == xlen )
         {
             finish = 0;
         }
+
         switch ( finish )
         {
             case 0:
@@ -2471,21 +2475,24 @@ public class BigInteger
                 }
                 w[ i++ ] = ni;
                 break;
+
             case 1:
-                w[ i ] = ni;
+                w[i] = ni;
                 while ( ++i < xlen )
                 {
-                    w[ i ] = x.words[ i ];
+                    w[i] = x.words[i];
                 }
                 break;
+
             case 2:
-                w[ i ] = ni;
+                w[i] = ni;
                 while ( ++i < xlen )
                 {
-                    w[ i ] = ~x.words[ i ];
+                    w[i] = ~x.words[i];
                 }
                 break;
         }
+
         result.ival = i;
     }
 
@@ -2498,13 +2505,13 @@ public class BigInteger
 
         if ( y >= 0 )
         {
-            return valueOf( x.words[ 0 ] & y );
+            return valueOf( x.words[0] & y );
         }
 
         int len = x.ival;
-        int[] words = new int[ len ];
+        var words = new int[ len ];
 
-        words[ 0 ] = x.words[ 0 ] & y;
+        words[0] = x.words[0] & y;
 
         while ( --len > 0 )
         {
@@ -2536,8 +2543,8 @@ public class BigInteger
         }
 
         int i;
-        int len = y.Negative ? x.ival : y.ival;
-        int[] words = new int[ len ];
+        int len = y.IsNegative ? x.ival : y.ival;
+        var words = new int[ len ];
 
         for ( i = 0; i < y.ival; i++ )
         {
@@ -2599,7 +2606,7 @@ public class BigInteger
             throw new ArithmeticException();
         }
 
-        return !and( ONE.shiftLeft(n) ).Zero;
+        return !and( ONE.shiftLeft(n) ).IsZeroOrNull;
     }
 
     public virtual BigInteger flipBit( int n )
@@ -2616,7 +2623,7 @@ public class BigInteger
     {
         get
         {
-            if ( Zero )
+            if ( IsZeroOrNull )
             {
                 return -1;
             }
@@ -2641,6 +2648,7 @@ public class BigInteger
         while ( i != 0 )
         {
             count += bit4_count[ i & 15 ];
+
             i = ( int ) ( ( uint ) i >> 4 );
         }
 
@@ -2675,6 +2683,6 @@ public class BigInteger
             i = bitCount( x_words, x_len );
         }
 
-        return Negative ? x_len * 32 - i : i;
+        return IsNegative ? x_len * 32 - i : i;
     }
 }

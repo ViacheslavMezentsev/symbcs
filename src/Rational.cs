@@ -2,15 +2,15 @@
 {
 	internal Algebraic nom;
 	internal Polynomial den;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Rational(Algebraic nom, Polynomial den) throws JasymcaException
-	public Rational(Algebraic nom, Polynomial den)
+
+    public Rational( Algebraic nom, Polynomial den )
 	{
-		Algebraic norm = den.a[den.degree()];
-		if (norm is Zahl)
+		var norm = den[ den.Degree() ];
+
+	    if ( norm is Symbolic )
 		{
-			this.nom = nom.div(norm);
-			this.den = (Polynomial)den.div(norm);
+			this.nom = nom / norm;
+		    this.den = ( Polynomial ) ( den / norm );
 		}
 		else
 		{
@@ -18,42 +18,46 @@
 			this.den = den;
 		}
 	}
-	public override bool ratfunc(Variable v)
+
+	public override bool IsRat( Variable v )
 	{
-		return nom.ratfunc(v) && den.ratfunc(v);
+		return nom.IsRat(v) && den.IsRat(v);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic reduce() throws JasymcaException
-	public override Algebraic reduce()
+
+	public override Algebraic Reduce()
 	{
-		if (nom is Zahl)
+		if (nom is Symbolic)
 		{
-			if (nom.Equals(Zahl.ZERO))
+			if (nom.Equals(Symbolic.ZERO))
 			{
-				return Zahl.ZERO;
+				return Symbolic.ZERO;
 			}
 			return this;
 		}
-		Algebraic[] pq = new Algebraic[] {nom, den};
+
+		var pq = new[] { nom, den };
+
 		pq = Exponential.reduce_exp(pq);
+
 		if (!nom.Equals(pq[0]) || !den.Equals(pq[1]))
 		{
-			return pq[0].div(pq[1]).reduce();
+			return ( pq[0] / pq[1] ).Reduce();
 		}
-		if (exaktq())
+
+		if (IsNumber())
 		{
-			Algebraic gcd = Poly.poly_gcd(den,nom);
-			if (!gcd.Equals(Zahl.ONE))
+			var gcd = Poly.poly_gcd(den,nom);
+			if (!gcd.Equals(Symbolic.ONE))
 			{
-				Algebraic n = Poly.polydiv(nom,gcd);
-				Algebraic d = Poly.polydiv(den,gcd);
-				if (d.Equals(Zahl.ONE))
+				var n = Poly.polydiv(nom,gcd);
+				var d = Poly.polydiv(den,gcd);
+				if (d.Equals(Symbolic.ONE))
 				{
 					return n;
 				}
-				else if (d is Zahl)
+				else if (d is Symbolic)
 				{
-					return n.div(d);
+					return n / d;
 				}
 				else
 				{
@@ -63,228 +67,270 @@
 		}
 		return this;
 	}
-	public override bool exaktq()
+
+	public override bool IsNumber()
 	{
-		return nom.exaktq() && den.exaktq();
+		return nom.IsNumber() && den.IsNumber();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic add(Algebraic x) throws JasymcaException
-	public override Algebraic add(Algebraic x)
-	{
-		if (x is Rational)
+
+    protected override Algebraic Add( Algebraic a )
+    {
+        if ( a is Rational )
 		{
-			return nom.mult(((Rational)x).den).add(((Rational)x).nom.mult(den)).div(den.mult(((Rational)x).den)).reduce();
+		    var r = ( Rational ) a;
+
+			return ( ( nom * r.den + r.nom * den ) / ( den * r.den ) ).Reduce();
+		}
+
+        return ( ( nom + a * den ) / den ).Reduce();
+    }
+
+    protected override Algebraic Mul( Algebraic a )
+    {
+        if ( a is Rational )
+		{
+		    var r = ( Rational ) a;
+
+			return ( nom * r.nom / ( den * r.den ) ).Reduce();
+		}
+        
+        return ( a * nom / den ).Reduce();
+    }
+
+    protected override Algebraic Div( Algebraic a )
+	{
+		if ( a is Rational )
+		{
+		    var r = ( Rational ) a;
+
+			return ( ( nom * r.den ) / ( den * r.nom ) ).Reduce();
 		}
 		else
 		{
-			return nom.add(x.mult(den)).div(den).reduce();
+			return ( nom / ( den * a ) ).Reduce();
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic mult(Algebraic x) throws JasymcaException
-	public override Algebraic mult(Algebraic x)
-	{
-		if (x is Rational)
-		{
-			return nom.mult(((Rational)x).nom).div(den.mult(((Rational)x).den)).reduce();
-		}
-		else
-		{
-			return nom.mult(x).div(den).reduce();
-		}
-	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic div(Algebraic x) throws JasymcaException
-	public override Algebraic div(Algebraic x)
-	{
-		if (x is Rational)
-		{
-			return nom.mult(((Rational)x).den).div(den.mult(((Rational)x).nom)).reduce();
-		}
-		else
-		{
-			return nom.div(den.mult(x)).reduce();
-		}
-	}
+
 	public override string ToString()
 	{
-		return "(" + nom + "/" + den + ")";
+		return string.Format( "({0}/{1})", nom, den );
 	}
-	public override bool Equals(object x)
+
+	public override bool Equals( object x )
 	{
-		return x is Rational && ((Rational)x).nom.Equals(nom) && ((Rational)x).den.Equals(den);
+		return x is Rational && ( ( Rational ) x ).nom == nom && ( ( Rational ) x ).den == den;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic deriv(Variable var) throws JasymcaException
-	public override Algebraic deriv(Variable @var)
+
+	public override Algebraic Derive( Variable v )
 	{
-		return nom.deriv(@var).mult(den).sub(den.deriv(@var).mult(nom)).div(den.mult(den)).reduce();
+		return ( ( nom.Derive(v) * den - den.Derive(v) * nom ) / ( den * den ) ).Reduce();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic integrate(Variable var) throws JasymcaException
-	public override Algebraic integrate(Variable @var)
+
+	public override Algebraic Integrate( Variable v )
 	{
-		if (!den.depends(@var))
+		if ( !den.Depends(v) )
 		{
-			return nom.integrate(@var).div(den);
+			return nom.Integrate(v) / den;
 		}
-		Algebraic quot = den.deriv(@var).div(nom);
-		if (quot.deriv(@var).Equals(Zahl.ZERO))
+
+		var quot = den.Derive(v) / nom;
+
+		if ( quot.Derive(v).Equals( Symbolic.ZERO ) )
 		{
-			return FunctionVariable.create("log",den).div(quot);
+		    return FunctionVariable.Create( "log", den ) / quot;
 		}
-		Algebraic[] q = new Algebraic[] {nom, den};
-		Poly.polydiv(q, @var);
-		if (!q[0].Equals(Zahl.ZERO) && nom.ratfunc(@var) && den.ratfunc(@var))
+
+	    var q = new[] { nom, den };
+
+	    Poly.polydiv( q, v );
+
+		if ( q[0] != Symbolic.ZERO && nom.IsRat(v) && den.IsRat(v) )
 		{
-			return q[0].integrate(@var).add(q[1].div(den).integrate(@var));
+			return q[0].Integrate(v) + ( q[1] / den ).Integrate(v);
 		}
-		if (ratfunc(@var))
+
+	    if ( IsRat(v) )
 		{
-			Algebraic r = Zahl.ZERO;
-			Vektor h = horowitz(nom,den,@var);
-			if (h.get(0) is Rational)
+			Algebraic r = Symbolic.ZERO;
+
+		    var h = Horowitz( nom, den, v );
+
+			if ( h[0] is Rational )
 			{
-				r = r.add(h.get(0));
+				r = r + h[0];
 			}
-			if (h.get(1) is Rational)
+
+			if ( h[1] is Rational )
 			{
-				r = r.add((new TrigInverseExpand()).f_exakt(((Rational)h.get(1)).intrat(@var)));
+			    r = r + new TrigInverseExpand().SymEval( ( ( Rational ) h[1] ).intrat(v) );
 			}
+
 			return r;
 		}
-		throw new JasymcaException("Could not integrate Function " + this);
+
+	    throw new JasymcaException( "Could not integrate Function " + this );
 	}
-	public override double norm()
+
+	public override double Norm()
 	{
-		return nom.norm() / den.norm();
+		return nom.Norm() / den.Norm();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic cc() throws JasymcaException
-	public override Algebraic cc()
+
+	public override Algebraic Conj()
 	{
-		return nom.cc().div(den.cc());
+		return nom.Conj() / den.Conj();
 	}
-	public override bool depends(Variable @var)
+
+    public override bool Depends( Variable v )
 	{
-		return nom.depends(@var) || den.depends(@var);
+		return nom.Depends(v) || den.Depends(v);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic value(Variable var, Algebraic x) throws JasymcaException
-	public override Algebraic value(Variable @var, Algebraic x)
+
+    public override Algebraic Value( Variable v, Algebraic x )
 	{
-		return nom.value(@var,x).div(den.value(@var,x));
+	    return nom.Value( v, x ) / den.Value( v, x );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic map(LambdaAlgebraic f) throws JasymcaException
-	public override Algebraic map(LambdaAlgebraic f)
+
+	public override Algebraic Map( LambdaAlgebraic f )
 	{
-		return f.f_exakt(nom).div(f.f_exakt(den));
+		return f.SymEval( nom ) / f.SymEval( den );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Vektor horowitz(Algebraic p, Polynomial q, Variable x) throws JasymcaException
-	public static Vektor horowitz(Algebraic p, Polynomial q, Variable x)
+
+	public static Vector Horowitz(Algebraic p, Polynomial q, Variable x)
 	{
-		if (Poly.degree(p,x) >= Poly.degree(q,x))
+	    if ( Poly.Degree( p, x ) >= Poly.Degree( q, x ) )
 		{
-			throw new JasymcaException("Degree of p must be smaller than degree of q");
+		    throw new JasymcaException( "Degree of p must be smaller than degree of q" );
 		}
-		p = p.rat();
-		q = (Polynomial)q.rat();
-		Algebraic d = Poly.poly_gcd(q, q.deriv(x));
-		Algebraic b = Poly.polydiv(q,d);
-		int m = b is Polynomial? ((Polynomial)b).degree():0;
-		int n = d is Polynomial? ((Polynomial)d).degree():0;
-		SimpleVariable[] a = new SimpleVariable[m];
-		Polynomial X = new Polynomial(x);
-		Algebraic A = Zahl.ZERO;
-		for (int i = a.Length - 1; i >= 0; i--)
+
+		p = p.Rat();
+
+	    q = ( Polynomial ) q.Rat();
+
+		var d = Poly.poly_gcd( q, q.Derive(x) );
+		var b = Poly.polydiv( q, d );
+
+        int m = b is Polynomial ? ( ( Polynomial ) b ).Degree() : 0;
+        int n = d is Polynomial ? ( ( Polynomial ) d ).Degree() : 0;
+
+		var a = new SimpleVariable[m];
+		var X = new Polynomial(x);
+
+		Algebraic A = Symbolic.ZERO;
+
+		for ( int i = a.Length - 1; i >= 0; i-- )
 		{
-			a[i] = new SimpleVariable("a" + i);
-			A = A.add(new Polynomial(a[i]));
-			if (i > 0)
+			a[i] = new SimpleVariable( "a" + i );
+
+			A = A + new Polynomial( a[i] );
+
+			if ( i > 0 )
 			{
-				A = A.mult(X);
+				A = A * X;
 			}
 		}
-		SimpleVariable[] c = new SimpleVariable[n];
-		Algebraic C = Zahl.ZERO;
-		for (int i = c.Length - 1; i >= 0; i--)
+
+		var c = new SimpleVariable[n];
+
+		Algebraic C = Symbolic.ZERO;
+
+		for ( int i = c.Length - 1; i >= 0; i-- )
 		{
-			c[i] = new SimpleVariable("c" + i);
-			C = C.add(new Polynomial(c[i]));
-			if (i > 0)
+			c[i] = new SimpleVariable( "c" + i );
+
+			C = C + new Polynomial( c[i] );
+
+			if ( i > 0 )
 			{
-				C = C.mult(X);
+				C = C * X;
 			}
 		}
-		Algebraic r = Poly.polydiv(C.mult(b).mult(d.deriv(x)),d);
-		r = b.mult(C.deriv(x)).sub(r).add(d.mult(A));
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] aik = new Algebraic[m+n][m+n];
-		Algebraic[][] aik = RectangularArrays.ReturnRectangularAlgebraicArray(m + n, m + n);
-		Algebraic cf ; Algebraic[] co = new Algebraic[m + n];
-		for (int i = 0; i < m + n; i++)
+
+		var r = Poly.polydiv( C * b * d.Derive(x), d );
+
+		r = b * C.Derive(x) - r + d * A;
+
+        var aik = Matrix.CreateRectangularArray<Algebraic>( m + n, m + n );
+
+		Algebraic cf; 
+
+        var co = new Algebraic[ m + n ];
+
+		for ( int i = 0; i < m + n; i++ )
 		{
-			co[i] = Poly.coefficient(p,x,i);
-			cf = Poly.coefficient(r,x,i);
-			for (int k = 0; k < m; k++)
+			co[i] = Poly.Coefficient( p, x, i );
+
+			cf = Poly.Coefficient( r, x, i );
+
+			for ( int k = 0; k < m; k++ )
 			{
-				aik[i][k] = cf.deriv(a[k]);
+				aik[i][k] = cf.Derive( a[k] );
 			}
-			for (int k = 0; k < n; k++)
+
+			for ( int k = 0; k < n; k++ )
 			{
-				aik[i][k + m] = cf.deriv(c[k]);
+				aik[i][ k + m ] = cf.Derive( c[k] );
 			}
 		}
-		Vektor s = LambdaLINSOLVE.Gauss(new Matrix(aik), new Vektor(co));
-		A = Zahl.ZERO;
-		for (int i = m - 1; i >= 0; i--)
+
+		var s = LambdaLINSOLVE.Gauss( new Matrix( aik ), new Vector( co ) );
+
+		A = Symbolic.ZERO;
+
+		for ( int i = m - 1; i >= 0; i-- )
 		{
-			A = A.add(s.get(i));
-			if (i > 0)
+			A = A + s[i];
+
+			if ( i > 0 )
 			{
-				A = A.mult(X);
+				A = A * X;
 			}
 		}
-		C = Zahl.ZERO;
-		for (int i = n - 1; i >= 0; i--)
+
+		C = Symbolic.ZERO;
+
+		for ( int i = n - 1; i >= 0; i-- )
 		{
-			C = C.add(s.get(i + m));
-			if (i > 0)
+			C = C + s[ i + m ];
+
+			if ( i > 0 )
 			{
-				C = C.mult(X);
+				C = C * X;
 			}
 		}
-		co = new Algebraic[2];
-		co[0] = C.div(d);
-		co[1] = A.div(b);
-		return new Vektor(co);
+
+        return new Vector( new[] { C / d, A / b } );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic intrat(Variable x) throws JasymcaException
-	internal virtual Algebraic intrat(Variable x)
+
+	internal virtual Algebraic intrat( Variable x )
 	{
-		Algebraic de = den.deriv(x);
-		if (de is Zahl)
+		var de = den.Derive(x);
+
+	    if ( de is Symbolic )
 		{
-			return makelog(nom.div(de), x, den.a[0].mult(Zahl.MINUS).div(de));
+			return MakeLog( nom / de, x, -den[0] / de );
 		}
-		Algebraic r = nom.div(de);
-		Vektor xi = den.monic().roots();
-		Algebraic rs = Zahl.ZERO;
-		for (int i = 0; i < xi.length(); i++)
+
+		var r = nom / de ;
+
+		var xi = den.Monic().roots();
+
+		Algebraic rs = Symbolic.ZERO;
+
+		for ( int i = 0; i < xi.Length(); i++ )
 		{
-			Algebraic c = r.value(x,xi.get(i));
-			rs = rs.add(makelog(c,x,xi.get(i)));
+			var c = r.Value( x, xi[i] );
+
+			rs = rs + MakeLog( c, x, xi[i] );
 		}
+
 		return rs;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: Algebraic makelog(Algebraic c, Variable x, Algebraic a) throws JasymcaException
-	internal virtual Algebraic makelog(Algebraic c, Variable x, Algebraic a)
+
+	internal virtual Algebraic MakeLog( Algebraic c, Variable x, Algebraic a )
 	{
-		Algebraic arg = (new Polynomial(x)).sub(a);
-		return FunctionVariable.create("log", arg).mult(c);
+		var arg = new Polynomial(x) - a;
+
+		return FunctionVariable.Create( "log", arg ) * c;
 	}
 }

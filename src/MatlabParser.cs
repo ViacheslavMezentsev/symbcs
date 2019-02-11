@@ -23,49 +23,49 @@ internal class MatlabParser : Parser
 	{
 		env.addPath(".");
 		env.addPath("m");
-		Environment.globals.Add("pi", Zahl.PI);
-        Environment.globals.Add( "i", Zahl.IONE );
-        Environment.globals.Add( "j", Zahl.IONE );
-        Environment.globals.Add( "eps", new Unexakt( 2.220446049250313E-16 ) );
-        Environment.globals.Add( "ratepsilon", new Unexakt( 2.0e-8 ) );
-        Environment.globals.Add( "algepsilon", new Unexakt( 1.0e-8 ) );
-        Environment.globals.Add( "rombergit", new Unexakt( 11 ) );
-	    Environment.globals.Add( "rombergtol", new Unexakt( 1.0e-4 ) );
-	    Environment.globals.Add( "sum", "$sum2" );
-		pst = new ParserState(null, 0);
+		Environment.Globals.Add("pi", Symbolic.PI);
+        Environment.Globals.Add( "i", Symbolic.IONE );
+        Environment.Globals.Add( "j", Symbolic.IONE );
+        Environment.Globals.Add( "eps", new Number( 2.220446049250313E-16 ) );
+        Environment.Globals.Add( "ratepsilon", new Number( 2.0e-8 ) );
+        Environment.Globals.Add( "algepsilon", new Number( 1.0e-8 ) );
+        Environment.Globals.Add( "rombergit", new Number( 11 ) );
+	    Environment.Globals.Add( "rombergtol", new Number( 1.0e-4 ) );
+	    Environment.Globals.Add( "sum", "$sum2" );
+		State = new ParserState(null, 0);
 		Operator.OPS = new Operator[]
 		{
-		    new Operator("PPR", "++", 1, Fields.RIGHT_LEFT, Fields.UNARY | Fields.LVALUE), 
-            new Operator("MMR", "--", 1, Fields.RIGHT_LEFT, Fields.UNARY | Fields.LVALUE), 
-            new Operator("PPL", "++", 1, Fields.LEFT_RIGHT, Fields.UNARY | Fields.LVALUE), 
-            new Operator("MML", "--", 1, Fields.LEFT_RIGHT, Fields.UNARY | Fields.LVALUE), 
-            new Operator("ADE", "+=",10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
-            new Operator("SUE", "-=",10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
-            new Operator("MUE", "*=",10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
-            new Operator("DIE", "/=",10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
-            new Operator("MUL", ".*", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("DIV", "./", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("POW", ".^", 1, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("EQU", "==", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("NEQ", "~=", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("GEQ", ">=", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("LEQ", "<=", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("LES", "<", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("OR", "|", 9, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("NOT", "!", 8, Fields.LEFT_RIGHT, Fields.UNARY), 
-            new Operator("AND", "&", 7, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("ASS", "=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE), 
-            new Operator("CR1", ":", 5, Fields.LEFT_RIGHT, Fields.BINARY | Fields.TERNARY), 
-            new Operator("ADD", "+", 4, Fields.LEFT_RIGHT, Fields.UNARY | Fields.BINARY), 
-            new Operator("SUB", "-", 4, Fields.LEFT_RIGHT, Fields.UNARY | Fields.BINARY), 
-            new Operator("MMU", "*", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("MDR", "/", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("MDL", "\\", 3, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("MPW", "^", 1, Fields.LEFT_RIGHT, Fields.BINARY), 
-            new Operator("ADJ", "'", 1, Fields.RIGHT_LEFT, Fields.UNARY)
+		    new Operator("PPR", "++", 1, Flags.RIGHT_LEFT, Flags.UNARY | Flags.LVALUE), 
+            new Operator("MMR", "--", 1, Flags.RIGHT_LEFT, Flags.UNARY | Flags.LVALUE), 
+            new Operator("PPL", "++", 1, Flags.LEFT_RIGHT, Flags.UNARY | Flags.LVALUE), 
+            new Operator("MML", "--", 1, Flags.LEFT_RIGHT, Flags.UNARY | Flags.LVALUE), 
+            new Operator("ADE", "+=",10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE), 
+            new Operator("SUE", "-=",10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE), 
+            new Operator("MUE", "*=",10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE), 
+            new Operator("DIE", "/=",10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE), 
+            new Operator("MUL", ".*", 3, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("DIV", "./", 3, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("POW", ".^", 1, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("EQU", "==", 6, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("NEQ", "~=", 6, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("GEQ", ">=", 6, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("LEQ", "<=", 6, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("LES", "<", 6, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("OR", "|", 9, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("NOT", "!", 8, Flags.LEFT_RIGHT, Flags.UNARY), 
+            new Operator("AND", "&", 7, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("ASS", "=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE), 
+            new Operator("CR1", ":", 5, Flags.LEFT_RIGHT, Flags.BINARY | Flags.TERNARY), 
+            new Operator("ADD", "+", 4, Flags.LEFT_RIGHT, Flags.UNARY | Flags.BINARY), 
+            new Operator("SUB", "-", 4, Flags.LEFT_RIGHT, Flags.UNARY | Flags.BINARY), 
+            new Operator("MMU", "*", 3, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("MDR", "/", 3, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("MDL", "\\", 3, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("MPW", "^", 1, Flags.LEFT_RIGHT, Flags.BINARY), 
+            new Operator("ADJ", "'", 1, Flags.RIGHT_LEFT, Flags.UNARY)
 		};
 		for (int i = 0; i < Operator.OPS.Length; i++)
 		{
@@ -100,7 +100,7 @@ internal class MatlabParser : Parser
 	{
 		string s , sp = null;
 		reset();
-        while ( ( s = readLine( instream ) ) != null )
+        while ( ( s = ReadLine( instream ) ) != null )
 		{
 			sp = s;
 			translate(s);
@@ -120,11 +120,11 @@ internal class MatlabParser : Parser
 		{
 			return null;
 		}
-		if (s == null && pst.inList == IN_BLOCK)
+		if (s == null && State.InList == IN_BLOCK)
 		{
-			List v = pst.tokens;
-			pst = (ParserState)pst.sub;
-			pst.tokens.Add(v);
+			List v = State.Tokens;
+			State = (ParserState)State.Sub;
+			State.Tokens.Add(v);
 		}
 		return get();
 	}
@@ -136,7 +136,7 @@ internal class MatlabParser : Parser
 	}
 	internal override List get()
 	{
-		List r = pst.tokens;
+		List r = State.Tokens;
 		List pgm = compile_statement(r);
 		if (pgm != null)
 		{
@@ -154,8 +154,8 @@ internal class MatlabParser : Parser
 		object t;
 		while ((t = nextToken(sb)) != null)
 		{
-			pst.tokens.Add(t);
-			pst.prev = t;
+			State.Tokens.Add(t);
+			State.Prev = t;
 		}
 	}
 	internal static string FUNCTION = "function", FOR = "for", WHILE = "while", IF = "if", ELSE = "else", END = "end", BREAK = "break", RETURN = "return", CONTINUE = "continue", EXIT = "exit";
@@ -175,7 +175,7 @@ internal class MatlabParser : Parser
 	}
 	public virtual object nextToken(StringBuilder s)
 	{
-		if (pst.inList == IN_BRACK && pst.prev != null && !oneof(pst.prev, listsep))
+		if (State.InList == IN_BRACK && State.Prev != null && !oneof(State.Prev, listsep))
 		{
 			int k = 0;
 			for (; k < s.Length && whitespace(s[k]); k++)
@@ -193,7 +193,7 @@ internal class MatlabParser : Parser
 				return ",";
 			}
 		}
-		if (pst.inList == IN_BLOCK && pst.prev != null && !oneof(pst.prev, listsep))
+		if (State.InList == IN_BLOCK && State.Prev != null && !oneof(State.Prev, listsep))
 		{
 			int k = 0;
 			for (; k < s.Length && whitespace(s[k]); k++)
@@ -217,40 +217,40 @@ internal class MatlabParser : Parser
 			case '"':
 				return ' ' + cutstring(s,'"','"');
 			case '(':
-				if (symbolq(pst.prev))
+				if (symbolq(State.Prev))
 				{
-					pst.prev = "@" + pst.prev;
+					State.Prev = "@" + State.Prev;
                     // TODO: Check this
-					pst.tokens.RemoveAt(pst.tokens.Count - 1);
-					pst.tokens.Add(pst.prev);
+					State.Tokens.RemoveAt(State.Tokens.Count - 1);
+					State.Tokens.Add(State.Prev);
 				}
-				pst = new ParserState(pst, IN_PARENT);
+				State = new ParserState(State, IN_PARENT);
 				return nextToken(s.Remove(0, 1));
 			case ')':
-				if (pst.inList != IN_PARENT)
+				if (State.InList != IN_PARENT)
 				{
 					throw new ParseException("Wrong parenthesis.");
 				}
-				List t = pst.tokens;
-				pst = (ParserState)pst.sub;
+				List t = State.Tokens;
+				State = (ParserState)State.Sub;
 				s.Remove(0, 1);
 				return t;
 			case '[':
-				pst = new ParserState(pst, IN_BRACK);
+				State = new ParserState(State, IN_BRACK);
 				return nextToken(s.Remove(0, 1));
 			case ']':
-				if (pst.inList != IN_BRACK)
+				if (State.InList != IN_BRACK)
 				{
 					throw new ParseException("Wrong brackets.");
 				}
-				t = pst.tokens;
+				t = State.Tokens;
 				while (t.Count > 0 && ";".Equals(t[t.Count - 1]))
 				{
                     // TODO: Check this
 					t.RemoveAt(t.Count - 1);
 				}
 				t.Insert(0, "[");
-				pst = (ParserState)pst.sub;
+				State = (ParserState)State.Sub;
 				s.Remove(0, 1);
 				return t;
 			case '%':
@@ -258,7 +258,7 @@ internal class MatlabParser : Parser
 			s.Remove(0, s.Length);
 			return null;
 		case '\'':
-			if (pst.prev == null || stringopq(pst.prev))
+			if (State.Prev == null || stringopq(State.Prev))
 			{
 				return ' ' + cutstring(s,'\'','\'');
 			}
@@ -296,7 +296,7 @@ case '.':
 	}
 	internal override bool ready()
 	{
-		return pst.sub == null;
+		return State.Sub == null;
 	}
 	private string separator = "()[]\n\t\r +-*/^!,;:=.<>'\\&|";
 	internal virtual object readString(StringBuilder s)
@@ -324,40 +324,40 @@ case '.':
 		s.Remove(0, k);
 		if (t.Equals(IF) || t.Equals(FOR) || t.Equals(WHILE) || t.Equals(FUNCTION))
 		{
-			if (pst.inList == IN_PARENT || pst.inList == IN_BRACK)
+			if (State.InList == IN_PARENT || State.InList == IN_BRACK)
 			{
 				throw new ParseException("Block starts within list.");
 			}
-			pst.tokens.Add(t);
-			pst = new ParserState(pst, IN_BLOCK);
+			State.Tokens.Add(t);
+			State = new ParserState(State, IN_BLOCK);
 			return nextToken(s);
 		}
 		if (t.Equals(ELSE))
 		{
-			if (pst.inList != IN_BLOCK)
+			if (State.InList != IN_BLOCK)
 			{
 				throw new ParseException("Orphaned else.");
 			}
-			List v = pst.tokens;
-			((ParserState)pst.sub).tokens.Add(v);
-			pst = new ParserState(pst.sub, IN_BLOCK);
+			List v = State.Tokens;
+			((ParserState)State.Sub).Tokens.Add(v);
+			State = new ParserState(State.Sub, IN_BLOCK);
 			return ELSE;
 		}
 		if (t.Equals(END))
 		{
-			if (pst.inList != IN_BLOCK)
+			if (State.InList != IN_BLOCK)
 			{
 				throw new ParseException("Orphaned end.");
 			}
-			List v = pst.tokens;
-			pst = (ParserState)pst.sub;
+			List v = State.Tokens;
+			State = (ParserState)State.Sub;
 			return v;
 		}
 		return t;
 	}
 	internal virtual List compile_unary(Operator op, List expr)
 	{
-		List arg_in = (op.left_right() ? expr.take(1, expr.Count) : expr.take(0, expr.Count - 1));
+		List arg_in = (op.left_right() ? expr.Take(1, expr.Count) : expr.Take(0, expr.Count - 1));
 		List arg = (op.lvalue() ? compile_lval(arg_in) : compile_expr(arg_in));
 		if (arg == null)
 		{
@@ -374,19 +374,19 @@ case '.':
 		{
 			if (op.symbol.Equals(expr[k0]))
 			{
-				List left_in = expr.take(0, k0);
+				List left_in = expr.Take(0, k0);
 				List left = compile_expr(left_in);
 				if (left == null)
 				{
 					continue;
 				}
-				List mid_in = expr.take(k0 + 1, k);
+				List mid_in = expr.Take(k0 + 1, k);
 				List mid = compile_expr(mid_in);
 				if (mid == null)
 				{
 					continue;
 				}
-				List right_in = expr.take(k + 1, expr.Count);
+				List right_in = expr.Take(k + 1, expr.Count);
 				List right = compile_expr(right_in);
 				if (right == null)
 				{
@@ -403,14 +403,14 @@ case '.':
 	}
 	internal virtual List compile_binary(Operator op, List expr, int k)
 	{
-		List left_in = expr.take(0, k);
+		List left_in = expr.Take(0, k);
 		List left = (op.lvalue() ? compile_lval(left_in) : compile_expr(left_in));
 		if (left == null)
 		{
 			return null;
 		}
 		;
-		List right_in = expr.take(k + 1, expr.Count);
+		List right_in = expr.Take(k + 1, expr.Count);
 		List right = compile_expr(right_in);
 		if (right == null)
 		{
@@ -449,7 +449,7 @@ case '.':
 				{
 					k = n - i - 1;
 				}
-                Operator op = Operator.get( expr[ k ], k == 0 ? Fields.START : ( k == n - 1 ? Fields.END : Fields.MID ) );
+                Operator op = Operator.get( expr[ k ], k == 0 ? Flags.START : ( k == n - 1 ? Flags.END : Flags.MID ) );
 				if (op == null || op.precedence != pred)
 				{
 					continue;
@@ -492,12 +492,12 @@ case '.':
 		{
 			return null;
 		}
-		expr = expr.take(1, expr.Count);
+		expr = expr.Take(1, expr.Count);
 		List r = new List();
 		int i = 0, ip = 0, nrow = 1;
 		while ((i = nextIndexOf(";",ip,expr)) != -1)
 		{
-			List x = expr.take(ip, i);
+			List x = expr.Take(ip, i);
 			List xs = compile_list(x);
 			if (xs == null)
 			{
@@ -508,7 +508,7 @@ case '.':
 			nrow++;
 			ip = i + 1;
 		}
-		List x1 = expr.take(ip, expr.Count);
+		List x1 = expr.Take(ip, expr.Count);
 		List xs1 = compile_list(x1);
 		if (xs1 == null)
 		{
@@ -535,7 +535,7 @@ case '.':
 		int i , ip = 0, n = 1;
 		while ((i = nextIndexOf(",",ip,expr)) != -1)
 		{
-			List x = expr.take(ip, i);
+			List x = expr.Take(ip, i);
 			List xs = compile_expr(x);
 			if (xs == null)
 			{
@@ -546,7 +546,7 @@ case '.':
 			n++;
 			ip = i + 1;
 		}
-		List x1 = expr.take(ip, expr.Count);
+		List x1 = expr.Take(ip, expr.Count);
 		List xs1 = compile_expr(x1);
 		if (xs1 == null)
 		{
@@ -583,12 +583,12 @@ case '.':
 		{
 			return null;
 		}
-		expr = expr.take(1, expr.Count);
+		expr = expr.Take(1, expr.Count);
 		r = new List();
 		int i , n = 1;
 		while ((i = expr.IndexOf(",")) != -1)
 		{
-			List x = expr.take(0, i);
+			List x = expr.Take(0, i);
 			List xs = compile_lval1(x);
 			if (xs == null)
 			{
@@ -596,7 +596,7 @@ case '.':
 			}
 			xs.AddRange(r);
 			r = xs;
-			expr = expr.take(i + 1, expr.Count);
+			expr = expr.Take(i + 1, expr.Count);
 			n++;
 		}
 		List xs1 = compile_lval1(expr);
@@ -671,8 +671,8 @@ case '.':
 		{
 			return null;
 		}
-		List left_in = expr.take(0, c);
-		List right_in = expr.take(c + 1, expr.Count);
+		List left_in = expr.Take(0, c);
+		List right_in = expr.Take(c + 1, expr.Count);
 		if (left_in != null && left_in.Count == 1 && ":".Equals(left_in[0]))
 		{
 			if (right_in != null && right_in.Count == 1 && ":".Equals(right_in[0]))
@@ -731,40 +731,54 @@ case '.':
 		{
 			return new List();
 		}
-		List expr = expr_in.clone();
-		object first = expr[0];
-		for (int i = 0; i < rules.Length; i++)
+
+	    var expr = expr_in.ToList();
+
+		var first = expr[0];
+
+		foreach (var rule in rules)
 		{
-			Rule r = rules[i];
-			if (r.rule_in[0].Equals(first) && expr.Count >= r.rule_in.Count)
-			{
-				Compiler c = new Compiler(r.rule_in, r.rule_out, this);
-				List expr_sub = expr.take(0, r.rule_in.Count);
-				List s = c.compile(expr_sub);
-				if (s != null)
-				{
-					expr.clear( 0, expr_sub.Count);
-					if (expr.Count == 0)
-					{
-						return s;
-					}
-					List t = compile_statement(expr);
-					if (t == null)
-					{
-						return null;
-					}
-					s.AddRange(t);
-					return s;
-				}
-			}
+		    if (rule.Input[0].Equals(first) && expr.Count >= rule.Input.Count)
+		    {
+		        var c = new Compiler(rule.Input, rule.Comp, this);
+
+		        var expr_sub = expr.Take(0, rule.Input.Count);
+
+		        var s = c.compile(expr_sub);
+
+		        if (s != null)
+		        {
+		            expr.Remove( 0, expr_sub.Count);
+
+		            if (expr.Count == 0)
+		            {
+		                return s;
+		            }
+
+		            var t = compile_statement(expr);
+
+		            if (t == null)
+		            {
+		                return null;
+		            }
+
+		            s.AddRange(t);
+
+		            return s;
+		        }
+		    }
 		}
+
 		if (commandq(first))
 		{
 			return compile_command(expr);
 		}
+
 		string lend = null;
+
 		int ic = expr.IndexOf(",");
 		int @is = expr.IndexOf(";");
+
 		if (ic >= 0 && (ic < @is || @is == -1))
 		{
 			lend = "#,";
@@ -776,17 +790,17 @@ case '.':
 		}
 		if (ic == 0)
 		{
-			expr.clear(0,1);
+			expr.Remove(0,1);
 			return compile_statement(expr);
 		}
 		if (lend != null)
 		{
-			List expr_sub = expr.take(0, ic);
+			List expr_sub = expr.Take(0, ic);
 			List s = compile_expr(expr_sub);
 			if (s != null)
 			{
 				s.Add(lend);
-				expr.clear( 0, ic + 1);
+				expr.Remove( 0, ic + 1);
 				if (expr.Count == 0)
 				{
 					return s;
@@ -906,7 +920,7 @@ case '.':
 		{
 			return null;
 		}
-		List left_in = expr.take(0,expr.Count - 1);
+		List left_in = expr.Take(0,expr.Count - 1);
 		if (left_in.Count == 1 && symbolq(left_in[0]) && refq(left_in[0]))
 		{
 			@ref.AddRange(left_in);

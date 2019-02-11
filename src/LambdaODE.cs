@@ -2,44 +2,64 @@
 
 internal class LambdaODE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
-		int narg = getNarg(st);
-		Algebraic dgl = getAlgebraic(st);
-		Variable y = getVariable(st);
-		Variable x = getVariable(st);
-		Algebraic p = Poly.coefficient(dgl, y,1);
-		Algebraic q = Poly.coefficient(dgl, y,0);
-		Algebraic pi = LambdaINTEGRATE.integrate(p,x);
-		if (pi is Rational && !pi.exaktq())
+		int narg = GetNarg(st);
+
+		var dgl = GetAlgebraic(st);
+        var y = GetVariable( st );
+        var x = GetVariable( st );
+
+        var p = Poly.Coefficient( dgl, y, 1 );
+        var q = Poly.Coefficient( dgl, y, 0 );
+
+		var pi = LambdaINTEGRATE.Integrate(p,x);
+
+		if (pi is Rational && !pi.IsNumber())
 		{
-			pi = (new LambdaRAT()).f_exakt(pi);
+			pi = (new LambdaRAT()).SymEval(pi);
 		}
+
 		Variable vexp = new FunctionVariable("exp", pi, new LambdaEXP());
+
 		Algebraic dn = new Polynomial(vexp);
-		Algebraic qi = LambdaINTEGRATE.integrate(q.div(dn),x);
-		if (qi is Rational && !qi.exaktq())
+
+	    var qi = LambdaINTEGRATE.Integrate( q / dn, x );
+
+		if (qi is Rational && !qi.IsNumber())
 		{
-			qi = (new LambdaRAT()).f_exakt(qi);
+			qi = (new LambdaRAT()).SymEval(qi);
 		}
+
 		Algebraic cn = new Polynomial(new SimpleVariable("C"));
-		Algebraic res = qi.add(cn).mult(dn);
-		res = (new ExpandUser()).f_exakt(res);
-		debug("User Function expand: " + res);
-		res = (new TrigExpand()).f_exakt(res);
-		debug("Trigexpand: " + res);
-		res = (new NormExp()).f_exakt(res);
-		debug("Norm: " + res);
+
+		var res = ( qi +cn ) * dn;
+
+		res = (new ExpandUser()).SymEval(res);
+
+		Debug("User Function expand: " + res);
+
+		res = (new TrigExpand()).SymEval(res);
+
+		Debug("Trigexpand: " + res);
+
+		res = (new NormExp()).SymEval(res);
+
+		Debug("Norm: " + res);
+
 		if (res is Rational)
 		{
-			res = (new LambdaRAT()).f_exakt(res);
+			res = (new LambdaRAT()).SymEval(res);
 		}
-		res = (new TrigInverseExpand()).f_exakt(res);
-		debug("Triginverse: " + res);
-		res = (new SqrtExpand()).f_exakt(res);
+
+		res = (new TrigInverseExpand()).SymEval(res);
+
+		Debug("Triginverse: " + res);
+
+		res = (new SqrtExpand()).SymEval(res);
+
 		st.Push(res);
+
 		return 0;
 	}
 }

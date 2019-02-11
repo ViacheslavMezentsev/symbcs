@@ -1,18 +1,18 @@
 ﻿public class Constant : SimpleVariable
 {
-	private Unexakt value;
+	private Complex value;
 
     public Constant( string name, double value ) : base( name )
     {
-        this.value = new Unexakt( value );
+        this.value = new Complex( value );
     }
 
-    public Constant( string name, Unexakt value ) : base( name )
+    public Constant( string name, Complex value ) : base( name )
     {
         this.value = value;
     }
 
-	public override bool smaller(Variable v)
+	public override bool Smaller(Variable v)
 	{
 	    if ( v is Constant )
 		{
@@ -33,25 +33,25 @@
 
 internal class Root : Constant
 {
-    internal Vektor poly;
+    internal Vector poly;
     internal int n;
 
-    public Root( Vektor poly, int n ) : base( "Root", 0.0 )
+    public Root( Vector poly, int n ) : base( "Root", 0.0 )
     {
         this.poly = poly;
         this.n = n;
     }
 
-    public override bool smaller( Variable v )
+    public override bool Smaller( Variable v )
     {
         if ( !( v is Root ) )
         {
-            return base.smaller(v);
+            return base.Smaller(v);
         }
 
         if ( !poly.Equals( ( ( Root ) v ).poly ) )
         {
-            return poly.norm() < ( ( Root ) v ).poly.norm();
+            return poly.Norm() < ( ( Root ) v ).poly.Norm();
         }
 
         return n < ( ( Root ) v ).n;
@@ -64,7 +64,7 @@ internal class Root : Constant
 
     public override string ToString()
     {
-        return "Root(" + new Vektor( poly ) + ", " + n + ")";
+        return string.Format( "Root({0}, {1})", new Vector( poly ), n );
     }
 
     internal override Algebraic Value
@@ -73,19 +73,20 @@ internal class Root : Constant
         {
             var roots = ( new Polynomial( new SimpleVariable( "x" ), poly ) ).roots();
 
-            return roots.get(n);
+            return roots[n];
         }
     }
 }
 
 internal class ExpandConstants : LambdaAlgebraic
 {
-    internal override Algebraic f_exakt( Algebraic f )
+    internal override Algebraic SymEval( Algebraic f )
     {
-        while ( f is Polynomial && ( ( Polynomial ) f ).v is Constant )
+        while ( f is Polynomial && ( ( Polynomial ) f )._v is Constant )
         {
-            f = f.value( ( ( Polynomial ) f ).v, ( ( Constant ) ( ( Polynomial ) f ).v ).Value );
+            f = f.Value( ( ( Polynomial ) f )._v, ( ( Constant ) ( ( Polynomial ) f )._v ).Value );
         }
-        return f.map( this );
+
+        return f.Map( this );
     }
 }

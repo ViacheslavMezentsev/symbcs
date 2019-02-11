@@ -4,40 +4,40 @@ internal class LambdaALGSYS : Lambda
 {
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
-		int narg = getNarg(st);
+		int narg = GetNarg(st);
 		if (narg != 2)
 		{
 			throw new ParseException("algsys requires 2 arguments.");
 		}
-		Algebraic expr = getAlgebraic(st).rat();
-		Algebraic vars = getAlgebraic(st);
-		if (!(expr is Vektor) || !(vars is Vektor) || ((Vektor)expr).length() != ((Vektor)vars).length())
+		Algebraic expr = GetAlgebraic(st).Rat();
+		Algebraic vars = GetAlgebraic(st);
+		if (!(expr is Vector) || !(vars is Vector) || ((Vector)expr).Length() != ((Vector)vars).Length())
 		{
 			throw new ParseException("Wrong type of arguments to algsys.");
 		}
-		expr = (new ExpandUser()).f_exakt(expr);
-		expr = (new TrigExpand()).f_exakt(expr);
-		expr = (new NormExp()).f_exakt(expr);
-		expr = (new CollectExp(expr)).f_exakt(expr);
-		expr = (new SqrtExpand()).f_exakt(expr);
+		expr = (new ExpandUser()).SymEval(expr);
+		expr = (new TrigExpand()).SymEval(expr);
+		expr = (new NormExp()).SymEval(expr);
+		expr = (new CollectExp(expr)).SymEval(expr);
+		expr = (new SqrtExpand()).SymEval(expr);
 		ArrayList v = new ArrayList();
-		for (int i = 0; i < ((Vektor)vars).length(); i++)
+		for (int i = 0; i < ((Vector)vars).Length(); i++)
 		{
-			Algebraic p = ((Vektor)vars).get(i);
+			Algebraic p = ((Vector)vars)[i];
 			if (!(p is Polynomial))
 			{
 				throw new ParseException("Wrong type of arguments to algsys.");
 			}
-			v.Add(((Polynomial)p).v);
+			v.Add(((Polynomial)p)._v);
 		}
-		st.Push(solvesys(((Vektor)expr).vector(), v));
+		st.Push(solvesys(((Vector)expr).ToList(), v));
 		return 0;
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: Vektor solvesys(Vector expr, Vector x) throws JasymcaException
-	internal virtual Vektor solvesys(ArrayList expr, ArrayList x)
+	internal virtual Vector solvesys(ArrayList expr, ArrayList x)
 	{
 		int nvars = x.Count;
 		ArrayList lsg = new ArrayList(), vars = new ArrayList();
@@ -52,18 +52,18 @@ internal class LambdaALGSYS : Lambda
 				{
 					ArrayList equ = (ArrayList)lsg[i];
 					ArrayList xv = (ArrayList)vars[i];
-					Vektor sol = solve(equ, xv, n);
+					Vector sol = solve(equ, xv, n);
 					lsg.RemoveAt(i);
 					vars.RemoveAt(i);
 					Variable v = (Variable)xv[n - 1];
-					for (int k = 0; k < sol.length(); k++)
+					for (int k = 0; k < sol.Length(); k++)
 					{
 						ArrayList eq = new ArrayList();
 						for (int j = 0; j < n - 1; j++)
 						{
-							eq.Add(((Algebraic)equ[j]).value(v, sol.get(k)));
+							eq.Add(((Algebraic)equ[j]).Value(v, sol[k]));
 						}
-						eq.Add(sol.get(k));
+						eq.Add(sol[k]);
 						for (int j = n; j < nvars; j++)
 						{
 							eq.Add(equ[j]);
@@ -98,7 +98,7 @@ internal class LambdaALGSYS : Lambda
 				{
 					Algebraic z = (Algebraic)equ[k];
 					equ.RemoveAt(k);
-					equ.Insert(k, z.value(v,y));
+					equ.Insert(k, z.Value(v,y));
 				}
 			}
 		}
@@ -109,17 +109,17 @@ internal class LambdaALGSYS : Lambda
 			for (n = 0; n < nvars; n++)
 			{
 				Variable v = (Variable)xv[n];
-				Algebraic y = (new Polynomial(v)).sub((Algebraic)equ[n]);
+				Algebraic y = (new Polynomial(v)) - ((Algebraic)equ[n]);
 				equ.RemoveAt(n);
 				equ.Insert(n, y);
 			}
 		}
-		Vektor[] r = new Vektor[lsg.Count];
+		Vector[] r = new Vector[lsg.Count];
 		for (int i = 0; i < lsg.Count; i++)
 		{
-			r[i] = Vektor.create((ArrayList)lsg[i]);
+			r[i] = Vector.Create((ArrayList)lsg[i]);
 		}
-		return new Vektor(r);
+		return new Vector(r);
 	}
 	internal virtual ArrayList clonev(ArrayList v)
 	{
@@ -132,7 +132,7 @@ internal class LambdaALGSYS : Lambda
 	}
 //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
 //ORIGINAL LINE: Vektor solve(Vector expr, Vector x, int n) throws JasymcaException
-	internal virtual Vektor solve(ArrayList expr, ArrayList x, int n)
+	internal virtual Vector solve(ArrayList expr, ArrayList x, int n)
 	{
 		Algebraic equ = null;
 		Variable v = null;
@@ -148,10 +148,10 @@ internal class LambdaALGSYS : Lambda
 				{
 					exp = ((Rational)exp).nom;
 				}
-				Algebraic slope = exp.deriv(v);
-				if (!slope.Equals(Zahl.ZERO) && slope is Zahl)
+				Algebraic slope = exp.Derive(v);
+				if (!slope.Equals(Symbolic.ZERO) && slope is Symbolic)
 				{
-					double nm = slope.norm() / exp.norm();
+					double nm = slope.Norm() / exp.Norm();
 					if (nm > norm)
 					{
 						norm = nm;
@@ -174,7 +174,7 @@ internal class LambdaALGSYS : Lambda
 					{
 						exp = ((Rational)exp).nom;
 					}
-					if (exp.depends(v))
+					if (exp.Depends(v))
 					{
 						equ = exp;
 						ke = k;
@@ -188,7 +188,7 @@ internal class LambdaALGSYS : Lambda
 		{
 			throw new JasymcaException("Expressions do not depend of Variables.");
 		}
-		Vektor sol = LambdaSOLVE.solve(equ, v);
+		Vector sol = LambdaSOLVE.solve(equ, v);
 		expr.RemoveAt(ke);
 		expr.Insert(n - 1, equ);
 		x.RemoveAt(iv);

@@ -2,76 +2,81 @@
 
 public class FunctionVariable : Variable
 {
-    public string fname;
-    public Algebraic arg;
-    public LambdaAlgebraic la;
 
-    public FunctionVariable( string fname, Algebraic arg, LambdaAlgebraic la )
+    #region Properties
+
+    public string Name { get; private set; }
+    public Algebraic Var { get; private set; }
+    public LambdaAlgebraic AlgLambda { get; private set; }
+
+    #endregion
+
+    public FunctionVariable( string fname, Algebraic fvar, LambdaAlgebraic flambda )
     {
-        this.fname = fname;
-        this.arg = arg;
-        this.la = la;
+        this.Name = fname;
+        this.Var = fvar;
+        this.AlgLambda = flambda;
     }
 
-    public override Algebraic deriv( Variable x )
+    public override Algebraic Derive( Variable v )
     {
-        if ( Equals( x ) )
+        if ( Equals(v) )
         {
-            return Zahl.ONE;
+            return Symbolic.ONE;
         }
 
-        if ( !arg.depends( x ) )
+        if ( !Var.Depends( v ) )
         {
-            return Zahl.ZERO;
+            return Symbolic.ZERO;
         }
 
-        if ( la == null )
+        if ( AlgLambda == null )
         {
-            throw new JasymcaException( "Can not differentiate " + fname + "  : No definition." );
+            throw new JasymcaException( "Can not differentiate " + Name + "  : No definition." );
         }
 
-        string diffrule = la.diffrule;
+        var diffrule = AlgLambda.diffrule;
 
         if ( diffrule == null )
         {
-            throw new JasymcaException( "Can not differentiate " + fname + " : No rule available." );
+            throw new JasymcaException( "Can not differentiate " + Name + " : No rule available." );
         }
 
-        Algebraic y = Lambda.evalx( diffrule, arg );
+        var y = Lambda.evalx( diffrule, Var );
 
-        return y.mult( arg.deriv( x ) );
+        return y * Var.Derive(v);
     }
 
-    public virtual Algebraic integrate( Variable x )
+    public virtual Algebraic Integrate( Variable x )
     {
-        arg = arg.reduce();
+        Var = Var.Reduce();
 
-        if ( la == null )
+        if ( AlgLambda == null )
         {
-            throw new JasymcaException( "Can not integrate " + fname );
+            throw new JasymcaException( "Can not integrate " + Name );
         }
 
-        return la.integrate( arg, x );
+        return AlgLambda.Integrate( Var, x );
     }
 
-    public static Algebraic create( string f, Algebraic arg )
+    public static Algebraic Create( string f, Algebraic arg )
     {
-        arg = arg.reduce();
+        arg = arg.Reduce();
 
-        object fl = Lambda.pc.env.getValue( f );
+        var fl = Lambda.pc.env.getValue( f );
 
         if ( fl != null && fl is LambdaAlgebraic )
         {
-            Algebraic r = ( ( LambdaAlgebraic ) fl ).f_exakt( arg );
+            var r = ( ( LambdaAlgebraic ) fl ).SymEval( arg );
 
             if ( r != null )
             {
                 return r;
             }
 
-            if ( arg is Unexakt )
+            if ( arg is Complex )
             {
-                return ( ( LambdaAlgebraic ) fl ).f( ( Zahl ) arg );
+                return ( ( LambdaAlgebraic ) fl ).PreEval( ( Symbolic ) arg );
             }
         }
         else
@@ -84,10 +89,10 @@ public class FunctionVariable : Variable
 
     public override bool Equals( object x )
     {
-        return x is FunctionVariable && fname.Equals( ( ( FunctionVariable ) x ).fname ) && arg.Equals( ( ( FunctionVariable ) x ).arg );
+        return x is FunctionVariable && Name.Equals( ( ( FunctionVariable ) x ).Name ) && Var.Equals( ( ( FunctionVariable ) x ).Var );
     }
 
-    public override Algebraic value( Variable @var, Algebraic x )
+    public override Algebraic Value( Variable @var, Algebraic x )
     {
         if ( Equals( @var ) )
         {
@@ -95,25 +100,25 @@ public class FunctionVariable : Variable
         }
         else
         {
-            x = arg.value( @var, x );
+            x = Var.Value( @var, x );
 
-            Algebraic r = la.f_exakt( x );
+            var r = AlgLambda.SymEval( x );
 
             if ( r != null )
             {
                 return r;
             }
 
-            if ( x is Unexakt )
+            if ( x is Complex )
             {
-                return la.f( ( Zahl ) x );
+                return AlgLambda.PreEval( ( Symbolic ) x );
             }
 
-            return new Polynomial( new FunctionVariable( fname, x, la ) );
+            return new Polynomial( new FunctionVariable( Name, x, AlgLambda ) );
         }
     }
 
-    public override bool smaller( Variable v )
+    public override bool Smaller( Variable v )
     {
         if ( v == SimpleVariable.top )
         {
@@ -125,41 +130,41 @@ public class FunctionVariable : Variable
             return false;
         }
 
-        if ( !( ( FunctionVariable ) v ).fname.Equals( fname ) )
+        if ( !( ( FunctionVariable ) v ).Name.Equals( Name ) )
         {
-            return fname.CompareTo( ( ( FunctionVariable ) v ).fname ) < 0;
+            return Name.CompareTo( ( ( FunctionVariable ) v ).Name ) < 0;
         }
 
-        if ( arg.Equals( ( ( FunctionVariable ) v ).arg ) )
+        if ( Var.Equals( ( ( FunctionVariable ) v ).Var ) )
         {
             return false;
         }
 
-        if ( arg is Polynomial && ( ( FunctionVariable ) v ).arg is Polynomial )
+        if ( Var is Polynomial && ( ( FunctionVariable ) v ).Var is Polynomial )
         {
-            var a = ( Polynomial ) arg;
-            var b = ( Polynomial ) ( ( FunctionVariable ) v ).arg;
+            var a = ( Polynomial ) Var;
+            var b = ( Polynomial ) ( ( FunctionVariable ) v ).Var;
 
-            if ( !a.v.Equals( b.v ) )
+            if ( !a._v.Equals( b._v ) )
             {
-                return a.v.smaller( b.v );
+                return a._v.Smaller( b._v );
             }
 
-            if ( a.degree() != b.degree() )
+            if ( a.Degree() != b.Degree() )
             {
-                return a.degree() < b.degree();
+                return a.Degree() < b.Degree();
             }
 
-            for ( int i = a.a.Length - 1; i >= 0; i-- )
+            for ( int i = a.Coeffs.Length - 1; i >= 0; i-- )
             {
-                if ( !a.a[i].Equals( b.a[i] ) )
+                if ( !a[i].Equals( b[i] ) )
                 {
-                    if ( a.a[i] is Zahl && b.a[i] is Zahl )
+                    if ( a[i] is Symbolic && b[i] is Symbolic )
                     {
-                        return ( ( Zahl ) a.a[i] ).smaller( ( Zahl ) b.a[i] );
+                        return ( ( Symbolic ) a[i] ).Smaller( ( Symbolic ) b[i] );
                     }
 
-                    return a.a[i].norm() < b.a[i].norm();
+                    return a[i].Norm() < b[i].Norm();
                 }
             }
         }
@@ -167,27 +172,27 @@ public class FunctionVariable : Variable
         return false;
     }
 
-    public override Variable cc()
+    public override Variable Conj()
     {
-        if ( fname.Equals( "exp" ) || fname.Equals( "log" ) || fname.Equals( "sqrt" ) )
+        if ( Name.Equals( "exp" ) || Name.Equals( "log" ) || Name.Equals( "sqrt" ) )
         {
-            return new FunctionVariable( fname, arg.cc(), la );
+            return new FunctionVariable( Name, Var.Conj(), AlgLambda );
         }
 
-        throw new JasymcaException( "Can't calculate cc for Function " + fname );
+        throw new JasymcaException( "Can't calculate cc for Function " + Name );
     }
 
     public override string ToString()
     {
-        string a = arg.ToString();
+        var a = Var.ToString();
 
         if ( a.StartsWith( "(", StringComparison.Ordinal ) && a.EndsWith( ")", StringComparison.Ordinal ) )
         {
-            return fname + a;
+            return Name + a;
         }
         else
         {
-            return fname + "(" + a + ")";
+            return Name + "(" + a + ")";
         }
     }
 }

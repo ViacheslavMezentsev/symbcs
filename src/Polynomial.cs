@@ -1,346 +1,383 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 
 public class Polynomial : Algebraic
 {
-	public Algebraic[] a = null;
-	public Variable v = null;
-	public Polynomial()
+	public Algebraic[] Coeffs;
+	public Variable _v;
+
+    public Algebraic this[ int n ]
+    {
+        get { return Coeffs[n]; }
+        set { Coeffs[n] = value; }
+    }
+
+    public Polynomial()
 	{
 	}
-	public Polynomial(Variable v, Algebraic[] a)
+
+    public Polynomial( Variable v, Algebraic[] c )
 	{
-		this.v = v;
-		this.a = Poly.reduce(a);
+		_v = v;
+		Coeffs = Poly.Reduce(c);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Polynomial(Variable var, Vektor v) throws JasymcaException
-	public Polynomial(Variable @var, Vektor v)
+
+    public Polynomial( Variable v, Vector vec )
 	{
-		this.v = @var;
-		this.a = new Algebraic[v.length()];
-		for (int i = 0; i < a.Length; i++)
+		_v = v;
+		Coeffs = new Algebraic[ vec.Length() ];
+
+		for (int i = 0; i < Coeffs.Length; i++)
 		{
-			a[i] = v.get(a.Length - 1 - i);
+			Coeffs[i] = vec[ Coeffs.Length - 1 - i ];
 		}
-		this.a = Poly.reduce(a);
+
+		Coeffs = Poly.Reduce(Coeffs);
 	}
-	public Polynomial(Variable @var)
+
+    public Polynomial( Variable @var )
 	{
-		a = new Zahl[] {Zahl.ZERO, Zahl.ONE};
-		this.v = @var;
+	    Coeffs = new Algebraic[] { Symbolic.ZERO, Symbolic.ONE };
+
+		this._v = @var;
 	}
+
 	public virtual Variable Var
 	{
-		get
-		{
-			return v;
-		}
+		get { return _v; }
 	}
-	public virtual Vektor coeff()
+
+	public virtual Vector Coeff()
 	{
-		Algebraic[] c = Poly.clone(a);
-		return new Vektor(c);
+		var c = Poly.Clone(Coeffs);
+
+		return new Vector(c);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic coefficient(Variable var, int n)throws JasymcaException
-	public virtual Algebraic coefficient(Variable @var, int n)
+
+	public virtual Algebraic coefficient(Variable v, int n)
 	{
-		if (@var.Equals(this.v))
+		if (v.Equals(_v))
 		{
 			return coefficient(n);
 		}
-		Algebraic c = Zahl.ZERO;
-		for (int i = 0; i < a.Length; i++)
+
+		Algebraic c = Symbolic.ZERO;
+
+		for (int i = 0; i < Coeffs.Length; i++)
 		{
-			Algebraic ci = a[i];
-			if (ci is Polynomial)
+			var ci = Coeffs[i];
+
+		    if ( ci is Polynomial )
 			{
-				c = c.add(((Polynomial)ci).coefficient(@var,n).mult((new Polynomial(this.v)).pow_n(i)));
+				c = c + ( ( Polynomial ) ci ).coefficient( v, n ) * ( new Polynomial( _v ) ^ i ) ;
 			}
-			else if (n == 0)
+		    else if ( n == 0 )
 			{
-				c = c.add(ci.mult((new Polynomial(this.v)).pow_n(i)));
+				c = c + ci * ( new Polynomial( _v ) ^ i );
 			}
 		}
+
 		return c;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic coefficient(int i) throws JasymcaException
-	public virtual Algebraic coefficient(int i)
+
+	public virtual Algebraic coefficient( int i )
 	{
-		if (i >= 0 && i < a.Length)
-		{
-			return a[i];
-		}
-		return Zahl.ZERO;
+	    return i >= 0 && i < Coeffs.Length ? Coeffs[i] : Symbolic.ZERO;
 	}
-	public override bool ratfunc(Variable v)
+
+	public override bool IsRat( Variable v )
 	{
-		if (v is FunctionVariable && ((FunctionVariable)this.v).arg.depends(v))
+		if ( v is FunctionVariable && ( ( FunctionVariable ) this._v ).Var.Depends(v) )
 		{
 			return false;
 		}
-		for (int i = 0; i < a.Length; i++)
-		{
-			if (!a[i].ratfunc(v))
-			{
-				return false;
-			}
-		}
-			return true;
+
+	    return Coeffs.All( t => t.IsRat(v) );
 	}
-	public virtual int degree()
+
+	public virtual int Degree()
 	{
-		return a.Length - 1;
+		return Coeffs.Length - 1;
 	}
-	public virtual int degree(Variable v)
+
+	public virtual int Degree( Variable v )
 	{
-		if (v.Equals(v))
+		if ( this._v == v )
 		{
-			return a.Length - 1;
+			return Coeffs.Length - 1;
 		}
+
 		int degree = 0;
-		for (int i = 0; i < a.Length; i++)
+
+		foreach ( var t in Coeffs )
 		{
-			int d = Poly.degree(a[i], v);
-			if (d > degree)
-			{
-				degree = d;
-			}
+		    int d = Poly.Degree( t, v );
+
+		    if ( d > degree )
+		    {
+		        degree = d;
+		    }
 		}
+
 		return degree;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic add(Algebraic p) throws JasymcaException
-	public override Algebraic add(Algebraic p)
+
+    protected override Algebraic Add( Algebraic a )
 	{
-		if (p is Rational)
+		if ( a is Rational )
 		{
-			return p.add(this);
+			return a + this;
 		}
-		if (p is Polynomial)
+
+	    if ( a is Polynomial )
 		{
-			if (v.Equals(((Polynomial)p).v))
+            var p = ( Polynomial ) a;
+
+		    if ( _v.Equals( p._v ) )
 			{
-				int len = Math.Max(a.Length, ((Polynomial)p).a.Length);
-				Algebraic[] csum = new Algebraic[len];
+			    int len = Math.Max( Coeffs.Length, p.Coeffs.Length );
+
+			    var csum = new Algebraic[ len ];
+
 				for (int i = 0; i < len; i++)
 				{
-					csum[i] = coefficient(i).add(((Polynomial)p).coefficient(i));
+				    csum[i] = coefficient(i) + p.coefficient(i);
 				}
-				return (new Polynomial(v, csum)).reduce();
+
+			    return ( new Polynomial( _v, csum ) ).Reduce();
 			}
-			else if (v.smaller(((Polynomial)p).v))
+		    else if ( _v.Smaller( p._v ) )
 			{
-				return p.add(this);
+				return a + this;
 			}
 		}
-		Algebraic[] _csum = Poly.clone(a);
-		_csum[0] = a[0].add(p);
-		return (new Polynomial(v, _csum)).reduce();
+
+	    var _csum = Poly.Clone( Coeffs );
+
+		_csum[0] = Coeffs[0] + a;
+
+	    return ( new Polynomial( _v, _csum ) ).Reduce();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic mult(Algebraic p) throws JasymcaException
-	public override Algebraic mult(Algebraic p)
+
+    protected override Algebraic Mul(Algebraic p)
 	{
 		if (p is Rational)
 		{
-			return p.mult(this);
+			return p * this;
 		}
 		if (p is Polynomial)
 		{
-			if (v.Equals(((Polynomial)p).v))
+			if (_v.Equals(((Polynomial)p)._v))
 			{
-				int len = a.Length + ((Polynomial)p).a.Length - 1;
-				Algebraic[] cprod = new Algebraic[len];
+				int len = Coeffs.Length + ((Polynomial)p).Coeffs.Length - 1;
+
+				var cprod = new Algebraic[len];
+
 				for (int i = 0; i < len; i++)
 				{
-					cprod[i] = Zahl.ZERO;
+					cprod[i] = Symbolic.ZERO;
 				}
-				for (int i = 0; i < a.Length; i++)
+
+				for (int i = 0; i < Coeffs.Length; i++)
 				{
-					for (int k = 0; k < ((Polynomial)p).a.Length; k++)
+					for (int k = 0; k < ((Polynomial)p).Coeffs.Length; k++)
 					{
-						cprod[i + k] = cprod[i + k].add(a[i].mult(((Polynomial)p).a[k]));
+						cprod[i + k] = cprod[i + k] + Coeffs[i] * ( ( Polynomial ) p )[k];
 					}
 				}
-					return (new Polynomial(v, cprod)).reduce();
+
+				return (new Polynomial(_v, cprod)).Reduce();
 			}
-			else if (v.smaller(((Polynomial)p).v))
+			else if (_v.Smaller(((Polynomial)p)._v))
 			{
-				return p.mult(this);
+				return p * this;
 			}
 		}
-		Algebraic[] _cprod = new Algebraic[a.Length];
-		for (int i = 0; i < a.Length; i++)
+
+	    var _cprod = new Algebraic[ Coeffs.Length ];
+
+		for ( int i = 0; i < Coeffs.Length; i++ )
 		{
-			_cprod[i] = a[i].mult(p);
+			_cprod[i] = Coeffs[i] * p;
 		}
-		return (new Polynomial(v, _cprod)).reduce();
+
+		return (new Polynomial(_v, _cprod)).Reduce();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic div(Algebraic q) throws JasymcaException
-	public override Algebraic div(Algebraic q)
+
+    protected override Algebraic Div( Algebraic q )
 	{
-		if (q is Zahl)
+		if (q is Symbolic)
 		{
-			Algebraic[] c = new Algebraic[a.Length];
-			for (int i = 0; i < a.Length; i++)
+		    var c = new Algebraic[ Coeffs.Length ];
+
+			for (int i = 0; i < Coeffs.Length; i++)
 			{
-				c[i] = a[i].div(q);
+				c[i] = Coeffs[i] / q;
 			}
-			return new Polynomial(v, c);
+
+			return new Polynomial(_v, c);
 		}
-		return base.div(q);
+
+		return base.Div(q);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic reduce() throws JasymcaException
-	public override Algebraic reduce()
+
+	public override Algebraic Reduce()
 	{
-		if (a.Length == 0)
+		if ( Coeffs.Length == 0 )
 		{
-			return Zahl.ZERO;
+			return Symbolic.ZERO;
 		}
-		if (a.Length == 1)
+
+		if ( Coeffs.Length == 1 )
 		{
-			return a[0].reduce();
+			return Coeffs[0].Reduce();
 		}
+
 		return this;
 	}
+
 	public override string ToString()
 	{
-		ArrayList x = new ArrayList();
-		for (int i = a.Length - 1; i > 0;i--)
+		var x = new ArrayList();
+
+		for ( int i = Coeffs.Length - 1; i > 0;i-- )
 		{
-			if (a[i].Equals(Zahl.ZERO))
-			{
-				continue;
-			}
-			string s = "";
-			if (a[i].Equals(Zahl.MINUS))
+            if ( Equals( Coeffs[i], Symbolic.ZERO ) ) continue;
+
+			var s = "";
+
+			if ( Equals(Coeffs[i], Symbolic.MINUS) )
 			{
 				s += "-";
 			}
-			else if (!a[i].Equals(Zahl.ONE))
+			else if ( !Equals(Coeffs[i], Symbolic.ONE) )
 			{
-				s += a[i].ToString() + "*";
+				s += Coeffs[i] + "*";
 			}
-			s += v.ToString();
-			if (i > 1)
+
+			s += _v.ToString();
+
+			if ( i > 1 )
 			{
 				s += "^" + i;
 			}
+
 			x.Add(s);
 		}
-		if (!a[0].Equals(Zahl.ZERO))
+
+		if ( !Equals(Coeffs[0], Symbolic.ZERO) )
 		{
-			x.Add(a[0].ToString());
+			x.Add( Coeffs[0].ToString() );
 		}
-		string _s = "";
-		if (x.Count > 1)
+
+		var _s = "";
+
+		if ( x.Count > 1 )
 		{
 			_s += "(";
 		}
-		for (int i = 0; i < x.Count; i++)
+
+		for ( int i = 0; i < x.Count; i++ )
 		{
-			_s += (string)x[i];
-			if (i < x.Count - 1 && !(((string)x[i + 1])[0] == '-'))
-			{
-				_s += "+";
-			}
+			_s += ( string ) x[i];
+
+		    if ( i >= x.Count - 1 || ( ( string ) x[ i + 1 ] )[0] == '-' ) continue;
+
+		    _s += "+";
 		}
-		if (x.Count > 1)
+
+		if ( x.Count > 1 )
 		{
 			_s += ")";
 		}
+
 		return _s;
 	}
+
 	public override bool Equals(object x)
 	{
-		if (!(x is Polynomial))
+		if ( !( x is Polynomial ) )
 		{
 			return false;
 		}
-		if (!(v.Equals(((Polynomial)x).v)) || a.Length != ((Polynomial)x).a.Length)
+
+	    if ( !( _v.Equals( ( ( Polynomial ) x )._v ) ) || Coeffs.Length != ( ( Polynomial ) x ).Coeffs.Length )
 		{
 			return false;
 		}
-		for (int i = 0; i < a.Length; i++)
-		{
-			if (!a[i].Equals(((Polynomial)x).a[i]))
-			{
-				return false;
-			}
-		}
-			return true;
+
+	    return !Coeffs.Where( ( t, i ) => !t.Equals( ( ( Polynomial ) x )[i] ) ).Any();
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic deriv(Variable var) throws JasymcaException
-	public override Algebraic deriv(Variable @var)
+
+	public override Algebraic Derive(Variable v)
 	{
-		Algebraic r1 = Zahl.ZERO, r2 = Zahl.ZERO;
-		Polynomial x = new Polynomial(this.v);
-		for (int i = a.Length - 1; i > 1; i--)
+		Algebraic r1 = Symbolic.ZERO, r2 = Symbolic.ZERO;
+
+		var x = new Polynomial(this._v);
+
+		for (int i = Coeffs.Length - 1; i > 1; i--)
 		{
-			r1 = r1.add(a[i].mult(new Unexakt(i))).mult(x);
+			r1 = ( r1 + Coeffs[i] * new Complex(i) ) * x;
 		}
-		if (a.Length > 1)
+
+		if (Coeffs.Length > 1)
 		{
-			r1 = r1.add(a[1]);
+			r1 = r1 + Coeffs[1];
 		}
-		for (int i = a.Length - 1; i > 0; i--)
+
+		for (int i = Coeffs.Length - 1; i > 0; i--)
 		{
-			r2 = r2.add(a[i].deriv(@var)).mult(x);
+			r2 = ( r2 + Coeffs[i].Derive(v) ) * x;
 		}
-		if (a.Length > 0)
+
+		if (Coeffs.Length > 0)
 		{
-			r2 = r2.add(a[0].deriv(@var));
+			r2 = r2 + Coeffs[0].Derive(v);
 		}
-		return r1.mult(this.v.deriv(@var)).add(r2).reduce();
+
+		return ( r1 * _v.Derive(v) + r2 ).Reduce();
 	}
-	public override bool depends(Variable @var)
+
+	public override bool Depends(Variable v)
 	{
-		if (a.Length == 0)
+		if ( Coeffs.Length == 0 )
 		{
 			return false;
 		}
-		if (this.v.Equals(@var))
+
+		if ( _v == v )
 		{
 			return true;
 		}
-		if (this.v is FunctionVariable && ((FunctionVariable)this.v).arg.depends(@var))
+
+		if ( _v is FunctionVariable && ( ( FunctionVariable ) _v ).Var.Depends(v) )
 		{
 			return true;
 		}
-		for (int i = 0; i < a.Length; i++)
-		{
-			if (a[i].depends(@var))
-			{
-				return true;
-			}
-		}
-			return false;
+
+	    return Coeffs.Any( t => t.Depends(v) );
 	}
+
 	internal static bool loopPartial = false;
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic integrate(Variable var) throws JasymcaException
-	public override Algebraic integrate(Variable item)
+
+	public override Algebraic Integrate( Variable v )
 	{
-		Algebraic tmp = Zahl.ZERO;
-		for (int i = 1; i < a.Length; i++)
+		Algebraic tmp = Symbolic.ZERO;
+
+		for (int i = 1; i < Coeffs.Length; i++)
 		{
-			if (!a[i].depends(item))
+		    if ( !Coeffs[ i ].Depends(v) )
 			{
-				if (item.Equals(this.v))
+			    if ( v.Equals( _v ) )
 				{
-					tmp = tmp.add(a[i].mult((new Polynomial(item)).pow_n(i + 1).div(new Unexakt(i + 1))));
+					tmp = tmp + Coeffs[i] * ( new Polynomial(v) ^ ( i + 1 ) ) / new Complex( i + 1 );
 				}
-				else if (this.v is FunctionVariable && ((FunctionVariable)this.v).arg.depends(item))
+			    else if ( _v is FunctionVariable && ( ( FunctionVariable ) _v ).Var.Depends(v) )
 				{
 					if (i == 1)
 					{
-						tmp = tmp.add(((FunctionVariable)this.v).integrate(item).mult(a[1]));
+						tmp = tmp + ( ( FunctionVariable ) _v ).Integrate(v) * Coeffs[1];
 					}
 					else
 					{
@@ -349,252 +386,301 @@ public class Polynomial : Algebraic
 				}
 					else
 					{
-						tmp = tmp.add(a[i].mult((new Polynomial(item)).mult((new Polynomial(this.v)).pow_n(i))));
+						tmp = tmp + Coeffs[i] * ( new Polynomial(v) * new Polynomial( _v ) ^ i );
 					}
 			}
-					else if (item.Equals(this.v))
+					else if (v.Equals(this._v))
 					{
 						throw new JasymcaException("Integral not supported.");
 					}
-					else if (this.v is FunctionVariable && ((FunctionVariable)this.v).arg.depends(item))
+					else if (this._v is FunctionVariable && ((FunctionVariable)this._v).Var.Depends(v))
 					{
-						if (i == 1 && a[i] is Polynomial && ((Polynomial)a[i]).v.Equals(item))
+						if (i == 1 && Coeffs[i] is Polynomial && ((Polynomial)Coeffs[i])._v.Equals(v))
 						{
-							debug("Trying to isolate inner derivative " + this);
+						    Debug( "Trying to isolate inner derivative " + this );
+
 							try
 							{
-								FunctionVariable f = (FunctionVariable)this.v;
-								Algebraic w = f.arg;
-								Algebraic q = a[i].div(w.deriv(item));
-								if (q.deriv(item).Equals(Zahl.ZERO))
+								var f = ( FunctionVariable ) _v;
+
+                                var w = f.Var;
+
+                                var q = Coeffs[ i ] / w.Derive(v);
+
+								if ( Equals(q.Derive(v), Symbolic.ZERO) )
 								{
-									SimpleVariable v = new SimpleVariable("v");
-									Algebraic p = FunctionVariable.create(f.fname, new Polynomial(v));
-									Algebraic r = p.integrate(v).value(v,w).mult(q);
-									tmp = tmp.add(r);
+									var sv = new SimpleVariable( "v" );
+
+                                    var p = FunctionVariable.Create( f.Name, new Polynomial( sv ) );
+
+                                    var r = p.Integrate( sv ).Value( sv, w ) * q;
+
+									tmp = tmp + r;
+
 									continue;
 								}
 							}
-							catch (JasymcaException)
+							catch ( JasymcaException )
 							{
 							}
-							debug("Failed.");
-							for (int k = 0;k < ((Polynomial)a[i]).a.Length;k++)
+
+						    Debug( "Failed." );
+
+							if ( ( ( Polynomial ) Coeffs[i] ).Coeffs.Any( t => t.Depends(v) ) )
 							{
-								if (((Polynomial)a[i]).a[k].depends(item))
-								{
-									throw new JasymcaException("Function not supported by this method");
-								}
+							    throw new JasymcaException("Function not supported by this method");
 							}
-								if (loopPartial)
+
+						    if ( loopPartial )
+							{
+								loopPartial = false;
+
+							    Debug( "Partial Integration Loop detected." );
+
+								throw new JasymcaException("Partial Integration Loop: " + this);
+							}
+
+						    Debug( "Trying partial integration: x^n*f(x) , n-times diff " + this );
+
+							try
+							{
+								loopPartial = true;
+
+								var c = Coeffs[i];
+
+							    var fv = ( ( FunctionVariable ) _v ).Integrate(v);
+
+								var r = fv * c;
+
+								while ( ( c = c.Derive(v) ) !=  Symbolic.ZERO )
 								{
-									loopPartial = false;
-									debug("Partial Integration Loop detected.");
-									throw new JasymcaException("Partial Integration Loop: " + this);
+								    r = r - fv.Integrate(v) * c;
 								}
-								debug("Trying partial integration: x^n*f(x) , n-times diff " + this);
-								try
-								{
-									loopPartial = true;
-									Algebraic _p = a[i];
-									Algebraic f = ((FunctionVariable)this.v).integrate(item);
-									Algebraic r = f.mult(_p);
-									while (!(_p = _p.deriv(item)).Equals(Zahl.ZERO))
-									{
-										f = f.integrate(item).mult(Zahl.MINUS);
-										r = r.add(f.mult(_p));
-									}
-									loopPartial = false;
-									tmp = tmp.add(r);
-									continue;
-								}
-								catch (JasymcaException)
-								{
-									loopPartial = false;
-								}
-								debug("Failed.");
-								debug("Trying partial integration: x^n*f(x) , 1-times int " + this);
-								try
-								{
-									loopPartial = true;
-									Algebraic p1 = a[i].integrate(item);
-									Algebraic f = new Polynomial((FunctionVariable)this.v);
-									Algebraic r = p1.mult(f).sub(p1.mult(f.deriv(item)).integrate(item));
-									loopPartial = false;
-									tmp = tmp.add(r);
-									continue;
-								}
-								catch (JasymcaException)
-								{
-									loopPartial = false;
-								}
-								debug("Failed");
-								throw new JasymcaException("Function not supported by this method");
+
+								loopPartial = false;
+								tmp = tmp + r;
+
+								continue;
+							}
+							catch ( JasymcaException )
+							{
+								loopPartial = false;
+							}
+
+						    Debug( "Failed." );
+						    Debug( "Trying partial integration: x^n*f(x) , 1-times int " + this );
+
+							try
+							{
+								loopPartial = true;
+
+								var p1 = Coeffs[i].Integrate(v);
+
+								Algebraic f = new Polynomial( ( FunctionVariable ) _v );
+
+								var r = p1 * f - ( p1 * f.Derive(v) ).Integrate(v);
+
+								loopPartial = false;
+
+								tmp = tmp + r;
+
+								continue;
+							}
+							catch ( JasymcaException )
+							{
+								loopPartial = false;
+							}
+
+						    Debug( "Failed" );
+
+						    throw new JasymcaException( "Function not supported by this method" );
 						}
 						else
 						{
-							throw new JasymcaException("Integral not supported.");
+						    throw new JasymcaException( "Integral not supported." );
 						}
 					}
 					else
 					{
-						tmp = tmp.add(a[i].integrate(item).mult((new Polynomial(this.v)).pow_n(i)));
+						tmp = tmp + Coeffs[i].Integrate(v) * new Polynomial( _v )^i;
 					}
 		}
-		if (a.Length > 0)
+
+		if ( Coeffs.Length > 0 )
 		{
-			tmp = tmp.add(a[0].integrate(item));
+			tmp = tmp + Coeffs[0].Integrate(v);
 		}
+
 		return tmp;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic cc() throws JasymcaException
-	public override Algebraic cc()
+
+	public override Algebraic Conj()
 	{
-		Polynomial xn = new Polynomial(v.cc());
-		Algebraic r = Zahl.ZERO;
-		for (int i = a.Length - 1; i > 0; i--)
+	    var xn = new Polynomial( _v.Conj() );
+
+		Algebraic r = Symbolic.ZERO;
+
+		for (int i = Coeffs.Length - 1; i > 0; i--)
 		{
-			r = r.add(a[i].cc()).mult(xn);
+			r = ( r + Coeffs[i].Conj() ) * xn;
 		}
-		if (a.Length > 0)
+
+		if ( Coeffs.Length > 0 )
 		{
-			r = r.add(a[0].cc());
+			r = r + Coeffs[0].Conj();
 		}
+
 		return r;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic value(Variable var, Algebraic x) throws JasymcaException
-	public override Algebraic value(Variable @var, Algebraic x)
+
+	public override Algebraic Value( Variable v, Algebraic a )
 	{
-		Algebraic r = Zahl.ZERO;
-		Algebraic v = this.v.value(@var,x);
-		for (int i = a.Length - 1; i > 0; i--)
+		Algebraic r = Symbolic.ZERO;
+
+		var b = _v.Value( v, a );
+
+		for ( int i = Coeffs.Length - 1; i > 0; i-- )
 		{
-			r = r.add(a[i].value(@var,x)).mult(v);
+			r = ( r + Coeffs[i].Value( v, a ) ) * b;
 		}
-		if (a.Length > 0)
+
+		if ( Coeffs.Length > 0 )
 		{
-			r = r.add(a[0].value(@var,x));
+			r = r + Coeffs[0].Value( v, a );
 		}
+
 		return r;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic value(Algebraic x) throws JasymcaException
-	public virtual Algebraic value(Algebraic x)
+
+	public virtual Algebraic value( Algebraic x )
 	{
-		return value(this.v, x);
+		return Value( _v, x );
 	}
-	public override bool exaktq()
+
+	public override bool IsNumber()
 	{
-		bool exakt = a[0].exaktq();
-		for (int i = 1; i < a.Length; i++)
+		var exakt = Coeffs[0].IsNumber();
+
+		for (int i = 1; i < Coeffs.Length; i++)
 		{
-			exakt = exakt && a[i].exaktq();
+			exakt = exakt && Coeffs[i].IsNumber();
 		}
+
 		return exakt;
 	}
-	public override double norm()
+
+	public override double Norm()
 	{
-		double norm = 0.0;
-		for (int i = 0; i < a.Length; i++)
-		{
-			norm += a[i].norm();
-		}
-		return norm;
+	    return Coeffs.Sum( t => t.Norm() );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic map(LambdaAlgebraic f) throws JasymcaException
-	public override Algebraic map(LambdaAlgebraic f)
+
+	public override Algebraic Map( LambdaAlgebraic f )
 	{
-		Algebraic x = v is SimpleVariable ? new Polynomial(v): FunctionVariable.create(((FunctionVariable)v).fname, f.f_exakt(((FunctionVariable)v).arg));
-		Algebraic r = Zahl.ZERO;
-		for (int i = a.Length - 1; i > 0; i--)
+		var x = _v is SimpleVariable ? new Polynomial(_v): FunctionVariable.Create(((FunctionVariable)_v).Name, f.SymEval(((FunctionVariable)_v).Var));
+
+		Algebraic r = Symbolic.ZERO;
+
+		for ( int i = Coeffs.Length - 1; i > 0; i-- )
 		{
-			r = r.add(f.f_exakt(a[i])).mult(x);
+			r = ( r + f.SymEval( Coeffs[i] ) ) * x;
 		}
-		if (a.Length > 0)
+
+		if ( Coeffs.Length > 0 )
 		{
-			r = r.add(f.f_exakt(a[0]));
+			r = r + f.SymEval( Coeffs[0] );
 		}
+
 		return r;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Polynomial monic() throws JasymcaException
-	public virtual Polynomial monic()
+
+	public virtual Polynomial Monic()
 	{
-		Algebraic cm = a[a.Length - 1];
-		if (cm.Equals(Zahl.ONE))
+		var cm = Coeffs.Last();
+
+		if ( Equals(cm, Symbolic.ONE) )
 		{
 			return this;
 		}
-		if (cm.Equals(Zahl.ZERO) || (cm.depends(v)))
+
+		if ( Equals(cm, Symbolic.ZERO) || cm.Depends( _v ) )
 		{
-			throw new JasymcaException("Ill conditioned polynomial: main coefficient Zero or not number");
+		    throw new JasymcaException( "Ill conditioned polynomial: main coefficient Zero or not number" );
 		}
-		Algebraic[] b = new Algebraic[a.Length];
-		b[a.Length - 1] = Zahl.ONE;
-		for (int i = 0; i < a.Length - 1; i++)
+
+		var b = new Algebraic[ Coeffs.Length ];
+
+		b[ Coeffs.Length - 1 ] = Symbolic.ONE;
+
+		for ( int i = 0; i < Coeffs.Length - 1; i++ )
 		{
-			b[i] = a[i].div(cm);
+			b[i] = Coeffs[i] / cm;
 		}
-		return new Polynomial(v, b);
+
+		return new Polynomial( _v, b );
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Algebraic[] square_free_dec(Variable var) throws JasymcaException
-	public virtual Algebraic[] square_free_dec(Variable @var)
+
+	public virtual Algebraic[] square_free_dec(Variable v)
 	{
-		if (!ratfunc(@var))
+		if ( !IsRat(v) )
 		{
 			return null;
 		}
-		Algebraic dp = deriv(@var);
-		Algebraic gcd_pdp = Poly.poly_gcd(this,dp);
-		Algebraic q = Poly.polydiv(this,gcd_pdp);
-		Algebraic p1 = Poly.polydiv(q, Poly.poly_gcd(q,gcd_pdp));
-		if (gcd_pdp is Polynomial && gcd_pdp.depends(@var) && ((Polynomial)gcd_pdp).ratfunc(@var))
+
+		var dp = Derive(v);
+
+		var gcd_pdp = Poly.poly_gcd(this,dp);
+
+		var q = Poly.polydiv(this,gcd_pdp);
+
+		var p1 = Poly.polydiv(q, Poly.poly_gcd(q,gcd_pdp));
+
+		if (gcd_pdp is Polynomial && gcd_pdp.Depends(v) && ((Polynomial)gcd_pdp).IsRat(v))
 		{
-			Algebraic[] sq = ((Polynomial)gcd_pdp).square_free_dec(@var);
-			Algebraic[] result = new Algebraic[sq.Length + 1];
+			var sq = ((Polynomial)gcd_pdp).square_free_dec(v);
+
+			var result = new Algebraic[sq.Length + 1];
+
 			result[0] = p1;
+
 			for (int i = 0; i < sq.Length;i++)
 			{
 				result[i + 1] = sq[i];
 			}
+
 			return result;
 		}
 		else
 		{
-			Algebraic[] result = new Algebraic[] {p1};
+			var result = new[] {p1};
+
 			return result;
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Zahl gcd_coeff() throws JasymcaException
-	public virtual Zahl gcd_coeff()
+
+	public virtual Symbolic gcd_coeff()
 	{
-		Zahl gcd;
-		if (a[0] is Zahl)
+		Symbolic gcd;
+		if (Coeffs[0] is Symbolic)
 		{
-			gcd = (Zahl)a[0];
+			gcd = (Symbolic)Coeffs[0];
 		}
-		else if (a[0] is Polynomial)
+		else if (Coeffs[0] is Polynomial)
 		{
-			gcd = ((Polynomial)a[0]).gcd_coeff();
+			gcd = ((Polynomial)Coeffs[0]).gcd_coeff();
 		}
 		else
 		{
 			throw new JasymcaException("Cannot calculate gcd from " + this);
 		}
-		for (int i = 1; i < a.Length; i++)
+		for (int i = 1; i < Coeffs.Length; i++)
 		{
-			if (a[i] is Zahl)
+			if (Coeffs[i] is Symbolic)
 			{
-				gcd = gcd.gcd((Zahl)a[i]);
+				gcd = gcd.gcd((Symbolic)Coeffs[i]);
 			}
-			else if (a[i] is Polynomial)
+			else if (Coeffs[i] is Polynomial)
 			{
-				gcd = gcd.gcd(((Polynomial)a[i]).gcd_coeff());
+				gcd = gcd.gcd(((Polynomial)Coeffs[i]).gcd_coeff());
 			}
 			else
 			{
@@ -603,152 +689,173 @@ public class Polynomial : Algebraic
 		}
 		return gcd;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Vektor solve(Variable var) throws JasymcaException
-	public virtual Vektor solve(Variable @var)
+
+	public virtual Vector solve(Variable @var)
 	{
-		if (!@var.Equals(this.v))
+		if (!@var.Equals(this._v))
 		{
-			return ((Polynomial)value(@var, Poly.top)).solve(SimpleVariable.top);
+			return ((Polynomial)Value(@var, Poly.top)).solve(SimpleVariable.top);
 		}
-		Algebraic[] factors = square_free_dec(@var);
-		ArrayList s = new ArrayList();
+		var factors = square_free_dec(@var);
+		var s = new ArrayList();
 		int n = factors == null?0:factors.Length;
 		for (int i = 0; i < n; i++)
 		{
 			if (factors[i] is Polynomial)
 			{
-				Vektor sol = null;
-				Algebraic equ = factors[i];
+				Vector sol = null;
+				var equ = factors[i];
 				try
 				{
 					sol = ((Polynomial)equ).solvepoly();
 				}
 				catch (JasymcaException)
 				{
-					sol = ((Polynomial)equ).monic().roots();
+					sol = ((Polynomial)equ).Monic().roots();
 				}
-				for (int k = 0; k < sol.length(); k++)
+				for (int k = 0; k < sol.Length(); k++)
 				{
-					s.Add(sol.get(k));
+					s.Add(sol[k]);
 				}
 			}
 		}
-		Algebraic[] cn = new Algebraic[s.Count];
+
+		var cn = new Algebraic[s.Count];
+
 		for (int i = 0; i < cn.Length; i++)
 		{
 			cn[i] = (Algebraic)s[i];
 		}
-		return new Vektor(cn);
+
+		return new Vector(cn);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Vektor solvepoly() throws JasymcaException
-	public virtual Vektor solvepoly()
+
+	public virtual Vector solvepoly()
 	{
-		ArrayList s = new ArrayList();
-		switch (degree())
+		var s = new ArrayList();
+
+		switch ( Degree() )
 		{
 			case 0:
 				break;
+
 			case 1:
-				s.Add(Zahl.MINUS.mult(a[0].div(a[1])));
+				s.Add( -Coeffs[0] / Coeffs[1] );
 				break;
+
 			case 2:
-				Algebraic p = a[1].div(a[2]);
-				Algebraic q = a[0].div(a[2]);
-				p = Zahl.MINUS.mult(p).div(Zahl.TWO);
-				q = p.mult(p).sub(q);
-				if (q.Equals(Zahl.ZERO))
+				var p = Coeffs[1] / Coeffs[2];
+				var q = Coeffs[0] / Coeffs[2];
+
+				p = -p / Symbolic.TWO;
+
+				q = p * p - q;
+
+				if ( Equals(q, Symbolic.ZERO) )
 				{
 					s.Add(p);
 					break;
 				}
-				q = FunctionVariable.create("sqrt", q);
-				s.Add(p.add(q));
-				s.Add(p.sub(q));
+
+			    q = FunctionVariable.Create( "sqrt", q );
+
+				s.Add( p + q );
+				s.Add( p - q );
 				break;
+
 			default:
 				int gcd = -1;
-				for (int i = 1; i < a.Length; i++)
+
+				for (int i = 1; i < Coeffs.Length; i++)
 				{
-					if (!a[i].Equals(Zahl.ZERO))
+					if ( Coeffs[i] !=  Symbolic.ZERO )
 					{
-						if (gcd < 0)
-						{
-							gcd = i;
-						}
-						else
-						{
-							gcd = Poly.gcd(i,gcd);
-						}
+					    gcd = gcd < 0 ? i : Poly.gcd( i, gcd );
 					}
 				}
-				int deg = degree() / gcd;
+
+				int deg = Degree() / gcd;
+
 				if (deg < 3)
 				{
-					Algebraic[] cn = new Algebraic[deg + 1];
+					var cn = new Algebraic[deg + 1];
+
 					for (int i = 0; i < cn.Length; i++)
 					{
-						cn[i] = a[i * gcd];
+						cn[i] = Coeffs[i * gcd];
 					}
-					Polynomial pr = new Polynomial(v, cn);
-					Vektor sn = pr.solvepoly();
+
+					var pr = new Polynomial(_v, cn);
+
+					var sn = pr.solvepoly();
+
 					if (gcd == 2)
 					{
-						cn = new Algebraic[sn.length() * 2];
-						for (int i = 0; i < sn.length(); i++)
+						cn = new Algebraic[sn.Length() * 2];
+
+						for (int i = 0; i < sn.Length(); i++)
 						{
-							cn[2 * i] = FunctionVariable.create("sqrt", sn.get(i));
-							cn[2 * i + 1] = cn[2 * i].mult(Zahl.MINUS);
+							cn[2 * i] = FunctionVariable.Create("sqrt", sn[i]);
+
+							cn[2 * i + 1] = -cn[2 * i];
 						}
 					}
 					else
 					{
-						cn = new Algebraic[sn.length()];
-						Zahl wx = new Unexakt(1.0 / gcd);
-						for (int i = 0; i < sn.length(); i++)
+						cn = new Algebraic[sn.Length()];
+
+						Symbolic wx = new Complex( 1.0 / gcd );
+
+						for (int i = 0; i < sn.Length(); i++)
 						{
-							Algebraic exp = FunctionVariable.create("log",sn.get(i));
-							cn[i] = FunctionVariable.create("exp", exp.mult(wx));
+							var exp = FunctionVariable.Create("log",sn[i]);
+
+							cn[i] = FunctionVariable.Create("exp", exp * wx );
 						}
 					}
-					return new Vektor(cn);
+					return new Vector(cn);
 				}
 				throw new JasymcaException("Can't solve expression " + this);
 		}
-		return Vektor.create(s);
+
+		return Vector.Create(s);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public Vektor roots() throws JasymcaException
-	public virtual Vektor roots()
+
+	public virtual Vector roots()
 	{
-		if (a.Length == 2)
+		if ( Coeffs.Length == 2 )
 		{
-			Algebraic[] result = new Algebraic[] {a[0].mult(Zahl.MINUS).div(a[1])};
-			return new Vektor(result);
+			return new Vector( new[] { -Coeffs[0] / Coeffs[1] } );
 		}
-		else if (a.Length == 3)
+		else if ( Coeffs.Length == 3 )
 		{
-			return new Vektor(Poly.pqsolve(a[1].div(a[2]), a[0].div(a[2])));
+			return new Vector( Poly.pqsolve( Coeffs[1] / Coeffs[2], Coeffs[0] / Coeffs[2] ) );
 		}
-		double[] ar = new double[a.Length];
-		double[] ai = new double[a.Length];
-		bool[] err = new bool[a.Length];
-		bool komplex = false;
-		for (int i = 0; i < a.Length; i++)
+
+        var ar = new double[ Coeffs.Length ];
+        var ai = new double[ Coeffs.Length ];
+
+		var err = new bool[Coeffs.Length];
+		var komplex = false;
+
+		for (int i = 0; i < Coeffs.Length; i++)
 		{
-			Algebraic cf = a[i];
-			if (!(cf is Zahl))
+			var cf = Coeffs[i];
+
+			if (!(cf is Symbolic))
 			{
-				throw new JasymcaException("Roots requires constant coefficients.");
+			    throw new JasymcaException( "Roots requires constant coefficients." );
 			}
-			ar[i] = ((Zahl)cf).unexakt().real;
-			ai[i] = ((Zahl)cf).unexakt().imag;
+
+			ar[i] = ((Symbolic)cf).ToComplex().Re;
+			ai[i] = ((Symbolic)cf).ToComplex().Im;
+
 			if (ai[i] != 0.0)
 			{
 				komplex = true;
 			}
 		}
+
 		if (komplex)
 		{
 			Pzeros.aberth(ar, ai, err);
@@ -756,7 +863,9 @@ public class Polynomial : Algebraic
 		else
 		{
 			Pzeros.bairstow(ar, ai, err);
+
 			bool ok = true;
+
 			for (int i = 0; i < err.Length - 1; i++)
 			{
 				if (err[i])
@@ -764,30 +873,37 @@ public class Polynomial : Algebraic
 					ok = false;
 				}
 			}
+
 			if (!ok)
 			{
-				for (int i = 0; i < a.Length; i++)
+				for (int i = 0; i < Coeffs.Length; i++)
 				{
-					Algebraic cf = a[i];
-					ar[i] = ((Zahl)cf).unexakt().real;
-					ai[i] = ((Zahl)cf).unexakt().imag;
+					Algebraic cf = Coeffs[i];
+
+					ar[i] = ((Symbolic)cf).ToComplex().Re;
+					ai[i] = ((Symbolic)cf).ToComplex().Im;
 				}
+
 				Pzeros.aberth(ar, ai, err);
 			}
 		}
-		Algebraic[] r = new Algebraic[a.Length - 1];
+
+		var r = new Algebraic[Coeffs.Length - 1];
+
 		for (int i = 0; i < r.Length; i++)
 		{
 			if (!err[i])
 			{
-				Unexakt x0 = new Unexakt(ar[i],ai[i]);
+				var x0 = new Complex(ar[i],ai[i]);
+
 				r[i] = x0;
 			}
 			else
 			{
-				throw new JasymcaException("Could not calculate root " + i);
+			    throw new JasymcaException( "Could not calculate root " + i );
 			}
 		}
-		return new Vektor(r);
+
+		return new Vector(r);
 	}
 }

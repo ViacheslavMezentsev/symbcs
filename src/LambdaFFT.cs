@@ -3,15 +3,15 @@ using System.Collections;
 
 internal class LambdaFFT : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
-        var x = getVektor( st );
+        int narg = GetNarg( st );
+        var x = GetVektor( st );
 
-        x = ( Vektor ) ( new ExpandConstants() ).f_exakt(x);
+        x = ( Vector ) ( new ExpandConstants() ).SymEval(x);
 
-        var re = ( ( Vektor ) x.realpart() ).Double;
-        var im = ( ( Vektor ) x.imagpart() ).Double;
+        var re = ( ( Vector ) x.RealPart() ).Double;
+        var im = ( ( Vector ) x.ImagPart() ).Double;
 
         int n = re.Length;
 
@@ -32,14 +32,14 @@ internal class LambdaFFT : Lambda
             ifft_1d( re, im, -1 );
         }
 
-        var a = new Unexakt[n];
+        var a = new Number[n];
 
         for ( int i = 0; i < n; i++ )
         {
-            a[i] = new Unexakt( re[i], im[i] );
+            a[i] = new Number( re[i], im[i] );
         }
 
-        st.Push( new Vektor(a) );
+        st.Push( new Vector(a) );
 
         return 0;
     }
@@ -169,15 +169,15 @@ internal class LambdaFFT : Lambda
 
 internal class LambdaIFFT : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
-        var x = getVektor( st );
+        int narg = GetNarg( st );
+        var x = GetVektor( st );
 
-        x = ( Vektor ) ( new ExpandConstants() ).f_exakt(x);
+        x = ( Vector ) ( new ExpandConstants() ).SymEval(x);
 
-        var re = ( ( Vektor ) x.realpart() ).Double;
-        var im = ( ( Vektor ) x.imagpart() ).Double;
+        var re = ( ( Vector ) x.RealPart() ).Double;
+        var im = ( ( Vector ) x.ImagPart() ).Double;
 
         int n = re.Length;
 
@@ -198,14 +198,14 @@ internal class LambdaIFFT : Lambda
             LambdaFFT.ifft_1d( re, im, 1 );
         }
 
-        var a = new Unexakt[n];
+        var a = new Number[n];
 
         for ( int i = 0; i < n; i++ )
         {
-            a[i] = new Unexakt( re[i], im[i] );
+            a[i] = new Number( re[i], im[i] );
         }
 
-        st.Push( new Vektor(a) );
+        st.Push( new Vector(a) );
 
         return 0;
     }

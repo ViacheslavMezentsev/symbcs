@@ -3,9 +3,13 @@ using System.Collections;
 
 public class Processor : Constants
 {
+    internal const int LIST = 1, MATRIX = 2, SCALAR = 3, STRING = 4, FUNCTION = 5, LVALUE = 6, SYMBOL = 7, NARG = 8, PDIR = 9, COLON = 10, SYMREF = 11;
+    internal const int BREAK = 1, CONTINUE = 2, RETURN = 3, EXIT = 4, ERROR = 5;
+
+    internal bool interrupt_flag;
     internal Stack stack;
     internal Environment env;
-    internal PrintStream ps = null;
+    internal PrintStream ps;
 
     public Processor( Environment env )
     {
@@ -16,38 +20,24 @@ public class Processor : Constants
 
     internal virtual Environment Environment
     {
-        set
-        {
-            this.env = value;
-        }
-        get
-        {
-            return env;
-        }
+        set { this.env = value; }
+        get { return env; }
     }
 
     internal virtual PrintStream PrintStream
     {
-        set
-        {
-            this.ps = value;
-        }
+        set { this.ps = value; }
     }
 
-    internal bool interrupt_flag = false;
-
-    internal virtual bool check_interrupt()
+    internal virtual bool CheckInterrupt()
     {
         return interrupt_flag;
     }
 
-    internal virtual void set_interrupt( bool flag )
+    internal virtual void SetInterrupt( bool flag )
     {
         interrupt_flag = flag;
     }
-
-    internal const int LIST = 1, MATRIX = 2, SCALAR = 3, STRING = 4, FUNCTION = 5, LVALUE = 6, SYMBOL = 7, NARG = 8, PDIR = 9, COLON = 10, SYMREF = 11;
-    internal const int BREAK = 1, CONTINUE = 2, RETURN = 3, EXIT = 4, ERROR = 5;
 
     internal virtual int instruction_type( object x )
     {
@@ -56,7 +46,7 @@ public class Processor : Constants
             return LIST;
         }
 
-        if ( x is Matrix || x is Vektor )
+        if ( x is Matrix || x is Vector )
         {
             return MATRIX;
         }
@@ -103,11 +93,11 @@ public class Processor : Constants
         return 0;
     }
 
-    public virtual int process_instruction( object x, bool canon )
+    public virtual int ProcessInstruction( object x, bool canon )
     {
         if ( interrupt_flag )
         {
-            set_interrupt( false );
+            SetInterrupt( false );
 
             throw new JasymcaException( "Interrupted." );
         }
@@ -128,7 +118,7 @@ public class Processor : Constants
                 return 0;
 
             case FUNCTION:
-                return ( ( Lambda ) x ).lambda( stack );
+                return ( ( Lambda ) x ).Eval( stack );
 
             case SYMREF:
                 var s = ( ( string ) x ).Substring(1);
@@ -141,7 +131,7 @@ public class Processor : Constants
                     {
                         LambdaLOADFILE.ReadFile( s + ".m" );
 
-                        val = env.getValue( s );
+                        val = env.getValue(s);
                     }
                     catch ( Exception )
                     {
@@ -150,7 +140,7 @@ public class Processor : Constants
 
                 if ( val is Lambda )
                 {
-                    return ( ( Lambda ) val ).lambda( stack );
+                    return ( ( Lambda ) val ).Eval( stack );
                 }
 
                 if ( val is Algebraic )
@@ -159,9 +149,9 @@ public class Processor : Constants
 
                     var idx = Index.createIndex( stack, mx );
 
-                    mx = mx.extract( idx );
+                    mx = mx.Extract( idx );
 
-                    stack.Push( mx.reduce() );
+                    stack.Push( mx.Reduce() );
 
                     return 0;
                 }
@@ -187,7 +177,7 @@ public class Processor : Constants
 
                     if ( val is Lambda )
                     {
-                        return ( ( Lambda ) val ).lambda( stack );
+                        return ( ( Lambda ) val ).Eval( stack );
                     }
                 }
 
@@ -211,7 +201,7 @@ public class Processor : Constants
                     }
                 }
 
-                return process_instruction( val, canon );
+                return ProcessInstruction( val, canon );
 
             case PDIR:
 
@@ -266,7 +256,7 @@ public class Processor : Constants
                 {
                     var z = x[i];
 
-                    int ret = process_instruction( z, canon );
+                    int ret = ProcessInstruction( z, canon );
 
                     if ( ret != 0 )
                     {
@@ -323,7 +313,7 @@ public class Processor : Constants
 
                     ps.print(s);
 
-                    ( ( Algebraic ) x ).print( ps );
+                    ( ( Algebraic ) x ).Print( ps );
 
                     ps.println( "" );
                 }

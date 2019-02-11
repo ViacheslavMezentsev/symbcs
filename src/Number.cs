@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections;
 
-public class Exakt : Zahl
+public class Number : Symbolic
 {
 	internal BigInteger[] real; 
     internal BigInteger[] imag;
 
-	public Exakt(BigInteger[] real) : this(real, null)
+	public Number(BigInteger[] real) : this(real, null)
 	{
 	}
 
-	public Exakt(long nom, long den)
+	public Number(long nom, long den)
 	{
 		real = new BigInteger[2];
 
@@ -18,7 +18,7 @@ public class Exakt : Zahl
 		real[1] = BigInteger.valueOf(den);
 	}
 
-	public Exakt(BigInteger r)
+	public Number(BigInteger r)
 	{
 		real = new BigInteger[2];
 
@@ -26,7 +26,7 @@ public class Exakt : Zahl
 		real[1] = BigInteger.ONE;
 	}
 
-	public Exakt(BigInteger[] real, BigInteger[] imag)
+	public Number(BigInteger[] real, BigInteger[] imag)
 	{
 		this.real = reducev(real);
 
@@ -36,19 +36,20 @@ public class Exakt : Zahl
 		}
 	}
 
-	public Exakt(double x) : this(x,0.0)
+	public Number(double x) : this(x,0.0)
 	{
 	}
 
-	public Exakt(double x, double y)
+	public Number(double x, double y)
 	{
-		real = reducev(double2rat(x));
+		real = reducev( double2rat(x) );
 
-		if (y != 0.0)
+		if ( y != 0.0 )
 		{
-			imag = reducev(double2rat(y));
+			imag = reducev( double2rat(y) );
 		}
 	}
+
 
 	internal virtual BigInteger double2big(double x)
 	{
@@ -95,11 +96,12 @@ public class Exakt : Zahl
 		}
 
 		double eps = 1.0e-8;
-		Zahl a = Lambda.pc.env.getnum("ratepsilon");
+
+		var a = Lambda.pc.env.getnum("ratepsilon");
 
 		if (a != null)
 		{
-			double epstry = a.unexakt().real;
+			double epstry = a.ToComplex().Re;
 
 			if (epstry > 0)
 			{
@@ -174,27 +176,33 @@ public class Exakt : Zahl
 		y[1] = Z;
 	}
 
-	internal virtual Exakt cfs(double tol1)
+	internal virtual Number cfs(double tol1)
 	{
-		ArrayList a = new ArrayList();
+		var list = new ArrayList();
 
-		Exakt error, y, ra, tol;
+		Number error, y, ra, tol;
 		BigInteger aa;
 
-		tol = (Exakt)mult(new Exakt(tol1));
+		tol = ( Number ) ( this * new Number( tol1 ) );
+
 		aa = real[0].divide(real[1]);
-		a.Add(aa);
-		y = new Exakt(cfs(a));
-		error = (Exakt)((Exakt)(sub(y))).abs();
+
+		list.Add(aa);
+		
+        y = new Number( cfs( list ) );
+
+		error = ( Number ) ( ( Number ) ( this - y ) ).Abs();
 		ra = this;
 
-		while (tol.smaller(error))
+		while (tol.Smaller(error))
 		{
-			ra = (Exakt)Zahl.ONE.div(ra.sub(new Exakt(aa)));
+			ra = ( Number ) ( ONE / ( ra - new Number(aa) ) );
+
 			aa = ra.real[0].divide(ra.real[1]);
-			a.Add(aa);
-			y = new Exakt(cfs(a));
-			error = (Exakt)((Exakt)sub(y)).abs();
+			list.Add(aa);
+			y = new Number(cfs(list));
+
+			error = ( Number ) ( ( Number ) ( this - y ) ).Abs();
 		}
 
 		return y;
@@ -245,22 +253,22 @@ public class Exakt : Zahl
 		return x;
 	}
 
-	public override Algebraic realpart()
+	public override Algebraic RealPart()
 	{
-		return new Exakt(real);
+		return new Number(real);
 	}
 
-	public override Algebraic imagpart()
+	public override Algebraic ImagPart()
 	{
 		if (imag != null)
 		{
-			return new Exakt(imag);
+			return new Number(imag);
 		}
 
-		return new Exakt(BigInteger.ZERO);
+		return new Number(BigInteger.ZERO);
 	}
 
-	public override bool exaktq()
+	public override bool IsNumber()
 	{
 		return true;
 	}
@@ -269,19 +277,12 @@ public class Exakt : Zahl
 	{
 		var q = x[0].divideAndRemainder( x[1] );
 
-		return q[0].doubleValue() + q[1].doubleValue() / x[1].doubleValue();
+		return q[0].ToDouble() + q[1].ToDouble() / x[1].ToDouble();
 	}
 
-	public virtual Unexakt tofloat()
+	public virtual Complex ToFloat()
 	{
-		if (imag == null)
-		{
-			return new Unexakt(floatValue(real));
-		}
-		else
-		{
-			return new Unexakt(floatValue(real), floatValue(imag));
-		}
+	    return imag == null ? new Complex( floatValue( real ) ) : new Complex( floatValue( real ), floatValue( imag ) );
 	}
 
 	private BigInteger[] add(BigInteger[] x, BigInteger[] y)
@@ -369,38 +370,38 @@ public class Exakt : Zahl
 		return x[0].Equals(y[0]) && x[1].Equals(y[1]);
 	}
 
-	public override Algebraic add(Algebraic x)
+    protected override Algebraic Add(Algebraic x)
 	{
-		if (!(x is Zahl))
+		if (!(x is Symbolic))
 		{
-			return x.add(this);
+			return x + this;
 		}
 
-		Exakt X = ((Zahl)x).exakt();
+		Number X = ((Symbolic)x).ToNumber();
 
-		return new Exakt(add(real, X.real), add(imag, X.imag));
+		return new Number(add(real, X.real), add(imag, X.imag));
 	}
 
-	public override Algebraic mult(Algebraic x)
+    protected override Algebraic Mul(Algebraic x)
 	{
-		if (!(x is Zahl))
+		if (!(x is Symbolic))
 		{
-			return x.mult(this);
+			return x * this;
 		}
 
-		Exakt X = ((Zahl)x).exakt();
+		Number X = ((Symbolic)x).ToNumber();
 
-		return new Exakt(sub(mult(real,X.real), mult(imag,X.imag)), add(mult(imag,X.real), mult(real,X.imag)));
+		return new Number(sub(mult(real,X.real), mult(imag,X.imag)), add(mult(imag,X.real), mult(real,X.imag)));
 	}
 
-	public override Algebraic div(Algebraic x)
+    protected override Algebraic Div(Algebraic x)
 	{
-		if (!(x is Zahl))
+		if (!(x is Symbolic))
 		{
-			return base.div(x);
+			return base.Div(x);
 		}
 
-		Exakt X = ((Zahl)x).exakt();
+		Number X = ((Symbolic)x).ToNumber();
 
 		BigInteger[] N = add(mult(X.real,X.real),mult(X.imag,X.imag));
 
@@ -410,7 +411,7 @@ public class Exakt : Zahl
 			throw new JasymcaException("Division by Zero.");
 		}
 
-		return new Exakt(div(add(mult(real,X.real), mult(imag,X.imag)), N), div(sub(mult(imag,X.real), mult(real,X.imag)), N));
+		return new Number(div(add(mult(real,X.real), mult(imag,X.imag)), N), div(sub(mult(imag,X.real), mult(real,X.imag)), N));
 	}
 
 	private BigInteger lsm(BigInteger x, BigInteger y)
@@ -418,58 +419,58 @@ public class Exakt : Zahl
 		return x.multiply(y).divide(x.gcd(y));
 	}
 
-	public override Algebraic[] div(Algebraic q1, Algebraic[] result)
+	public override Algebraic[] Div(Algebraic q1, Algebraic[] result)
 	{
 		if (result == null)
 		{
 			result = new Algebraic[2];
 		}
 
-		if (!(q1 is Zahl))
+		if (!(q1 is Symbolic))
 		{
-			result[0] = Zahl.ZERO;
+			result[0] = Symbolic.ZERO;
 			result[1] = this;
 
 			return result;
 		}
 
-		Exakt q = ((Zahl)q1).exakt();
+		var q = ((Symbolic)q1).ToNumber();
 
-		if (!komplexq() && q.komplexq())
+		if (!IsComplex() && q.IsComplex())
 		{
-			result[0] = Zahl.ZERO;
+			result[0] = Symbolic.ZERO;
 			result[1] = this;
 			return result;
 		}
 
-		if (komplexq() && !q.komplexq())
+		if (IsComplex() && !q.IsComplex())
 		{
-			result[0] = div(q);
-			result[1] = Zahl.ZERO;
+			result[0] = Div(q);
+			result[1] = Symbolic.ZERO;
 
 			return result;
 		}
 
-		if (komplexq() && q.komplexq())
+		if (IsComplex() && q.IsComplex())
 		{
-			result[0] = imagpart().div(q.imagpart());
-			result[1] = sub(result[0].mult(q));
+			result[0] = ImagPart() / q.ImagPart();
+			result[1] = this - result[0] * q;
 
 			return result;
 		}
 
-		if (integerq() && q.integerq())
+		if (IsInteger() && q.IsInteger())
 		{
-			BigInteger[] d = real[0].divideAndRemainder(q.real[0]);
+			var d = real[0].divideAndRemainder(q.real[0]);
 
-			result[0] = new Exakt(d[0]);
-			result[1] = new Exakt(d[1]);
+			result[0] = new Number(d[0]);
+			result[1] = new Number(d[1]);
 
 			return result;
 		}
 
-		result[0] = div(q);
-		result[1] = Zahl.ZERO;
+		result[0] = Div(q);
+		result[1] = Symbolic.ZERO;
 
 		return result;
 	}
@@ -499,51 +500,51 @@ public class Exakt : Zahl
 		return "(" + b2string(real) + (imag[0].compareTo(BigInteger.ZERO) > 0?"+":"") + b2string(imag) + "*i)";
 	}
 
-	public override bool integerq()
+	public override bool IsInteger()
 	{
 		return real[1].Equals(BigInteger.ONE) && imag == null;
 	}
 
-	public override bool smaller(Zahl x)
+	public override bool Smaller( Symbolic x )
 	{
-		return unexakt().smaller(x);
+		return ToComplex().Smaller(x);
 	}
 
-	public override bool komplexq()
+	public override bool IsComplex()
 	{
 		return imag != null && !imag[0].Equals(BigInteger.ZERO);
 	}
 
-	public override bool imagq()
+	public override bool IsImaginary()
 	{
 		return imag != null && !imag[0].Equals(BigInteger.ZERO) && real[0].Equals(BigInteger.ZERO);
 	}
 
 	public override bool Equals(object x)
 	{
-		if (x is Exakt)
+	    if ( x is Number )
 		{
-			return Equals(real,((Exakt)x).real) && Equals(imag,((Exakt)x).imag);
+		    return Equals( real, ( ( Number ) x ).real ) && Equals( imag, ( ( Number ) x ).imag );
 		}
 
-		return tofloat().Equals(x);
+		return ToFloat().Equals(x);
 	}
 
-	public override double norm()
+	public override double Norm()
 	{
-		return tofloat().norm();
+		return ToFloat().Norm();
 	}
 
-	public override Algebraic rat()
+	public override Algebraic Rat()
 	{
 		return this;
 	}
 
-	public override Zahl abs()
+	public override Symbolic Abs()
 	{
-		if (komplexq())
+		if (IsComplex())
 		{
-			return tofloat().abs();
+			return ToFloat().Abs();
 		}
 
 		BigInteger[] r = new BigInteger[2];
@@ -551,49 +552,49 @@ public class Exakt : Zahl
 		r[0] = real[0].compareTo(BigInteger.ZERO) < 0?real[0].negate():real[0];
 		r[1] = real[1];
 
-		return new Exakt(r);
+		return new Number(r);
 	}
 
-	public virtual Exakt gcd(Exakt x)
+	public virtual Number gcd(Number x)
 	{
-		if (Equals(Zahl.ZERO))
+		if (Equals(Symbolic.ZERO))
 		{
 			return x;
 		}
-		else if (x.Equals(Zahl.ZERO))
+		else if (x.Equals(Symbolic.ZERO))
 		{
 			return this;
 		}
-		if (komplexq() && x.komplexq())
+		if (IsComplex() && x.IsComplex())
 		{
-			Exakt r = ((Exakt)realpart()).gcd((Exakt)x.realpart());
-			Exakt i = ((Exakt)imagpart()).gcd((Exakt)x.imagpart());
+			var r = ((Number)RealPart()).gcd((Number)x.RealPart());
+			var i = ((Number)ImagPart()).gcd((Number)x.ImagPart());
 
-			if (r.Equals(Zahl.ZERO))
+			if (r.Equals(Symbolic.ZERO))
 			{
-				return (Exakt)i.mult(Zahl.IONE);
+				return (Number)i.Mul(Symbolic.IONE);
 			}
 
-			if (realpart().div(r).Equals(imagpart().div(i)))
+			if ( ( RealPart() / r ).Equals( ImagPart() / i ) )
 			{
-				return (Exakt)r.add(i.mult(Zahl.IONE));
+				return (Number)r.Add(i.Mul(Symbolic.IONE));
 			}
 			else
 			{
-				return Zahl.ONE.exakt();
+				return Symbolic.ONE.ToNumber();
 			}
 		}
-		else if (komplexq() || x.komplexq())
+		else if (IsComplex() || x.IsComplex())
 		{
-			return Zahl.ONE.exakt();
+			return Symbolic.ONE.ToNumber();
 		}
 		else
 		{
-			return (Exakt)(new Exakt(real[0].multiply(x.real[1]).gcd(real[1].multiply(x.real[0])))).div(new Exakt(real[1].multiply(x.real[1])));
+			return (Number)(new Number(real[0].multiply(x.real[1]).gcd(real[1].multiply(x.real[0])))).Div(new Number(real[1].multiply(x.real[1])));
 		}
 	}
 
-	public override int intval()
+	public override int ToInt()
 	{
 		return real[0].intValue();
 	}

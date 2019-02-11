@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -27,56 +26,56 @@ internal class OctaveParser : Parser
 
 	public OctaveParser( Environment env ) : base(env)
 	{
-		env.addPath(".");
-		env.addPath("m");
+		env.addPath( "." );
+		env.addPath( "m" );
 
-        Environment.globals.Add( "pi", Zahl.PI );
-        Environment.globals.Add( "i", Zahl.IONE );
-        Environment.globals.Add( "j", Zahl.IONE );
-        Environment.globals.Add( "eps", new Unexakt( 2.220446049250313E-16 ) );
-        Environment.globals.Add( "ratepsilon", new Unexakt( 2.0e-8 ) );
-        Environment.globals.Add( "algepsilon", new Unexakt( 1.0e-8 ) );
-        Environment.globals.Add( "rombergit", new Unexakt( 11 ) );
-	    Environment.globals.Add( "rombergtol", new Unexakt( 1.0e-4 ) );
+        Environment.Globals.Add( "pi", Symbolic.PI );
+        Environment.Globals.Add( "i", Symbolic.IONE );
+        Environment.Globals.Add( "j", Symbolic.IONE );
+        Environment.Globals.Add( "eps", new Number( 2.220446049250313E-16 ) );
+        Environment.Globals.Add( "ratepsilon", new Number( 2.0e-8 ) );
+        Environment.Globals.Add( "algepsilon", new Number( 1.0e-8 ) );
+        Environment.Globals.Add( "rombergit", new Number( 11 ) );
+	    Environment.Globals.Add( "rombergtol", new Number( 1.0e-4 ) );
 
-		pst = new ParserState( null, 0 );
+		State = new ParserState( null, 0 );
 
         Operator.OPS = new[]
         {
-            new Operator( "POW", ".**", 1, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "PPR", "++", 1, Fields.RIGHT_LEFT, Fields.UNARY | Fields.LVALUE ), 
-            new Operator( "MMR", "--", 1, Fields.RIGHT_LEFT, Fields.UNARY | Fields.LVALUE ), 
-            new Operator( "PPL", "++", 1, Fields.LEFT_RIGHT, Fields.UNARY | Fields.LVALUE ), 
-            new Operator( "MML", "--", 1, Fields.LEFT_RIGHT, Fields.UNARY | Fields.LVALUE ), 
-            new Operator( "ADE", "+=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
-            new Operator( "SUE", "-=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
-            new Operator( "MUE", "*=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
-            new Operator( "DIE", "/=", 10, Fields.RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
-            new Operator( "MPW", "**", 1, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "MUL", ".*", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "DIV", "./", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "POW", ".^", 1, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "EQU", "==", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "NEQ", "~=", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "GEQ", ">=", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "LEQ", "<=", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "TRN", ".'", 1, Fields.RIGHT_LEFT, Fields.UNARY ), 
-            new Operator( "GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "LES", "<", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "OR", "|", 9, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "NOT", "~", 8, Fields.LEFT_RIGHT, Fields.UNARY ), 
-            new Operator( "AND", "&", 7, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "GRE", ">", 6, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "ASS", "=", 10,Fields. RIGHT_LEFT, Fields.BINARY | Fields.LVALUE ), 
-            new Operator( "CR1", ":", 5, Fields.LEFT_RIGHT, Fields.BINARY | Fields.TERNARY ), 
-            new Operator( "ADD", "+", 4, Fields.LEFT_RIGHT, Fields.UNARY | Fields.BINARY ), 
-            new Operator( "SUB", "-", 4, Fields.LEFT_RIGHT, Fields.UNARY | Fields.BINARY ), 
-            new Operator( "MMU", "*", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "MDR", "/", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "MDL", "\\", 3, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "MPW", "^", 1, Fields.LEFT_RIGHT, Fields.BINARY ), 
-            new Operator( "ADJ", "'", 1, Fields.RIGHT_LEFT, Fields.UNARY )
+            new Operator( "POW", ".**", 1, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "PPR", "++", 1, Flags.RIGHT_LEFT, Flags.UNARY | Flags.LVALUE ), 
+            new Operator( "MMR", "--", 1, Flags.RIGHT_LEFT, Flags.UNARY | Flags.LVALUE ), 
+            new Operator( "PPL", "++", 1, Flags.LEFT_RIGHT, Flags.UNARY | Flags.LVALUE ), 
+            new Operator( "MML", "--", 1, Flags.LEFT_RIGHT, Flags.UNARY | Flags.LVALUE ), 
+            new Operator( "ADE", "+=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ), 
+            new Operator( "SUE", "-=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ), 
+            new Operator( "MUE", "*=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ), 
+            new Operator( "DIE", "/=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ), 
+            new Operator( "MPW", "**", 1, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "MUL", ".*", 3, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "DIV", "./", 3, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "POW", ".^", 1, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "EQU", "==", 6, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "NEQ", "~=", 6, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "GEQ", ">=", 6, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "LEQ", "<=", 6, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "TRN", ".'", 1, Flags.RIGHT_LEFT, Flags.UNARY ), 
+            new Operator( "GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "LES", "<", 6, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "OR", "|", 9, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "NOT", "~", 8, Flags.LEFT_RIGHT, Flags.UNARY ), 
+            new Operator( "AND", "&", 7, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "ASS", "=", 10,Flags. RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ), 
+            new Operator( "CR1", ":", 5, Flags.LEFT_RIGHT, Flags.BINARY | Flags.TERNARY ), 
+            new Operator( "ADD", "+", 4, Flags.LEFT_RIGHT, Flags.UNARY | Flags.BINARY ), 
+            new Operator( "SUB", "-", 4, Flags.LEFT_RIGHT, Flags.UNARY | Flags.BINARY ), 
+            new Operator( "MMU", "*", 3, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "MDR", "/", 3, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "MDL", "\\", 3, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "MPW", "^", 1, Flags.LEFT_RIGHT, Flags.BINARY ), 
+            new Operator( "ADJ", "'", 1, Flags.RIGHT_LEFT, Flags.UNARY )
         };
 
         nonsymbols.AddRange( Operator.OPS.Select( t => t.symbol ).ToList() );
@@ -107,7 +106,7 @@ internal class OctaveParser : Parser
 
 		reset();
 
-        while ( ( s = readLine( istream ) ) != null )
+        while ( ( s = ReadLine( istream ) ) != null )
 		{
 			sp = s;
 
@@ -129,30 +128,30 @@ internal class OctaveParser : Parser
 			return null;
 		}
 
-		if ( s == null && pst.inList == IN_BLOCK )
+		if ( s == null && State.InList == IN_BLOCK )
 		{
-			var v = pst.tokens;
+			var v = State.Tokens;
 
-		    pst = ( ParserState ) pst.sub;
+		    State = ( ParserState ) State.Sub;
 
-			pst.tokens.Add(v);
+			State.Tokens.Add(v);
 		}
 
 		return get();
 	}
 
-	public override List compile(string s)
+	public override List compile( string expr )
 	{
 		reset();
 
-		translate(s);
+		translate( expr );
 
 		return get();
 	}
 
 	internal override List get()
 	{
-		var r = pst.tokens;
+		var r = State.Tokens;
 
 		var pgm = compile_statement(r);
 
@@ -164,22 +163,22 @@ internal class OctaveParser : Parser
 		throw new ParseException( "Compilation failed." );
 	}
 
-	internal override void translate( string s )
+	internal override void translate( string expr )
 	{
-		if ( s == null )
+		if ( expr == null )
 		{
 			return;
 		}
 
-		var sb = new StringBuilder(s);
+		var sb = new StringBuilder( expr );
 
 		object t;
 
 	    while ( ( t = nextToken( sb ) ) != null )
 		{
-			pst.tokens.Add(t);
+			State.Tokens.Add(t);
 
-			pst.prev = t;
+			State.Prev = t;
 		}
 	}
 
@@ -190,14 +189,14 @@ internal class OctaveParser : Parser
 	private string sepright = ")]*/^!,;:=.<>'\\";
 	private string sepleft = "*/^!,;:=.<>'\\+-";
 
-	internal virtual bool refq(object expr)
+	internal virtual bool refq( object expr )
 	{
 	    return expr is string && ( ( string ) expr ).Length > 0 && ( ( string ) expr )[0] == '@';
 	}
 
-    internal override bool commandq( object x )
+    internal override bool commandq( object expr )
     {
-        return oneof( x, commands );
+        return oneof( expr, commands );
     }
 
     internal virtual bool operatorq( object expr )
@@ -207,7 +206,7 @@ internal class OctaveParser : Parser
 
     public virtual object nextToken( StringBuilder s )
 	{
-        if ( pst.inList == IN_BRACK && pst.prev != null && !oneof( pst.prev, sepleft ) )
+        if ( State.InList == IN_BRACK && State.Prev != null && !oneof( State.Prev, sepleft ) )
         {
             int k = 0;
 
@@ -244,7 +243,7 @@ internal class OctaveParser : Parser
             }
         }
 
-        if ( pst.inList == IN_BLOCK && pst.prev != null && !oneof( pst.prev, listsep ) )
+        if ( State.InList == IN_BLOCK && State.Prev != null && !oneof( State.Prev, listsep ) )
         {
             int k = 0;
 
@@ -276,53 +275,52 @@ internal class OctaveParser : Parser
                 return ' ' + cutstring( s, '"', '"' );
 
             case '(':
-                if ( symbolq( pst.prev ) )
+                if ( symbolq( State.Prev ) )
                 {
-                    pst.prev = "@" + pst.prev;
-                    // TODO: Check this
-                    pst.tokens.RemoveAt( pst.tokens.Count - 1 );
-                    pst.tokens.Add( pst.prev );
+                    State.Prev = "@" + State.Prev;
+
+                    State.Tokens.RemoveAt( State.Tokens.Count - 1 );
+                    State.Tokens.Add( State.Prev );
                 }
 
-                pst = new ParserState( pst, IN_PARENT );
+                State = new ParserState( State, IN_PARENT );
 
                 return nextToken( s.Remove( 0, 1 ) );
 
             case ')':
-                if ( pst.inList != IN_PARENT )
+                if ( State.InList != IN_PARENT )
                 {
                     throw new ParseException( "Wrong parenthesis." );
                 }
 
-                var t = pst.tokens;
+                var t = State.Tokens;
 
-                pst = ( ParserState ) pst.sub;
+                State = ( ParserState ) State.Sub;
 
                 s.Remove( 0, 1 );
 
                 return t;
 
             case '[':
-                pst = new ParserState( pst, IN_BRACK );
+                State = new ParserState( State, IN_BRACK );
 
                 return nextToken( s.Remove( 0, 1 ) );
 
             case ']':
-                if ( pst.inList != IN_BRACK )
+                if ( State.InList != IN_BRACK )
                 {
                     throw new ParseException( "Wrong brackets." );
                 }
 
-                t = pst.tokens;
+                t = State.Tokens;
 
                 while ( t.Count > 0 && ";".Equals( t[ t.Count - 1 ] ) )
                 {
-                    // TODO: Check this
                     t.RemoveAt( t.Count - 1 );
                 }
 
                 t.Insert( 0, "[" );
-                pst = ( ParserState ) pst.sub;
+                State = ( ParserState ) State.Sub;
                 s.Remove( 0, 1 );
 
                 return t;
@@ -333,13 +331,13 @@ internal class OctaveParser : Parser
                 return null;
 
             case '\'':
-                if ( pst.prev == null || stringopq( pst.prev ) )
+                if ( State.Prev == null || stringopq( State.Prev ) )
                 {
                     return ' ' + cutstring( s, '\'', '\'' );
                 }
                 else
                 {
-                    return readString(s);
+                    return ReadString(s);
                 }
 
             case ';':
@@ -361,28 +359,21 @@ internal class OctaveParser : Parser
                 return readNumber(s);
 
             case '.':
-                if ( s.Length > 1 && number( s[1] ) )
-                {
-                    return readNumber(s);
-                }
-                else
-                {
-                    return readString(s);
-                }
+                return s.Length > 1 && number( s[1] ) ? readNumber(s) : ReadString(s);
 
             default:
-                return readString(s);
+                return ReadString(s);
         }
 	}
 
 	internal override bool ready()
 	{
-		return pst.sub == null;
+		return State.Sub == null;
 	}
 
 	private string separator = "()[]\n\t\r +-*/^!,;:=.<>'\\&|";
 
-	internal virtual object readString(StringBuilder s)
+	internal virtual object ReadString( StringBuilder s )
 	{
 	    int len = s.Length > 2 ? 3 : s.Length;
 
@@ -410,46 +401,46 @@ internal class OctaveParser : Parser
 
         if ( t.Equals( IF ) || t.Equals( FOR ) || t.Equals( WHILE ) || t.Equals( FUNCTION ) )
         {
-            if ( pst.inList == IN_PARENT || pst.inList == IN_BRACK )
+            if ( State.InList == IN_PARENT || State.InList == IN_BRACK )
             {
                 throw new ParseException( "Block starts within list." );
             }
 
-            pst.tokens.Add(t);
+            State.Tokens.Add(t);
 
-            pst = new ParserState( pst, IN_BLOCK );
+            State = new ParserState( State, IN_BLOCK );
 
             return nextToken(s);
         }
 
         if ( t.Equals( ELSE ) )
         {
-            if ( pst.inList != IN_BLOCK )
+            if ( State.InList != IN_BLOCK )
             {
                 throw new ParseException( "Orphaned else." );
             }
 
-            var v = pst.tokens;
+            var tokens = State.Tokens;
 
-            ( ( ParserState ) pst.sub ).tokens.Add(v);
+            ( ( ParserState ) State.Sub ).Tokens.Add( tokens );
 
-            pst = new ParserState( pst.sub, IN_BLOCK );
+            State = new ParserState( State.Sub, IN_BLOCK );
 
             return ELSE;
         }
 
         if ( t.Equals( END ) )
         {
-            if ( pst.inList != IN_BLOCK )
+            if ( State.InList != IN_BLOCK )
             {
                 throw new ParseException( "Orphaned end." );
             }
 
-            var v = pst.tokens;
+            var tokens = State.Tokens;
 
-            pst = ( ParserState ) pst.sub;
+            State = ( ParserState ) State.Sub;
 
-            return v;
+            return tokens;
         }
 
         return t;
@@ -457,7 +448,7 @@ internal class OctaveParser : Parser
 
 	internal virtual List compile_unary( Operator op, List expr )
 	{
-        var arg_in = ( op.left_right() ? expr.take( 1, expr.Count ) : expr.take( 0, expr.Count - 1 ) );
+        var arg_in = ( op.left_right() ? expr.Take( 1, expr.Count ) : expr.Take( 0, expr.Count - 1 ) );
 
         var arg = ( op.lvalue() ? compile_lval( arg_in ) : compile_expr( arg_in ) );
 
@@ -480,7 +471,7 @@ internal class OctaveParser : Parser
         {
             if ( op.symbol.Equals( expr[ k0 ] ) )
             {
-                var left_in = expr.take( 0, k0 );
+                var left_in = expr.Take( 0, k0 );
                 var left = compile_expr( left_in );
 
                 if ( left == null )
@@ -488,7 +479,7 @@ internal class OctaveParser : Parser
                     continue;
                 }
 
-                var mid_in = expr.take( k0 + 1, k );
+                var mid_in = expr.Take( k0 + 1, k );
                 var mid = compile_expr( mid_in );
 
                 if ( mid == null )
@@ -496,7 +487,7 @@ internal class OctaveParser : Parser
                     continue;
                 }
 
-                var right_in = expr.take( k + 1, expr.Count );
+                var right_in = expr.Take( k + 1, expr.Count );
                 var right = compile_expr( right_in );
 
                 if ( right == null )
@@ -518,7 +509,7 @@ internal class OctaveParser : Parser
 
 	internal virtual List compile_binary(Operator op, List expr, int k)
 	{
-        var left_in = expr.take( 0, k );
+        var left_in = expr.Take( 0, k );
 
         var left = ( op.lvalue() ? compile_lval( left_in ) : compile_expr( left_in ) );
 
@@ -527,7 +518,7 @@ internal class OctaveParser : Parser
             return null;
         }
 
-        var right_in = expr.take( k + 1, expr.Count );
+        var right_in = expr.Take( k + 1, expr.Count );
 
         var right = compile_expr( right_in );
 
@@ -547,7 +538,7 @@ internal class OctaveParser : Parser
                 nargs = ( int? ) left_narg;
 
                 right.Insert( right.Count - 1, "#" + nargs );
-                left.RemoveAt( 0 );
+                left.RemoveAt(0);
             }
             else
             {
@@ -566,23 +557,29 @@ internal class OctaveParser : Parser
 	{
 		List s;
 		int n = expr.Count;
+
 		for (int pred = 10; pred >= 0; pred--)
 		{
 			for (int i = 0; i < n; i++)
 			{
 				int k = i;
+
 				if (pred != 6)
 				{
 					k = n - i - 1;
 				}
-                Operator op = Operator.get( expr[ k ], k == 0 ? Fields.START : ( k == n - 1 ? Fields.END : Fields.MID ) );
+
+                var op = Operator.get( expr[k], k == 0 ? Flags.START : ( k == n - 1 ? Flags.END : Flags.MID ) );
+
 				if (op == null || op.precedence != pred)
 				{
 					continue;
 				}
+
 				if (op.unary() && ((k == 0 && op.left_right()) || (k == n - 1 && !op.left_right())))
 				{
 					s = compile_unary(op, expr);
+
 					if (s != null)
 					{
 						return s;
@@ -592,17 +589,21 @@ internal class OctaveParser : Parser
 						continue;
 					}
 				}
+
 				if (k > 2 && k < n - 1 && op.ternary())
 				{
 					s = compile_ternary(op, expr, k);
+
 					if (s != null)
 					{
 						return s;
 					}
 				}
+
 				if (k > 0 && k < n - 1 && op.binary())
 				{
 					s = compile_binary(op, expr, k);
+
 					if (s != null)
 					{
 						return s;
@@ -610,6 +611,7 @@ internal class OctaveParser : Parser
 				}
 			}
 		}
+
 		return null;
 	}
 
@@ -619,32 +621,43 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
-		expr = expr.take(1, expr.Count);
-		List r = new List();
+
+		expr = expr.Take(1, expr.Count);
+
+		var r = new List();
+
 		int i = 0, ip = 0, nrow = 1;
+
 		while ((i = nextIndexOf(";",ip,expr)) != -1)
 		{
-			List x = expr.take(ip, i);
-			List xs = compile_list(x);
+			var x = expr.Take(ip, i);
+			var xs = compile_list(x);
+
 			if (xs == null)
 			{
 				return null;
 			}
+
 			xs.AddRange(r);
 			r = xs;
 			nrow++;
 			ip = i + 1;
 		}
-		List x1 = expr.take(ip, expr.Count);
-		List xs1 = compile_list(x1);
+
+		var x1 = expr.Take(ip, expr.Count);
+
+		var xs1 = compile_list(x1);
+
 		if (xs1 == null)
 		{
 			return null;
 		}
+
 		xs1.AddRange(r);
 		r = xs1;
-		r.Add(new int?(nrow));
+		r.Add(nrow);
 		r.Add(CRV);
+
 		return r;
 	}
 
@@ -654,35 +667,45 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
-		List r = new List();
+
+		var r = new List();
+
 		if (expr.Count == 0)
 		{
-			r.Add(new int?(0));
+			r.Add(0);
 			return r;
 		}
-		int i , ip = 0, n = 1;
+
+		int i, ip = 0, n = 1;
+
 		while ((i = nextIndexOf(",",ip,expr)) != -1)
 		{
-			List x = expr.take(ip, i);
-			List xs = compile_expr(x);
+			var x = expr.Take(ip, i);
+			var xs = compile_expr(x);
+
 			if (xs == null)
 			{
 				return null;
 			}
+
 			xs.AddRange(r);
 			r = xs;
 			n++;
 			ip = i + 1;
 		}
-		List x1 = expr.take(ip, expr.Count);
-		List xs1 = compile_expr(x1);
+
+		var x1 = expr.Take(ip, expr.Count);
+		var xs1 = compile_expr(x1);
+
 		if (xs1 == null)
 		{
 			return null;
 		}
+
 		xs1.AddRange(r);
 		r = xs1;
-		r.Add(new int?(n));
+		r.Add(n);
+
 		return r;
 	}
 
@@ -692,11 +715,14 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
-		List r = compile_lval1(expr);
+
+		var r = compile_lval1(expr);
+
 		if (r != null)
 		{
 			return r;
 		}
+
 		if (expr.Count == 1)
 		{
 			if (expr[0] is List)
@@ -708,34 +734,45 @@ internal class OctaveParser : Parser
 				return null;
 			}
 		}
+
 		if (!"[".Equals(expr[0]))
 		{
 			return null;
 		}
-		expr = expr.take(1, expr.Count);
+
+		expr = expr.Take(1, expr.Count);
+
 		r = new List();
+
 		int i , n = 1;
+
 		while ((i = expr.IndexOf(",")) != -1)
 		{
-			List x = expr.take(0, i);
-			List xs1 = compile_lval1(x);
+			var x = expr.Take(0, i);
+			var xs1 = compile_lval1(x);
+
 			if (xs1 == null)
 			{
 				return null;
 			}
+
 			xs1.AddRange(r);
 			r = xs1;
-			expr = expr.take(i + 1, expr.Count);
+			expr = expr.Take(i + 1, expr.Count);
 			n++;
 		}
-		List xs = compile_lval1(expr);
+
+		var xs = compile_lval1(expr);
+
 		if (xs == null)
 		{
 			return null;
 		}
+
 		xs.AddRange(r);
 		r = xs;
-		r.Insert(0, new int?(n));
+		r.Insert(0, n);
+
 		return r;
 	}
 
@@ -745,34 +782,43 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
+
 		switch (expr.Count)
 		{
 			case 1:
-				object x = expr[0];
+				var x = expr[0];
+
 				if (x is List)
 				{
 					return compile_lval1((List)x);
 				}
+
 				if (symbolq(x) && !refq(x))
 				{
-					List s = new List();
-					s.Add("$" + x);
-					return s;
+				    return new List {"$" + x};
 				}
+
 				return null;
+
 			case 2:
 				x = expr[0];
+
 				if (!symbolq(x) || !refq(x) || !(expr[1] is List))
 				{
 					return null;
 				}
-				List lst = compile_index((List)expr[1]);
+
+				var lst = compile_index((List)expr[1]);
+
 				if (lst == null)
 				{
 					return null;
 				}
+
 				lst.Add("$" + ((string)x).Substring(1));
+
 				return lst;
+
 			default:
 				return null;
 		}
@@ -786,12 +832,10 @@ internal class OctaveParser : Parser
 		}
 		if (expr.Count == 1 && ":".Equals(expr[0]))
 		{
-			List s = new List();
-			s.Add(":");
-			s.Add(ONE);
-			return s;
+		    var s = new List {":", ONE};
+		    return s;
 		}
-		List r = compile_expr(expr);
+		var r = compile_expr(expr);
 		if (r != null)
 		{
 			r.Add(ONE);
@@ -802,21 +846,18 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
-		List left_in = expr.take(0, c);
-		List right_in = expr.take(c + 1, expr.Count);
+		var left_in = expr.Take(0, c);
+		var right_in = expr.Take(c + 1, expr.Count);
 		if (left_in != null && left_in.Count == 1 && ":".Equals(left_in[0]))
 		{
 			if (right_in != null && right_in.Count == 1 && ":".Equals(right_in[0]))
 			{
-				List s = new List();
-				s.Add(":");
-				s.Add(":");
-				s.Add(TWO);
-				return s;
+			    var s = new List {":", ":", TWO};
+			    return s;
 			}
 			else
 			{
-				List right = compile_expr(right_in);
+				var right = compile_expr(right_in);
 				if (right == null)
 				{
 					return null;
@@ -828,7 +869,7 @@ internal class OctaveParser : Parser
 		}
 		else
 		{
-			List left = compile_expr(left_in);
+			var left = compile_expr(left_in);
 			if (left == null)
 			{
 				return null;
@@ -841,7 +882,7 @@ internal class OctaveParser : Parser
 			}
 			else
 			{
-				List right = compile_expr(right_in);
+				var right = compile_expr(right_in);
 				if (right == null)
 				{
 					return null;
@@ -859,66 +900,88 @@ internal class OctaveParser : Parser
 		{
 			return null;
 		}
+
 		if (expr_in.Count == 0)
 		{
 			return new List();
 		}
-		List expr = expr_in.clone();
-		object first = expr[0];
-		for (int i = 0; i < rules.Length; i++)
+
+		var expr = expr_in.ToList();
+
+		var first = expr[0];
+
+	    foreach ( var rule in rules )
 		{
-			Rule r = rules[i];
-			if (r.rule_in[0].Equals(first) && expr.Count >= r.rule_in.Count)
-			{
-				Compiler c = new Compiler(r.rule_in, r.rule_out, this);
-				List expr_sub = expr.take(0, r.rule_in.Count);
-				List s = c.compile(expr_sub);
-				if (s != null)
-				{
-					expr.clear( 0, expr_sub.Count);
-					if (expr.Count == 0)
-					{
-						return s;
-					}
-					List t = compile_statement(expr);
-					if (t == null)
-					{
-						return null;
-					}
-					s.AddRange(t);
-					return s;
-				}
-			}
+		    if ( !rule.Input[0].Equals( first ) || expr.Count < rule.Input.Count ) continue;
+
+		    var c = new Compiler( rule.Input, rule.Comp, this );
+
+		    var expr_sub = expr.Take( 0, rule.Input.Count );
+
+		    var s = c.compile( expr_sub );
+
+		    if ( s == null ) continue;
+
+		    expr.Remove( 0, expr_sub.Count );
+
+		    if ( expr.Count == 0 )
+		    {
+		        return s;
+		    }
+
+		    var t = compile_statement( expr );
+
+		    if ( t == null )
+		    {
+		        return null;
+		    }
+
+		    s.AddRange(t);
+
+		    return s;
 		}
+
 		if (commandq(first))
 		{
-			List expr_sub = expr;
+			var expr_sub = expr;
+
 			int indx = expr.IndexOf(";");
+
 			if (indx > 0)
 			{
-				expr_sub = expr.take(0, indx + 1);
+				expr_sub = expr.Take(0, indx + 1);
 			}
-			List s = compile_command(expr_sub);
+
+			var s = compile_command(expr_sub);
+
 			if (s != null)
 			{
 				if (indx > 0)
 				{
 					s.Add("#;");
-					expr.clear( 0, indx + 1);
-					List t = compile_statement(expr);
+					expr.Remove( 0, indx + 1);
+
+					var t = compile_statement(expr);
+
 					if (t == null)
 					{
 						return null;
 					}
+
 					s.AddRange(t);
 				}
+
 				return s;
 			}
+
 			return null;
 		}
+
 		string lend = null;
+
 		int ic = expr.IndexOf(",");
 		int indx1 = expr.IndexOf(";");
+
 		if (ic >= 0 && (ic < indx1 || indx1 == -1))
 		{
 			lend = "#,";
@@ -928,29 +991,38 @@ internal class OctaveParser : Parser
 			lend = "#;";
 			ic = indx1;
 		}
+
 		if (ic == 0)
 		{
-			expr.clear(0,1);
+			expr.Remove(0,1);
+
 			return compile_statement(expr);
 		}
+
 		if (lend != null)
 		{
-			List expr_sub = expr.take(0, ic);
-			List s = compile_expr(expr_sub);
+			var expr_sub = expr.Take(0, ic);
+
+			var s = compile_expr(expr_sub);
+
 			if (s != null)
 			{
 				s.Add(lend);
-				expr.clear( 0, ic + 1);
+				expr.Remove( 0, ic + 1);
 				if (expr.Count == 0)
 				{
 					return s;
 				}
-				List t = compile_statement(expr);
+
+				var t = compile_statement(expr);
+
 				if (t == null)
 				{
 					return null;
 				}
+
 				s.AddRange(t);
+
 				return s;
 			}
 		}
@@ -958,6 +1030,7 @@ internal class OctaveParser : Parser
 		{
 			return compile_expr(expr);
 		}
+
 		return null;
 	}
 
@@ -979,31 +1052,30 @@ internal class OctaveParser : Parser
         {
             return "#ret";
         }
+
         return null;
 	}
 
 	internal override List compile_func(List expr)
 	{
-        if ( expr.Count == 2 )
-        {
-            object op = expr[0];
+	    if ( expr.Count != 2 ) return null;
 
-            object ref_in = expr[1];
+	    var op = expr[0];
 
-            if ( symbolq( op ) && refq( op ) && ref_in is List )
-            {
-                var lst = compile_list( ( List ) ref_in );
+	    var ref_in = expr[1];
 
-                if ( lst != null )
-                {
-                    lst.Add( op );
+	    if ( symbolq( op ) && refq( op ) && ref_in is List )
+	    {
+	        var lst = compile_list( ( List ) ref_in );
 
-                    return lst;
-                }
-            }
-        }
+	        if ( lst == null ) return null;
 
-        return null;
+	        lst.Add( op );
+
+	        return lst;
+	    }
+
+	    return null;
 	}
 
 	internal override List compile_expr(List expr)
@@ -1015,7 +1087,7 @@ internal class OctaveParser : Parser
 
         if ( expr.Count == 1 )
         {
-            object x = expr[0];
+            var x = expr[0];
 
             if ( x is Algebraic )
             {
@@ -1076,7 +1148,7 @@ internal class OctaveParser : Parser
             return res;
         }
 
-        object ref_in = expr[ expr.Count - 1 ];
+        var ref_in = expr[ expr.Count - 1 ];
 
         if ( !( ref_in is List ) )
         {
@@ -1090,7 +1162,7 @@ internal class OctaveParser : Parser
             return null;
         }
 
-        var left_in = expr.take( 0, expr.Count - 1 );
+        var left_in = expr.Take( 0, expr.Count - 1 );
 
         if ( left_in.Count == 1 && symbolq( left_in[0] ) && refq( left_in[0] ) )
         {

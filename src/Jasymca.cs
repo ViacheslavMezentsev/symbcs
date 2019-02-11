@@ -76,11 +76,11 @@ public class Jasymca
 
     #region Public methods
     
-    public virtual void interrupt()
+    public virtual void Interrupt()
     {
         if ( Proc != null )
         {
-            Proc.set_interrupt( true );
+            Proc.SetInterrupt( true );
         }
     }
 
@@ -171,7 +171,7 @@ public class Jasymca
 
 			try
 			{
-				Proc.set_interrupt( false );
+				Proc.SetInterrupt( false );
 
                 var istream = new MemoryStream( Encoding.UTF8.GetBytes( Console.ReadLine() ) );
 

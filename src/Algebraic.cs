@@ -11,9 +11,9 @@ public abstract class Algebraic
 
     #region Internal methods
 
-    internal static void debug( string s )
+    internal static void Debug( string s )
     {
-        Lambda.debug(s);
+        Lambda.Debug(s);
     }
 
     #endregion
@@ -22,82 +22,111 @@ public abstract class Algebraic
 
     #region Abstract
 
-    public abstract Algebraic add( Algebraic x );
+    protected abstract Algebraic Add( Algebraic a );
 
-    public abstract Algebraic mult( Algebraic x );
+    protected abstract Algebraic Mul( Algebraic a );
 
-    public abstract Algebraic cc();
+    public abstract Algebraic Conj();
 
-    public abstract Algebraic deriv( Variable var );
+    public abstract Algebraic Derive( Variable v );
 
-    public abstract Algebraic integrate( Variable var );
+    public abstract Algebraic Integrate( Variable v );
 
-    public abstract double norm();
+    public abstract double Norm();
 
-    public abstract Algebraic map( LambdaAlgebraic f );
+    public abstract Algebraic Map( LambdaAlgebraic f );
 
     public abstract override bool Equals( object x );
 
     #endregion
 
+    #region Operators
+
+    public static Algebraic operator +( Algebraic lhs, Algebraic rhs )
+    {
+        return lhs.Add( rhs );
+    }
+
+    public static Algebraic operator -( Algebraic lhs, Algebraic rhs )
+    {
+        return lhs + rhs * Symbolic.MINUS;
+    }
+
+    public static Algebraic operator -( Algebraic self )
+    {
+        return self * Symbolic.MINUS;
+    }
+
+    public static Algebraic operator *( Algebraic lhs, Algebraic rhs )
+    {
+        return lhs.Mul( rhs );
+    }
+
+    public static Algebraic operator /( Algebraic lhs, Algebraic rhs )
+    {
+        return lhs.Div( rhs );
+    }
+
+    public static Algebraic operator ^( Algebraic lhs, int rhs )
+    {
+        return lhs.Pow( rhs );
+    }
+
+    #endregion
+
     #region Virtual
 
-    public virtual Algebraic sub( Algebraic x )
-	{
-		return add( x.mult( Zahl.MINUS ) );
-	}
-
-    public virtual Algebraic div( Algebraic x )
+    protected virtual Algebraic Div( Algebraic x )
     {
         if ( x is Polynomial )
         {
-            return new Rational( this, ( Polynomial ) x ).reduce();
+            return new Rational( this, ( Polynomial ) x ).Reduce();
         }
 
         if ( x is Rational )
         {
-            return ( ( Rational ) x ).den.mult( this ).div( ( ( Rational ) x ).nom );
+            return ( ( Rational ) x ).den.Mul( this ).Div( ( ( Rational ) x ).nom );
         }
 
-        if ( !x.scalarq() )
+        if ( !x.IsScalar() )
         {
-            return new Matrix( this ).div( x );
+            return new Matrix( this ).Div(x);
         }
 
         throw new JasymcaException( "Can not divide " + this + " through " + x );
     }
 
-	public virtual Algebraic pow_n( int n )
+	public virtual Algebraic Pow( int exp )
 	{
-		Algebraic pow, x = this;
+		Algebraic pow, self = this;
 
-		if ( n <= 0 )
+		if ( exp <= 0 )
 		{
-			if ( n == 0 || Equals( Zahl.ONE ) )
+			if ( exp == 0 || Equals(self, Symbolic.ONE) )
 			{
-				return Zahl.ONE;
+				return Symbolic.ONE;
 			}
 
-			if ( Equals( Zahl.ZERO ) )
+			if ( Equals(self, Symbolic.ZERO) )
 			{
 				throw new JasymcaException( "Division by Zero." );
 			}
 
-			x = Zahl.ONE.div(x);
+			self = Symbolic.ONE / self;
 
-			n = -n;
+			exp = -exp;
 		}
 
-		for ( pow = Zahl.ONE; ; )
+		for ( pow = Symbolic.ONE; ; )
 		{
-			if ( ( n & 1 ) != 0 )
+			if ( ( exp & 1 ) != 0 )
 			{
-				pow = pow.mult(x);
+				pow = pow * self;
 			}
 
-			if ( ( n >>= 1 ) != 0 )
+			if ( ( exp >>= 1 ) != 0 )
 			{
-				x = x.mult(x);
+				self = self * self;
 			}
 			else
 			{
@@ -108,117 +137,121 @@ public abstract class Algebraic
 		return pow;
 	}
 
-    public virtual Algebraic realpart()
+    public virtual Algebraic RealPart()
     {
-        return add( cc() ).div( Zahl.TWO );
+        return ( this + Conj() ) / Symbolic.TWO;
     }
 
-    public virtual Algebraic imagpart()
+    public virtual Algebraic ImagPart()
     {
-        return sub( cc() ).div( Zahl.TWO ).div( Zahl.IONE );
+        return ( this - Conj() ) / Symbolic.TWO / Symbolic.IONE;
     }
 
-	public virtual Algebraic rat()
+	public virtual Algebraic Rat()
 	{
-		return map( new LambdaRAT() );
+		return Map( new LambdaRAT() );
 	}
 
-	public virtual Algebraic reduce()
+	public virtual Algebraic Reduce()
 	{
 		return this;
 	}
 
-    public virtual Algebraic value( Variable item, Algebraic x )
+    public virtual Algebraic Value( Variable v, Algebraic a )
 	{
 		return this;
 	}
 
-    public virtual bool depends( Variable item )
+    public virtual bool Depends( Variable v )
 	{
 		return false;
 	}
 
-	public virtual bool ratfunc( Variable v )
+	public virtual bool IsRat( Variable v )
 	{
 		return true;
 	}
 
-	public virtual bool depdir( Variable item )
+	public virtual bool DepDir( Variable v )
 	{
-        return depends( item ) && ratfunc( item );
+        return Depends(v) && IsRat(v);
 	}
 
-	public virtual bool constantq()
+	public virtual bool IsConstant()
 	{
 		return false;
 	}
 
-	public virtual bool komplexq()
+	public virtual bool IsComplex()
 	{
-		return !imagpart().Equals( Zahl.ZERO );
+		return ImagPart() != Symbolic.ZERO;
 	}
 
-	public virtual bool scalarq()
+	public virtual bool IsScalar()
 	{
 		return true;
 	}
 
-	public virtual bool exaktq()
+	public virtual bool IsNumber()
 	{
 		return false;
 	}
 
-	public virtual Algebraic promote(Algebraic b)
+	public virtual Algebraic Promote( Algebraic a )
 	{
-		if ( b.scalarq() )
+		if ( a.IsScalar() )
 		{
 			return this;
 		}
 
-		if ( b is Vektor )
+		if ( a is Vector )
 		{
-		    var bv = ( Vektor ) b;
+		    var bv = ( Vector ) a;
 
-		    if ( this is Vektor && ( ( Vektor ) this ).length() == bv.length() )
+		    if ( this is Vector && ( ( Vector ) this ).Length() == bv.Length() )
 			{
 				return this;
 			}
 
-		    if ( scalarq() )
+		    if ( IsScalar() )
 			{
-			    return new Vektor( this, bv.length() );
+			    return new Vector( this, bv.Length() );
 			}
 		}
 
-	    if ( b is Matrix )
+	    if ( a is Matrix )
 		{
-		    var bm = ( Matrix ) b;
+		    var bm = ( Matrix ) a;
 
-		    if ( this is Matrix && bm.equalsized( ( Matrix ) this ) )
+		    if ( this is Matrix && bm.Equalsized( ( Matrix ) this ) )
 			{
 				return this;
 			}
 
-		    if ( scalarq() )
+		    if ( IsScalar() )
 			{
-			    return new Matrix( this, bm.nrow(), bm.ncol() );
+			    return new Matrix( this, bm.Rows(), bm.Cols() );
 			}
 		}
 
 		throw new JasymcaException( "Wrong argument type." );
 	}
 
-	public virtual void print( PrintStream p )
+    public override string ToString()
+    {
+        return StringFmt.Compact( base.ToString() );
+    }
+
+    public virtual void Print( PrintStream stream )
 	{
-		p.print( StringFmt.compact( ToString() ) );
+		stream.print( ToString() );
 	}
 
-
-    public virtual Algebraic map( LambdaAlgebraic lambda, Algebraic arg )
+    public virtual Algebraic Map( LambdaAlgebraic lambda, Algebraic arg )
     {
         if ( arg == null )
 		{
-		    var r = lambda.f_exakt( this );
+		    var r = lambda.SymEval( this );
 
 		    if ( r != null )
 			{
@@ -232,13 +265,13 @@ public abstract class Algebraic
 			    fname = fname.Substring( "Lambda".Length );
 				fname = fname.ToLower();
 
-			    return FunctionVariable.create( fname, this );
+			    return FunctionVariable.Create( fname, this );
 			}
 
 		    throw new JasymcaException( "Wrong type of arguments." );
 		}
 
-        return lambda.f_exakt( this, arg );
+        return lambda.SymEval( this, arg );
     }
 
     #endregion

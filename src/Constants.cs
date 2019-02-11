@@ -2,7 +2,7 @@
 {
 }
 
-public static class Fields
+public static class Flags
 {
 	public const int UNARY = 1, BINARY = 2, TERNARY = 4, LVALUE = 8, LIST = 16;
 	public const int LEFT_RIGHT = 0, RIGHT_LEFT = 1;

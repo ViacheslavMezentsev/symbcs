@@ -1,4 +1,6 @@
-﻿internal interface INumFmt
+﻿using System.Globalization;
+
+internal interface INumFmt
 {
 	string ToString( double x );
 }
@@ -138,6 +140,8 @@ public class NumFmtJava : INumFmt
 
 	public virtual string ToString( double x )
 	{
-		return "" + x;
+	    var cultureInfo = new CultureInfo( "" ) { NumberFormat = { NumberDecimalSeparator = "." } };
+
+        return string.Format( cultureInfo, "{0:0.################E0}", x );
 	}
 }

@@ -86,7 +86,7 @@
     <Compile Include="src\Constants.cs" />
     <Compile Include="src\DateTimeHelperClass.cs" />
     <Compile Include="src\Environment.cs" />
-    <Compile Include="src\Exakt.cs" />
+    <Compile Include="src\Number.cs" />
     <Compile Include="src\Exponential.cs" />
     <Compile Include="src\Extensions.cs" />
     <Compile Include="src\FunctionVariable.cs" />
@@ -122,16 +122,15 @@
     <Compile Include="src\Pzeros.cs" />
     <Compile Include="src\Random.cs" />
     <Compile Include="src\Rational.cs" />
-    <Compile Include="src\RectangularArrays.cs" />
     <Compile Include="src\Sfun.cs" />
     <Compile Include="src\SimpleVariable.cs" />
     <Compile Include="src\StringFmt.cs" />
     <Compile Include="src\StringHelperClass.cs" />
-    <Compile Include="src\Unexakt.cs" />
+    <Compile Include="src\Complex.cs" />
     <Compile Include="src\Variable.cs" />
-    <Compile Include="src\Vektor.cs" />
+    <Compile Include="src\Vector.cs" />
     <Compile Include="src\XProcessor.cs" />
-    <Compile Include="src\Zahl.cs" />
+    <Compile Include="src\Symbolic.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

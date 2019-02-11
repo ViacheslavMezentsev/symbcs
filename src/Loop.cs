@@ -5,215 +5,282 @@ using System.Threading;
 
 internal class LambdaERROR : Lambda
 {
-	public override int lambda(Stack st)
-	{
-		LambdaPRINTF.printf(st);
-		return Processor.ERROR;
-	}
+    public override int Eval( Stack stack )
+    {
+        LambdaPRINTF.printf( stack );
+
+        return Processor.ERROR;
+    }
 }
+
 internal class LambdaEVAL : Lambda
 {
-	public override int lambda(Stack st)
-	{
-		int narg = getNarg(st);
-		object s_in = st.Pop();
-		if (!(s_in is string))
-		{
-			throw new JasymcaException("Argument to EVAL must be string.");
-		}
-		string s = (string)s_in;
-		List pgm = pr.compile(s);
-		return pc.process_list(pgm, true);
-	}
+    public override int Eval( Stack stack )
+    {
+        int narg = GetNarg( stack );
+
+        var s_in = stack.Pop();
+
+        if ( !( s_in is string ) )
+        {
+            throw new JasymcaException( "Argument to EVAL must be string." );
+        }
+
+        var pgm = pr.compile( ( string ) s_in );
+
+        return pc.process_list( pgm, true );
+    }
 }
+
 internal class LambdaBLOCK : Lambda
 {
-	public override int lambda(Stack st)
+	public override int Eval(Stack stack)
 	{
-		int narg = getNarg(st);
-		Environment local = pc.env.copy();
-		List code = getList(st);
-		Stack ups = new Stack();
-		int ret = UserProgram.process_block(code, ups, local, false);
+        int narg = GetNarg( stack );
+
+        var local = pc.env.copy();
+        var code = GetList( stack );
+
+        var ups = new Stack();
+
+	    int ret = UserProgram.process_block( code, ups, local, false );
+
 		pc.env.update(local);
-		if (ret != Processor.ERROR && ups.Count > 0)
+
+	    if ( ret != Processor.ERROR && ups.Count > 0 )
 		{
-			object y = ups.Pop();
-			st.Push(y);
+			var y = ups.Pop();
+
+			stack.Push(y);
 		}
 		else
 		{
-			throw new JasymcaException("Error processing block.");
+		    throw new JasymcaException( "Error processing block." );
 		}
+
 		return 0;
 	}
 }
+
 internal class LambdaBRANCH : Lambda
 {
-	public override int lambda(Stack st)
-	{
-		int narg = getNarg(st), sel ;
-		List cond, b_true, b_false;
-		switch (narg)
-		{
-			case 2:
-				cond = getList(st);
-				b_true = getList(st);
-				pc.process_list(cond, true);
-				sel = getInteger(pc.stack);
-				if (sel == 1)
-				{
-					return pc.process_list(b_true, true);
-				}
-				else if (sel != 0)
-				{
-					throw new JasymcaException("Branch requires boolean type.");
-				}
-				break;
-			case 3:
-				cond = getList(st);
-				b_true = getList(st);
-				b_false = getList(st);
-				pc.process_list(cond, true);
-				sel = getInteger(pc.stack);
-				if (sel == 1)
-				{
-					return pc.process_list(b_true, true);
-				}
-				else if (sel == 0)
-				{
-					return pc.process_list(b_false, true);
-				}
-				else
-				{
-					throw new JasymcaException("Branch requires boolean type, got " + sel);
-				}
-				default:
-					throw new JasymcaException("Wrong number of arguments to branch.");
-		}
-		return 0;
-	}
+    public override int Eval( Stack stack )
+    {
+        int narg = GetNarg( stack ), sel;
+
+        List cond, b_true, b_false;
+
+        switch ( narg )
+        {
+            case 2:
+                cond = GetList( stack );
+                b_true = GetList( stack );
+                pc.process_list( cond, true );
+                sel = GetInteger( pc.stack );
+
+                if ( sel == 1 )
+                {
+                    return pc.process_list( b_true, true );
+                }
+                else if ( sel != 0 )
+                {
+                    throw new JasymcaException( "Branch requires boolean type." );
+                }
+
+                break;
+
+            case 3:
+
+                cond = GetList( stack );
+                b_true = GetList( stack );
+                b_false = GetList( stack );
+
+                pc.process_list( cond, true );
+
+                sel = GetInteger( pc.stack );
+
+                if ( sel == 1 )
+                {
+                    return pc.process_list( b_true, true );
+                }
+                else if ( sel == 0 )
+                {
+                    return pc.process_list( b_false, true );
+                }
+                else
+                {
+                    throw new JasymcaException( "Branch requires boolean type, got " + sel );
+                }
+            default:
+                throw new JasymcaException( "Wrong number of arguments to branch." );
+        }
+
+        return 0;
+    }
 }
+
 internal class LambdaFOR : Lambda
 {
-	public override int lambda(Stack st)
-	{
-		int narg = getNarg(st);
-		List cond = getList(st);
-		List body = getList(st);
-		pc.process_list(cond, true);
-		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Vektor) || ((Algebraic)pc.stack.Peek()).Name == null)
-		{
-			throw new ParseException("Wrong format in for-loop.");
-		}
-		Vektor vals = (Vektor)pc.stack.Pop();
-		for (int i = 0; i < vals.length() ; i++)
-		{
-			pc.env.putValue(vals.Name, vals.get(i));
-			int ret = pc.process_list(body, true);
-			switch (ret)
-			{
-				case Processor.BREAK:
-					return 0;
-				case Processor.RETURN:
-			case Processor.EXIT:
-		case Processor.ERROR:
-			return ret;
-		case Processor.CONTINUE: break;
-			}
-		}
-		return 0;
-	}
+    public override int Eval( Stack stack )
+    {
+        int narg = GetNarg( stack );
+
+        var cond = GetList( stack );
+        var body = GetList( stack );
+
+        pc.process_list( cond, true );
+
+        if ( pc.stack.Count == 0 || !( pc.stack.Peek() is Vector ) || ( ( Algebraic ) pc.stack.Peek() ).Name == null )
+        {
+            throw new ParseException( "Wrong format in for-loop." );
+        }
+
+        var vals = ( Vector ) pc.stack.Pop();
+
+        for ( int i = 0; i < vals.Length(); i++ )
+        {
+            pc.env.putValue( vals.Name, vals[i] );
+
+            int ret = pc.process_list( body, true );
+
+            switch ( ret )
+            {
+                case Processor.BREAK:
+                    return 0;
+
+                case Processor.RETURN:
+                case Processor.EXIT:
+                case Processor.ERROR:
+                    return ret;
+
+                case Processor.CONTINUE: break;
+            }
+        }
+
+        return 0;
+    }
 }
+
 internal class LambdaXFOR : Lambda
 {
-	public override int lambda(Stack st)
-	{
-		int narg = getNarg(st);
-		List cond = getList(st);
-		List step_in = getList(st);
-		List thru_in = getList(st);
-		List body = getList(st);
-		pc.process_list(cond, true);
-		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Zahl) || ((Algebraic)pc.stack.Peek()).Name == null)
-		{
-			throw new ParseException("Non-constant initializer in for loop.");
-		}
-		Zahl x = (Zahl)pc.stack.Pop();
-		string xname = x.Name;
-		pc.process_list(step_in, true);
-		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Zahl))
-		{
-			throw new ParseException("Step size must be constant.");
-		}
-		Zahl step = (Zahl)pc.stack.Pop();
-		pc.process_list(thru_in, true);
-		if (pc.stack.Count == 0 || !(pc.stack.Peek() is Zahl))
-		{
-			throw new ParseException("Wrong format in for-loop.");
-		}
-		Zahl thru = (Zahl)pc.stack.Pop();
-		bool pos = !step.smaller(Zahl.ZERO);
-		while (true)
-		{
-			if ((pos ? thru.smaller(x) : x.smaller(thru)))
-			{
-				break;
-			}
-			pc.env.putValue(xname, x);
-			int ret = pc.process_list(body, true);
-			switch (ret)
-			{
-				case Processor.BREAK:
-					return 0;
-				case Processor.RETURN:
-			case Processor.EXIT:
-		case Processor.ERROR:
-			return ret;
-		case Processor.CONTINUE: break;
-			}
-			x = (Zahl)x.add(step);
-		}
-		return 0;
-	}
+    public override int Eval( Stack stack )
+    {
+        int narg = GetNarg( stack );
+
+        var cond = GetList( stack );
+        var step_in = GetList( stack );
+        var thru_in = GetList( stack );
+        var body = GetList( stack );
+
+        pc.process_list( cond, true );
+
+        if ( pc.stack.Count == 0 || !( pc.stack.Peek() is Symbolic ) || ( ( Algebraic ) pc.stack.Peek() ).Name == null )
+        {
+            throw new ParseException( "Non-constant initializer in for loop." );
+        }
+
+        var x = ( Symbolic ) pc.stack.Pop();
+
+        var xname = x.Name;
+
+        pc.process_list( step_in, true );
+
+        if ( pc.stack.Count == 0 || !( pc.stack.Peek() is Symbolic ) )
+        {
+            throw new ParseException( "Step size must be constant." );
+        }
+
+        var step = ( Symbolic ) pc.stack.Pop();
+
+        pc.process_list( thru_in, true );
+
+        if ( pc.stack.Count == 0 || !( pc.stack.Peek() is Symbolic ) )
+        {
+            throw new ParseException( "Wrong format in for-loop." );
+        }
+
+        var thru = ( Symbolic ) pc.stack.Pop();
+
+        var pos = !step.Smaller( Symbolic.ZERO );
+
+        while ( true )
+        {
+            if ( ( pos ? thru.Smaller( x ) : x.Smaller( thru ) ) )
+            {
+                break;
+            }
+
+            pc.env.putValue( xname, x );
+
+            int ret = pc.process_list( body, true );
+
+            switch ( ret )
+            {
+                case Processor.BREAK:
+                    return 0;
+
+                case Processor.RETURN:
+                case Processor.EXIT:
+                case Processor.ERROR:
+                    return ret;
+
+                case Processor.CONTINUE: break;
+            }
+
+            x = ( Symbolic ) ( x + step );
+        }
+
+        return 0;
+    }
 }
+
 internal class LambdaWHILE : Lambda
 {
-	public override int lambda(Stack st)
-	{
-		int narg = getNarg(st);
-		List cond = getList(st);
-		List body = getList(st);
-		while (true)
-		{
-			pc.process_list(cond, true);
-			object c = pc.stack.Pop();
-			if (c.Equals(Zahl.ZERO))
-			{
-				break;
-			}
-			else if (!c.Equals(Zahl.ONE))
-			{
-				throw new JasymcaException("Not boolean: " + c);
-			}
-			int ret = pc.process_list(body, true);
-			switch (ret)
-			{
-				case Processor.BREAK:
-					return 0;
-				case Processor.RETURN:
-			case Processor.EXIT:
-		case Processor.ERROR:
-			return ret;
-		case Processor.CONTINUE: break;
-			}
-		}
-		return 0;
-	}
+    public override int Eval( Stack stack )
+    {
+        int narg = GetNarg( stack );
+
+        var cond = GetList( stack );
+        var body = GetList( stack );
+
+        while ( true )
+        {
+            pc.process_list( cond, true );
+
+            var c = ( Symbolic ) pc.stack.Pop();
+
+            if ( Equals( c, Symbolic.ZERO ) )
+            {
+                break;
+            }
+            else if ( !Equals( c, Symbolic.ONE ) )
+            {
+                throw new JasymcaException( "Not boolean: " + c );
+            }
+
+            int ret = pc.process_list( body, true );
+
+            switch ( ret )
+            {
+                case Processor.BREAK:
+                    return 0;
+
+                case Processor.RETURN:
+                case Processor.EXIT:
+                case Processor.ERROR:
+                    return ret;
+
+                case Processor.CONTINUE: break;
+            }
+        }
+
+        return 0;
+    }
 }
+
 internal class LambdaPRINTF : Lambda
 {
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
 		printf(st);
 		return 0;
@@ -221,7 +288,7 @@ internal class LambdaPRINTF : Lambda
 
 	internal static void printf( Stack st )
 	{
-        int narg = getNarg( st );
+        int narg = GetNarg( st );
 
         var s_in = st.Pop();
 
@@ -273,11 +340,11 @@ internal class LambdaPRINTF : Lambda
 
 internal class LambdaPAUSE : Lambda
 {
-	public override int lambda( Stack st )
+	public override int Eval( Stack st )
 	{
-		int narg = getNarg(st);
+		int narg = GetNarg(st);
 
-	    int millis = Math.Abs( getInteger( st ) );
+	    int millis = Math.Abs( GetInteger( st ) );
 
 		try
 		{

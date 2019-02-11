@@ -3,14 +3,14 @@ using System.Collections;
 
 public class Environment : Hashtable
 {
-    internal static ArrayList path = new ArrayList();
-    internal static Hashtable globals = new Hashtable();
+    internal static ArrayList Paths = new ArrayList();
+    internal static Hashtable Globals = new Hashtable();
 
     internal virtual void addPath(string s)
 	{
-		if ( !path.Contains(s) )
+		if ( !Paths.Contains(s) )
 		{
-			path.Add(s);
+			Paths.Add(s);
 		}
 	}
 
@@ -60,7 +60,7 @@ public class Environment : Hashtable
 			s += getValue( ( string ) key ) + "\n";
 		}
 
-		k = globals.Keys.GetEnumerator();
+		k = Globals.Keys.GetEnumerator();
 
 		s += "Globals:\n";
 
@@ -85,7 +85,7 @@ public class Environment : Hashtable
 		{
 			if ( x is Lambda )
 			{
-			    globals[ name ] = x;
+			    Globals[ name ] = x;
 			}
 			else
 			{
@@ -108,7 +108,7 @@ public class Environment : Hashtable
 			return r;
 		}
 
-        r = globals[ name ];
+        r = Globals[ name ];
 
 		if ( r != null )
 		{
@@ -132,18 +132,18 @@ public class Environment : Hashtable
 		return r;
 	}
 
-	public virtual Zahl getnum( string name )
+	public virtual Symbolic getnum( string name )
 	{
         var r = this[ name ];
 
 		if ( r == null )
 		{
-            r = globals[ name ];
+            r = Globals[ name ];
 		}
 
-		if ( r is Zahl )
+		if ( r is Symbolic )
 		{
-			return ( Zahl ) r;
+			return ( Symbolic ) r;
 		}
 
 		return null;

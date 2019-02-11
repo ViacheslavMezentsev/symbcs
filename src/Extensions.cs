@@ -2,7 +2,7 @@
 
 public static class Extensions
 {
-    internal static List ToList( this ArrayList list )
+    public static List ToList( this IList list )
     {
         return new List( list );
     }

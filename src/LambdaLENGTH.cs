@@ -3,38 +3,34 @@ using System.Collections;
 
 internal class LambdaLENGTH : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
-		int narg = getNarg(st);
-		Algebraic x = getAlgebraic(st);
-		if (x.scalarq() && !x.constantq())
+		int narg = GetNarg(st);
+		Algebraic x = GetAlgebraic(st);
+		if (x.IsScalar() && !x.IsConstant())
 		{
 			throw new JasymcaException("Unknown variable dimension: " + x);
 		}
 		Matrix m = new Matrix(x);
-		st.Push(new Unexakt((double)Math.Max(m.ncol(), m.nrow())));
+		st.Push(new Complex((double)Math.Max(m.Cols(), m.Rows())));
 		return 0;
 	}
 }
 internal class LambdaPROD : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
-		int narg = getNarg(st);
-		Algebraic x = getAlgebraic(st);
-		if (x.scalarq() && !x.constantq())
+		int narg = GetNarg(st);
+		Algebraic x = GetAlgebraic(st);
+		if (x.IsScalar() && !x.IsConstant())
 		{
 			throw new JasymcaException("Unknown variable dimension: " + x);
 		}
 		Matrix mx = new Matrix(x);
 		Algebraic s = mx.col(1);
-		for (int i = 2; i <= mx.ncol(); i++)
+		for (int i = 2; i <= mx.Cols(); i++)
 		{
-			s = s.mult(mx.col(i));
+			s = s * mx.col(i);
 		}
 		st.Push(s);
 		return 0;
@@ -42,18 +38,16 @@ internal class LambdaPROD : Lambda
 }
 internal class LambdaSIZE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
-		int narg = getNarg(st);
-		Algebraic x = getAlgebraic(st);
-		if (x.scalarq() && !x.constantq())
+		int narg = GetNarg(st);
+		Algebraic x = GetAlgebraic(st);
+		if (x.IsScalar() && !x.IsConstant())
 		{
 			throw new JasymcaException("Unknown variable dimension: " + x);
 		}
 		Matrix mx = new Matrix(x);
-		Unexakt nr = new Unexakt((double)mx.nrow()), nc = new Unexakt((double)mx.ncol());
+		Complex nr = new Complex((double)mx.Rows()), nc = new Complex((double)mx.Cols());
 		if (length == 2)
 		{
 			st.Push(nr);
@@ -62,23 +56,21 @@ internal class LambdaSIZE : Lambda
 		}
 		else
 		{
-			st.Push(new Vektor(new Algebraic[]{nr,nc}));
+			st.Push(new Vector(new Algebraic[]{nr,nc}));
 		}
 		return 0;
 	}
 }
 internal class LambdaMIN : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
-		int narg = getNarg(st);
-		Algebraic x = getAlgebraic(st);
+		int narg = GetNarg(st);
+		Algebraic x = GetAlgebraic(st);
 		Matrix mx;
-		if (x is Vektor)
+		if (x is Vector)
 		{
-			mx = Matrix.column((Vektor) x);
+			mx = Matrix.Column((Vector) x);
 		}
 		else
 		{
@@ -90,16 +82,14 @@ internal class LambdaMIN : Lambda
 }
 internal class LambdaMAX : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
-		int narg = getNarg(st);
-		Algebraic x = getAlgebraic(st);
+		int narg = GetNarg(st);
+		Algebraic x = GetAlgebraic(st);
 		Matrix mx;
-		if (x is Vektor)
+		if (x is Vector)
 		{
-			mx = Matrix.column((Vektor) x);
+			mx = Matrix.Column((Vector) x);
 		}
 		else
 		{
@@ -111,12 +101,10 @@ internal class LambdaMAX : Lambda
 }
 internal class LambdaFIND : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack st)
 	{
-		int narg = getNarg(st);
-		Algebraic x = getAlgebraic(st);
+		int narg = GetNarg(st);
+		Algebraic x = GetAlgebraic(st);
 		Matrix mx = new Matrix(x);
 		st.Push(mx.find());
 		return 0;

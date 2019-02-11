@@ -1,447 +1,513 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 
 public class Matrix : Algebraic
 {
+
+    #region Private fields
+
 	private Algebraic[][] a;
-	public Matrix(Algebraic[][] a)
+
+    #endregion
+
+    #region Constructors
+
+    public Matrix( Algebraic[][] a )
 	{
 		this.a = a;
 	}
-	public Matrix(Algebraic x, int nrow, int ncol)
+
+    public Matrix( Algebraic x, int nrow, int ncol )
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: this.a = new Algebraic[nrow][ncol];
-		this.a = RectangularArrays.ReturnRectangularAlgebraicArray(nrow, ncol);
-		for (int i = 0; i < nrow; i++)
+	    a = CreateRectangularArray<Algebraic>( nrow, ncol );
+
+	    for ( int i = 0; i < nrow; i++ )
 		{
-			for (int k = 0; k < ncol; k++)
+		    for ( int k = 0; k < ncol; k++ )
 			{
 				a[i][k] = x;
 			}
 		}
 	}
-	public Matrix(int nrow, int ncol) : this(Zahl.ZERO, nrow, ncol)
+
+    public Matrix( int nrow, int ncol ) : this( Symbolic.ZERO, nrow, ncol )
 	{
 	}
-	public Matrix(double[][] b, int nr, int nc)
+
+    public Matrix( double[][] b, int nr, int nc )
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: a = new Algebraic[nr][nc];
-		a = RectangularArrays.ReturnRectangularAlgebraicArray(nr, nc);
-		nr = Math.Min(nr,b.Length);
-		nc = Math.Min(nc,b[0].Length);
-		for (int i = 0; i < nr; i++)
+	    a = CreateRectangularArray<Algebraic>( nr, nc );
+
+		nr = Math.Min( nr, b.Length );
+		nc = Math.Min( nc, b[0].Length );
+
+	    for ( int i = 0; i < nr; i++ )
 		{
-			for (int k = 0; k < nc; k++)
+		    for ( int k = 0; k < nc; k++ )
 			{
-			a[i][k] = new Unexakt(b[i][k]);
+			    a[i][k] = new Complex( b[i][k] );
 			}
 		}
 	}
-	public Matrix(double[][] b) : this(b, b.Length, b[0].Length)
+
+	public Matrix( double[][] b ) : this( b, b.Length, b[0].Length )
 	{
 	}
-	public Matrix(Algebraic x)
+
+    public Matrix( Algebraic x )
 	{
-		if (x == null)
-		{
-			this.a = new Algebraic[][]
-			{
-				new Algebraic[] {Zahl.ZERO}
-			};
-		}
-		else if (x is Vektor)
-		{
-			this.a = new Algebraic[][] {((Vektor)x).get()};
-		}
-		else if (x is Matrix)
-		{
-			this.a = ((Matrix)x).a;
-		}
-		else
-		{
-			this.a = new Algebraic[][]
-			{
-				new Algebraic[] {x}
-			};
-		}
+        if ( x == null )
+        {
+            a = new[] { new Algebraic[] { Symbolic.ZERO } };
+        }
+        else if ( x is Vector )
+        {
+            a = new[] { ( ( Vector ) x ).ToArray() };
+        }
+        else if ( x is Matrix )
+        {
+            a = ( ( Matrix ) x ).a;
+        }
+        else
+        {
+            a = new[] { new[] {x} };
+        }
 	}
-	public virtual Algebraic get(int i, int k)
-	{
-		if (i < 0 || i >= a.Length || k < 0 || k >= a[0].Length)
-		{
-			throw new JasymcaException("Index out of bounds.");
-		}
-		return a[i][k];
-	}
-	public virtual void set(int i, int k, Algebraic x)
-	{
-		if (i < 0 || i >= a.Length || k < 0 || k >= a[0].Length)
-		{
-			throw new JasymcaException("Index out of bounds.");
-		}
-		a[i][k] = x;
-	}
-	public virtual int nrow()
+
+    #endregion
+
+    public static T[][] CreateRectangularArray<T>( int rows, int cols )
+    {
+        T[][] array = null;
+
+        if ( rows > -1 )
+        {
+            array = new T[ rows ][];
+
+            if ( cols > -1 )
+            {
+                for ( int r = 0; r < rows; r++ )
+                {
+                    array[r] = new T[ cols ];
+                }
+            }
+        }
+
+        return array;
+    }
+
+    public Algebraic this[ int i, int k ]
+    {
+        get
+        {
+            if ( i < 0 || i >= a.Length || k < 0 || k >= a[0].Length )
+            {
+                throw new JasymcaException( "Index out of bounds." );
+            }
+
+            return a[i][k];
+        }
+        set
+        {
+		    if ( i < 0 || i >= a.Length || k < 0 || k >= a[0].Length )
+		    {
+		        throw new JasymcaException( "Index out of bounds." );
+		    }
+
+		    a[i][k] = value;            
+        }
+    }
+
+	public virtual int Rows()
 	{
 		return a.Length;
 	}
-	public virtual int ncol()
+
+	public virtual int Cols()
 	{
 		return a[0].Length;
 	}
-	public virtual double[][] getDouble(int nr, int nc)
+
+	public virtual double[][] GetDouble( int nr, int nc )
 	{
-		if (nr == 0)
+		if ( nr == 0 )
 		{
 			nr = a.Length;
 		}
-		if (nc == 0)
+
+		if ( nc == 0 )
 		{
 			nc = a[0].Length;
 		}
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: double[][] b = new double[nr][nc];
-		double[][] b = RectangularArrays.ReturnRectangularDoubleArray(nr, nc);
-		nr = Math.Min(nr,a.Length);
-		nc = Math.Min(nc,a[0].Length);
-		for (int i = 0; i < nr; i++)
+
+		var b = CreateRectangularArray<double>( nr, nc );
+
+	    nr = Math.Min( nr, a.Length );
+	    nc = Math.Min( nc, a[0].Length );
+
+		for ( int i = 0; i < nr; i++ )
 		{
-			for (int k = 0; k < nc; k++)
+			for ( int k = 0; k < nc; k++ )
 			{
-				Algebraic x = a[i][k];
-				if (!(x is Unexakt) || x.komplexq())
+				var x = a[i][k];
+
+			    if ( !( x is Complex ) || x.IsComplex() )
 				{
-					throw new JasymcaException("Not a real, double Matrix");
+				    throw new JasymcaException( "Not a real, double Matrix" );
 				}
-				b[i][k] = ((Unexakt)x).real;
+
+				b[i][k] = ( ( Complex ) x ).Re;
 			}
 		}
+
 		return b;
 	}
+
 	public virtual double[][] Double
 	{
-		get
-		{
-			return getDouble(0,0);
-		}
+		get { return GetDouble( 0, 0 ); }
 	}
+
 	public virtual Algebraic col(int k)
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] c = new Algebraic[a.Length][1];
-		Algebraic[][] c = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, 1);
-		for (int i = 0; i < a.Length; i++)
+	    var c = CreateRectangularArray<Algebraic>( a.Length, 1 );
+
+		for ( int i = 0; i < a.Length; i++ )
 		{
-			c[i][0] = a[i][k - 1];
+			c[i][0] = a[i][ k - 1 ];
 		}
-		return (new Matrix(c)).reduce();
+
+		return new Matrix(c).Reduce();
 	}
+
 	public virtual Algebraic row(int k)
 	{
-		Algebraic[] c = new Algebraic[a[0].Length];
-		for (int i = 0; i < a[0].Length; i++)
+		var c = new Algebraic[ a[0].Length ];
+
+		for ( int i = 0; i < a[0].Length; i++ )
 		{
-			c[i] = a[k - 1][i];
+			c[i] = a[ k - 1 ][i];
 		}
-		return (new Vektor(c)).reduce();
+
+		return new Vector(c).Reduce();
 	}
-	public virtual void insert(Matrix x, Index idx)
+
+    public virtual void Insert( Matrix x, Index idx )
 	{
-		if (idx.row_max > nrow() || idx.col_max > ncol())
+	    if ( idx.row_max > Rows() || idx.col_max > Cols() )
 		{
-			Matrix e = new Matrix(Math.Max(idx.row_max,nrow()), Math.Max(idx.col_max,ncol()));
-			for (int i = 0; i < nrow(); i++)
+		    var e = new Matrix( Math.Max( idx.row_max, Rows() ), Math.Max( idx.col_max, Cols() ) );
+
+			for ( int i = 0; i < Rows(); i++ )
 			{
-				for (int k = 0; k < ncol(); k++)
+				for ( int k = 0; k < Cols(); k++ )
 				{
 					e.a[i][k] = a[i][k];
 				}
 			}
-				a = e.a;
+
+			a = e.a;
 		}
-		if (x.nrow() == 1 && x.ncol() == 1)
+
+	    if ( x.Rows() == 1 && x.Cols() == 1 )
 		{
-			for (int i = 0; i < idx.row.Length; i++)
+		    foreach ( int r in idx.row )
+		    {
+		        foreach ( int c in idx.col )
+		        {
+		            a[ r - 1 ][ c - 1 ] = x.a[0][0];
+		        }
+		    }
+
+		    return;
+		}
+
+	    if ( x.Rows() == idx.row.Length && x.Cols() == idx.col.Length )
+		{
+		    for ( int i = 0; i < idx.row.Length; i++ )
 			{
-				for (int k = 0; k < idx.col.Length; k++)
+			    for ( int k = 0; k < idx.col.Length; k++ )
 				{
-					a[idx.row[i] - 1][idx.col[k] - 1] = x.a[0][0];
+					a[ idx.row[i] - 1 ][ idx.col[k] - 1 ] = x.a[i][k];
 				}
 			}
-				return;
+
+			return;
 		}
-		if (x.nrow() == idx.row.Length && x.ncol() == idx.col.Length)
-		{
-			for (int i = 0; i < idx.row.Length; i++)
-			{
-				for (int k = 0; k < idx.col.Length; k++)
-				{
-					a[idx.row[i] - 1][idx.col[k] - 1] = x.a[i][k];
-				}
-			}
-				return;
-		}
-		throw new JasymcaException("Wrong index dimension.");
+
+	    throw new JasymcaException( "Wrong index dimension." );
 	}
-	public virtual Matrix extract(Index idx)
+
+	public virtual Matrix Extract( Index idx )
 	{
-		if (idx.row_max > nrow() || idx.col_max > ncol())
+	    if ( idx.row_max > Rows() || idx.col_max > Cols() )
 		{
-			throw new JasymcaException("Index out of range.");
+		    throw new JasymcaException( "Index out of range." );
 		}
-		Matrix x = new Matrix(idx.row.Length, idx.col.Length);
-		for (int i = 0; i < idx.row.Length; i++)
+
+	    var x = new Matrix( idx.row.Length, idx.col.Length );
+
+		for ( int i = 0; i < idx.row.Length; i++ )
 		{
-			for (int k = 0; k < idx.col.Length; k++)
+			for ( int k = 0; k < idx.col.Length; k++ )
 			{
-				x.a[i][k] = a[idx.row[i] - 1][idx.col[k] - 1];
+				x.a[i][k] = a[ idx.row[i] - 1 ][ idx.col[k] - 1 ];
 			}
 		}
 			return x;
 	}
-	public static Matrix column(Vektor x)
+
+	public static Matrix Column( Vector x )
 	{
-		return (new Matrix(x)).transpose();
+		return new Matrix(x).transpose();
 	}
-	public static Matrix row(Vektor x)
+
+	public static Matrix row( Vector x )
 	{
 		return new Matrix(x);
 	}
-	public override Algebraic cc()
+
+	public override Algebraic Conj()
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][a[0].Length];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a[0].Length);
-		for (int i = 0; i < a.Length; i++)
+		var b = CreateRectangularArray<Algebraic>(a.Length, a[0].Length);
+
+		for ( int i = 0; i < a.Length; i++ )
 		{
-			for (int k = 0; k < a[0].Length; k++)
+			for ( int k = 0; k < a[0].Length; k++ )
 			{
-				b[i][k] = a[i][k].cc();
+				b[i][k] = a[i][k].Conj();
 			}
 		}
-			return new Matrix(b);
+
+		return new Matrix(b);
 	}
-	public override Algebraic add(Algebraic x)
+
+    protected override Algebraic Add( Algebraic x )
 	{
-		if (x.scalarq())
+		if ( x.IsScalar() )
 		{
-			x = x.promote(this);
+			x = x.Promote( this );
 		}
-		if (x is Matrix && equalsized((Matrix)x))
+
+	    if ( x is Matrix && Equalsized( ( Matrix ) x ) )
 		{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][a[0].Length];
-			Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a[0].Length);
-			for (int i = 0; i < a.Length; i++)
+		    var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
+
+			for ( int i = 0; i < a.Length; i++ )
 			{
-				for (int k = 0; k < a[0].Length; k++)
+				for ( int k = 0; k < a[0].Length; k++ )
 				{
-					b[i][k] = a[i][k].add(((Matrix)x).a[i][k]);
+					b[i][k] = a[i][k] + ( ( Matrix ) x ).a[i][k];
 				}
 			}
-				return new Matrix(b);
+
+			return new Matrix(b);
 		}
-		throw new JasymcaException("Wrong arguments for add:" + this + "," + x);
+
+	    throw new JasymcaException( "Wrong arguments for add:" + this + "," + x );
 	}
-	public override bool scalarq()
+
+	public override bool IsScalar()
 	{
 		return false;
 	}
-	public virtual bool equalsized(Matrix x)
+
+    public virtual bool Equalsized( Matrix x )
 	{
-		return nrow() == x.nrow() && ncol() == x.ncol();
+		return Rows() == x.Rows() && Cols() == x.Cols();
 	}
-	public override Algebraic mult(Algebraic x)
+
+    protected override Algebraic Mul( Algebraic x )
 	{
-		if (x.scalarq())
+	    if ( x.IsScalar() )
 		{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][a[0].Length];
-			Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a[0].Length);
-			for (int i = 0; i < a.Length; i++)
+		    var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
+
+			for ( int i = 0; i < a.Length; i++ )
 			{
-				for (int k = 0; k < a[0].Length; k++)
+				for ( int k = 0; k < a[0].Length; k++ )
 				{
-				b[i][k] = a[i][k].mult(x);
+				    b[i][k] = a[i][k] * x;
 				}
 			}
+
 			return new Matrix(b);
 		}
-		Matrix xm = new Matrix(x);
-		if (ncol() != xm.nrow())
+
+		var xm = new Matrix(x);
+
+	    if ( Cols() != xm.Rows() )
 		{
-			throw new JasymcaException("Matrix dimensions wrong.");
+		    throw new JasymcaException( "Matrix dimensions wrong." );
 		}
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][xm.a[0].Length];
-		Algebraic[][] b1 = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, xm.a[0].Length);
-		for (int i = 0; i < a.Length; i++)
+
+	    var b1 = CreateRectangularArray<Algebraic>( a.Length, xm.a[0].Length );
+
+	    for ( int i = 0; i < a.Length; i++ )
 		{
-			for (int k = 0; k < xm.a[0].Length; k++)
+		    for ( int k = 0; k < xm.a[0].Length; k++ )
 			{
-			b1[i][k] = a[i][0].mult(xm.a[0][k]);
-			for (int l = 1; l < xm.a.Length; l++)
-			{
-				b1[i][k] = b1[i][k].add(a[i][l].mult(xm.a[l][k]));
-			}
+			    b1[i][k] = a[i][0] * xm.a[0][k];
+
+			    for ( int l = 1; l < xm.a.Length; l++ )
+			    {
+				    b1[i][k] = b1[i][k] + a[i][l] * xm.a[l][k];
+			    }
 			}
 		}
+
 		return new Matrix(b1);
 	}
-	public override Algebraic div(Algebraic x)
+
+    protected override Algebraic Div( Algebraic x )
 	{
-		if (x.scalarq())
+	    if ( x.IsScalar() )
 		{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][a[0].Length];
-			Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a[0].Length);
-			for (int i = 0; i < a.Length; i++)
+		    var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
+
+		    for ( int i = 0; i < a.Length; i++ )
 			{
-				for (int k = 0; k < a[0].Length; k++)
+			    for ( int k = 0; k < a[0].Length; k++ )
 				{
-				b[i][k] = a[i][k].div(x);
+				    b[i][k] = a[i][k] / x;
 				}
 			}
+
 			return new Matrix(b);
 		}
-		return mult((new Matrix(x)).pseudoinverse());
+
+	    return Mul( new Matrix(x).pseudoinverse() );
 	}
-	public static Matrix eye(int nr, int nc)
+
+    public static Matrix Eye( int nr, int nc )
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[nr][nc];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(nr, nc);
-		for (int i = 0; i < nr; i++)
+	    var b = CreateRectangularArray<Algebraic>( nr, nc );
+
+		for ( int i = 0; i < nr; i++ )
 		{
-			for (int k = 0; k < nc; k++)
+			for ( int k = 0; k < nc; k++ )
 			{
-				b[i][k] = (i == k ? Zahl.ONE : Zahl.ZERO);
+				b[i][k] = i == k ? Symbolic.ONE : Symbolic.ZERO;
 			}
 		}
-			return new Matrix(b);
+
+		return new Matrix(b);
 	}
-	public virtual Algebraic mpow(int n)
+
+	public virtual Algebraic mpow( int n )
 	{
-		if (n == 0)
-		{
-			return Matrix.eye(a.Length, a[0].Length);
-		}
-		if (n == 1)
-		{
-			return this;
-		}
-		if (n > 1)
-		{
-			return pow_n(n);
-		}
-		;
-		return (new Matrix(mpow(-n))).invert();
+        if ( n == 0 )
+        {
+            return Eye( a.Length, a[0].Length );
+        }
+
+        if ( n == 1 )
+        {
+            return this;
+        }
+
+        if ( n > 1 )
+        {
+            return Pow(n);
+        }
+
+        return new Matrix( mpow( -n ) ).invert();
+
 	}
-	public override Algebraic reduce()
+
+	public override Algebraic Reduce()
 	{
-		if (a.Length == 1)
-		{
-			return (new Vektor(a[0])).reduce();
-		}
-		else
-		{
-			return this;
-		}
+	    return a.Length == 1 ? new Vector( a[0] ).Reduce() : this;
 	}
-	public override Algebraic deriv(Variable @var)
+
+	public override Algebraic Derive( Variable item )
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[nrow()][ncol()];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(nrow(), ncol());
-		for (int i = 0; i < a.Length; i++)
+	    var b = CreateRectangularArray<Algebraic>( Rows(), Cols() );
+
+		for ( int i = 0; i < a.Length; i++ )
 		{
-			for (int k = 0; k < a[0].Length; k++)
+			for ( int k = 0; k < a[0].Length; k++ )
 			{
-				b[i][k] = a[i][k].deriv(@var);
+				b[i][k] = a[i][k].Derive( item );
 			}
 		}
-			return new Matrix(b);
+
+		return new Matrix(b);
 	}
-	public override Algebraic integrate(Variable @var)
+
+	public override Algebraic Integrate(Variable item)
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[nrow()][ncol()];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(nrow(), ncol());
-		for (int i = 0; i < a.Length; i++)
+	    var b = CreateRectangularArray<Algebraic>( Rows(), Cols() );
+
+		for ( int i = 0; i < a.Length; i++ )
 		{
-			for (int k = 0; k < a[0].Length; k++)
+			for ( int k = 0; k < a[0].Length; k++ )
 			{
-				b[i][k] = a[i][k].integrate(@var);
+				b[i][k] = a[i][k].Integrate( item );
 			}
 		}
-			return new Matrix(b);
+
+		return new Matrix(b);
 	}
-	public override double norm()
+
+	public override double Norm()
 	{
-		double n = 0.0;
-		for (int i = 0; i < a.Length; i++)
-		{
-			for (int k = 0; k < a[0].Length; k++)
-			{
-				n += a[i][k].norm();
-			}
-		}
-			return n;
+	    return a.Sum( t => t.Sum( x => x.Norm() ) );
 	}
-	public override bool constantq()
+
+	public override bool IsConstant()
 	{
-		for (int i = 0; i < a.Length; i++)
-		{
-			for (int k = 0; k < a[0].Length; k++)
-			{
-				if (!a[i][k].constantq())
-				{
-					return false;
-				}
-			}
-		}
-				return true;
+	    foreach ( var t in a )
+	    {
+            return t.Any( x => !x.IsConstant() );
+	    }
+
+	    return true;
 	}
+
 	public override bool Equals(object x)
 	{
-		if (!(x is Matrix) || !equalsized((Matrix)x))
+		if ( !( x is Matrix ) || !Equalsized( ( Matrix ) x ) )
 		{
 			return false;
 		}
-		for (int i = 0; i < a.Length; i++)
+
+		for ( int i = 0; i < a.Length; i++ )
 		{
-			for (int k = 0; k < a[0].Length; k++)
+			for ( int k = 0; k < a[0].Length; k++ )
 			{
-				if (!a[i][k].Equals(((Matrix)x).a[i][k]))
+				if ( !a[i][k].Equals( ( ( Matrix ) x ).a[i][k] ) )
 				{
 					return false;
 				}
 			}
 		}
-				return true;
+
+		return true;
 	}
-	public override Algebraic map(LambdaAlgebraic f, Algebraic arg2)
+
+	public override Algebraic Map( LambdaAlgebraic f, Algebraic arg )
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][a[0].Length];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a[0].Length);
-		if (arg2 is Matrix && equalsized((Matrix)arg2))
+		var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
+
+		if ( arg is Matrix && Equalsized( ( Matrix ) arg ) )
 		{
-			for (int i = 0; i < a.Length; i++)
+			for ( int i = 0; i < a.Length; i++ )
 			{
-				for (int k = 0; k < a[0].Length; k++)
+				for ( int k = 0; k < a[0].Length; k++ )
 				{
-					Algebraic c = ((Matrix)arg2).get(i,k);
-					object r = a[i][k].map(f, c);
-					if (r is Algebraic)
+					var c = ( ( Matrix ) arg )[ i, k ];
+
+					object r = a[i][k].Map( f, c );
+
+					if ( r is Algebraic )
 					{
-						b[i][k] = (Algebraic)r;
+						b[i][k] = ( Algebraic ) r;
 					}
 					else
 					{
-						throw new JasymcaException("Cannot evaluate function to algebraic.");
+					    throw new JasymcaException( "Cannot evaluate function to algebraic." );
 					}
 				}
 			}
@@ -452,7 +518,7 @@ public class Matrix : Algebraic
 			{
 				for (int k = 0; k < a[0].Length; k++)
 				{
-					object r = a[i][k].map(f, arg2);
+					object r = a[i][k].Map(f, arg);
 					if (r is Algebraic)
 					{
 						b[i][k] = (Algebraic)r;
@@ -466,72 +532,86 @@ public class Matrix : Algebraic
 		}
 		return new Matrix(b);
 	}
-	public override Algebraic value(Variable @var, Algebraic x)
+	public override Algebraic Value(Variable item, Algebraic x)
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][a[0].Length];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a[0].Length);
-		for (int i = 0; i < a.Length; i++)
+		var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
+
+		for ( int i = 0; i < a.Length; i++ )
 		{
-			for (int k = 0; k < a[0].Length; k++)
+			for ( int k = 0; k < a[0].Length; k++ )
 			{
-				b[i][k] = a[i][k].value(@var,x);
+				b[i][k] = a[i][k].Value( item, x );
 			}
 		}
-			return new Matrix(b);
+
+		return new Matrix(b);
 	}
+
 	public override string ToString()
 	{
 		int max = 0;
 		string r = "";
-		for (int i = 0; i < a.Length; i++)
+
+		foreach ( var t in a )
 		{
-			for (int k = 0; k < a[0].Length; k++)
-			{
-				int l = StringFmt.compact(a[i][k].ToString()).Length;
-				if (l > max)
-				{
-					max = l;
-				}
-			}
+		    for ( int k = 0; k < a[0].Length; k++ )
+		    {
+		        int l = StringFmt.Compact( t[k].ToString() ).Length;
+
+		        if ( l > max )
+		        {
+		            max = l;
+		        }
+		    }
 		}
+
 		max += 2;
-		for (int i = 0; i < a.Length; i++)
+
+		foreach ( var t in a )
 		{
-			r += "\n  ";
-			for (int k = 0; k < a[0].Length; k++)
-			{
-				string c = StringFmt.compact(a[i][k].ToString());
-				r += c;
-				for (int m = 0; m < max - c.Length; m++)
-				{
-					r += " ";
-				}
-			}
+		    r += "\n  ";
+
+		    for ( int k = 0; k < a[0].Length; k++ )
+		    {
+		        var c = StringFmt.Compact( t[k].ToString() );
+
+		        r += c;
+
+		        for ( int m = 0; m < max - c.Length; m++ )
+		        {
+		            r += " ";
+		        }
+		    }
 		}
+
 		return r;
 	}
-	public override void print(PrintStream p)
+
+	public override void Print(PrintStream p)
 	{
 		int max = 0;
-		for (int i = 0; i < a.Length; i++)
+
+		foreach ( var t in a )
 		{
-			for (int k = 0; k < a[0].Length; k++)
-			{
-				int l = StringFmt.compact(a[i][k].ToString()).Length;
-				if (l > max)
-				{
-					max = l;
-				}
-			}
+		    for ( int k = 0; k < a[0].Length; k++ )
+		    {
+		        int l = StringFmt.Compact( t[k].ToString() ).Length;
+
+		        if (l > max)
+		        {
+		            max = l;
+		        }
+		    }
 		}
+
 		max += 2;
+
 		for (int i = 0; i < a.Length; i++)
 		{
 			p.print("\n  ");
 			for (int k = 0; k < a[0].Length; k++)
 			{
-				string r = StringFmt.compact(a[i][k].ToString());
+				string r = StringFmt.Compact(a[i][k].ToString());
 				p.print(r);
 				for (int m = 0; m < max - r.Length; m++)
 				{
@@ -540,25 +620,21 @@ public class Matrix : Algebraic
 			}
 		}
 	}
-	public override Algebraic map(LambdaAlgebraic f)
+	public override Algebraic Map(LambdaAlgebraic f)
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] cn = new Algebraic[a.Length][a[0].Length];
-		Algebraic[][] cn = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a[0].Length);
+		var cn = CreateRectangularArray<Algebraic>(a.Length, a[0].Length);
 		for (int i = 0; i < a.Length; i++)
 		{
 			for (int k = 0; k < a[0].Length; k++)
 			{
-				cn[i][k] = f.f_exakt(a[i][k]);
+				cn[i][k] = f.SymEval(a[i][k]);
 			}
 		}
 			return new Matrix(cn);
 	}
 	public virtual Matrix transpose()
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a[0].Length][a.Length];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a[0].Length, a.Length);
+		var b = CreateRectangularArray<Algebraic>(a[0].Length, a.Length);
 		for (int i = 0; i < a.Length; i++)
 		{
 			for (int k = 0; k < a[0].Length; k++)
@@ -570,198 +646,226 @@ public class Matrix : Algebraic
 	}
 	public virtual Matrix adjunkt()
 	{
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a[0].Length][a.Length];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a[0].Length, a.Length);
+		var b = CreateRectangularArray<Algebraic>(a[0].Length, a.Length);
 		for (int i = 0; i < a.Length; i++)
 		{
 			for (int k = 0; k < a[0].Length; k++)
 			{
-				b[k][i] = a[i][k].cc();
+				b[k][i] = a[i][k].Conj();
 			}
 		}
 			return new Matrix(b);
 	}
+
 	public virtual Matrix invert()
 	{
-		Algebraic _det = det();
-		if (_det.Equals(Zahl.ZERO))
+		var _det = det();
+
+		if ( _det.Equals( Symbolic.ZERO ) )
 		{
-			throw new JasymcaException("Matrix not invertible.");
+		    throw new JasymcaException( "Matrix not invertible." );
 		}
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length][a.Length];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length, a.Length);
-		if (a.Length == 1)
+
+	    var b = CreateRectangularArray<Algebraic>( a.Length, a.Length );
+
+	    if ( a.Length == 1 )
 		{
-			b[0][0] = Zahl.ONE.div(_det);
+			b[0][0] = Symbolic.ONE / _det;
 		}
 		else
 		{
-			for (int i = 0; i < a.Length; i++)
+			for ( int i = 0; i < a.Length; i++ )
 			{
-				for (int k = 0; k < a[0].Length; k++)
+				for ( int k = 0; k < a[0].Length; k++ )
 				{
-					b[i][k] = unterdet(k,i).div(_det);
+					b[i][k] = unterdet( k, i ) / _det;
 				}
 			}
 		}
+
 		return new Matrix(b);
 	}
+
 	public virtual Algebraic min()
 	{
-		Algebraic[] r = new Algebraic[ncol()];
-		for (int i = 0; i < ncol(); i++)
+		var r = new Algebraic[Cols()];
+		for (int i = 0; i < Cols(); i++)
 		{
-			Algebraic min = a[0][i];
-			if (!(min is Zahl))
+			var min = a[0][i];
+			if (!(min is Symbolic))
 			{
 				throw new JasymcaException("MIN requires constant arguments.");
 			}
-			for (int k = 1; k < nrow(); k++)
+			for (int k = 1; k < Rows(); k++)
 			{
-				Algebraic x = a[k][i];
-				if (!(x is Zahl))
+				var x = a[k][i];
+				if (!(x is Symbolic))
 				{
 					throw new JasymcaException("MIN requires constant arguments.");
 				}
-				if (((Zahl)x).smaller((Zahl)min))
+				if (((Symbolic)x).Smaller((Symbolic)min))
 				{
 					min = x;
 				}
 			}
 			r[i] = min;
 		}
-		return (new Vektor(r)).reduce();
+		return (new Vector(r)).Reduce();
 	}
 	public virtual Algebraic max()
 	{
-		Algebraic[] r = new Algebraic[ncol()];
-		for (int i = 0; i < ncol(); i++)
+		var r = new Algebraic[Cols()];
+		for (int i = 0; i < Cols(); i++)
 		{
-			Algebraic max = a[0][i];
-			if (!(max is Zahl))
+			var max = a[0][i];
+			if (!(max is Symbolic))
 			{
 				throw new JasymcaException("MAX requires constant arguments.");
 			}
-			for (int k = 1; k < nrow(); k++)
+			for (int k = 1; k < Rows(); k++)
 			{
-				Algebraic x = a[k][i];
-				if (!(x is Zahl))
+				var x = a[k][i];
+				if (!(x is Symbolic))
 				{
 					throw new JasymcaException("MAX requires constant arguments.");
 				}
-				if (((Zahl)max).smaller((Zahl)x))
+				if (((Symbolic)max).Smaller((Symbolic)x))
 				{
 					max = x;
 				}
 			}
 			r[i] = max;
 		}
-		return (new Vektor(r)).reduce();
+		return (new Vector(r)).Reduce();
 	}
+
 	public virtual Algebraic find()
 	{
-		ArrayList v = new ArrayList();
-		for (int i = 0; i < nrow(); i++)
+		var v = new ArrayList();
+
+		for ( int i = 0; i < Rows(); i++ )
 		{
-			for (int k = 0; k < ncol(); k++)
+			for ( int k = 0; k < Cols(); k++ )
 			{
-				if (!Zahl.ZERO.Equals(a[i][k]))
+				if ( !Symbolic.ZERO.Equals( a[i][k] ) )
 				{
-					v.Add(new Unexakt(i * nrow() + k + 1.0));
+					v.Add( new Complex( i * Rows() + k + 1.0 ) );
 				}
 			}
 		}
-		Vektor vx = Vektor.create(v);
-		if (nrow() == 1)
+
+		var vx = Vector.Create(v);
+
+		if ( Rows() == 1 )
 		{
 			return vx;
 		}
-		return column(vx);
+
+		return Column( vx );
 	}
-	public virtual Polynomial charpoly(Variable x)
+
+	public virtual Polynomial CharPoly( Variable x )
 	{
-		Polynomial p = new Polynomial(x);
-		Matrix m = (Matrix)(sub(Matrix.eye(a.Length,a[0].Length).mult(p)));
-		p = (Polynomial)(m.det2());
-		p = (Polynomial)p.rat();
+		var p = new Polynomial(x);
+
+		var m = ( Matrix ) ( this - Eye( a.Length, a[0].Length ) * p );
+
+		p = ( Polynomial ) m.det2();
+		p = ( Polynomial ) p.Rat();
+
 		return p;
 	}
-	public virtual Vektor eigenvalues()
+
+	public virtual Vector EigenValues()
 	{
 		Variable x = SimpleVariable.top;
-		Polynomial p = charpoly(x);
-		Algebraic[] ps = p.square_free_dec(p.v);
-		Vektor r;
-		ArrayList v = new ArrayList();
-		for (int i = 0; i < ps.Length; i++)
+
+		var p = CharPoly(x);
+		var ps = p.square_free_dec( p._v );
+
+		Vector r;
+
+		var v = new ArrayList();
+
+		for ( int i = 0; i < ps.Length; i++ )
 		{
-			if (ps[i] is Polynomial)
-			{
-				r = ((Polynomial)ps[i]).monic().roots();
-				for (int k = 0; r != null && k < r.length() ; k++)
-				{
-					for (int j = 0; j <= i; j++)
-					{
-						v.Add(r.get(k));
-					}
-				}
-			}
+		    if ( !(ps[i] is Polynomial ) ) continue;
+
+		    r = ( ( Polynomial ) ps[i] ).Monic().roots();
+
+		    for ( int k = 0; r != null && k < r.Length() ; k++ )
+		    {
+		        for ( int j = 0; j <= i; j++ )
+		        {
+		            v.Add( r[k] );
+		        }
+		    }
 		}
-		return Vektor.create(v);
+
+		return Vector.Create(v);
 	}
+
 	public virtual Algebraic det()
 	{
-		if (a.Length != a[0].Length)
+		if ( a.Length != a[0].Length )
 		{
-			return Zahl.ZERO;
+			return Symbolic.ZERO;
 		}
-		switch (a.Length)
+
+		switch ( a.Length )
 		{
 			case 1:
 				return a[0][0];
+
 			case 2:
-				return a[0][0].mult(a[1][1]).sub(a[0][1].mult(a[1][0]));
+
+				return a[0][0] * a[1][1] - a[0][1] * a[1][0];
+
 			case 3:
-				return a[0][0].mult(a[1][1]).mult(a[2][2]).add(a[0][1].mult(a[1][2]).mult(a[2][0])).add(a[0][2].mult(a[1][0]).mult(a[2][1])).sub(a[0][2].mult(a[1][1]).mult(a[2][0])).sub(a[0][0].mult(a[1][2]).mult(a[2][1])).sub(a[0][1].mult(a[1][0]).mult(a[2][2]));
+
+				return a[0][0] * a[1][1] * a[2][2] + a[0][1]* a[1][2] * a[2][0] + a[0][2] * a[1][0] * a[2][1] 
+                    - ( a[0][2] * a[1][1] * a[2][0] + a[0][0]* a[1][2] * a[2][1] + a[0][1] * a[1][0] * a[2][2] );
+
 			default:
-				Matrix c = copy();
-				int perm = c.rank_decompose(null,null);
-				Algebraic r = c.get(0,0);
-				for (int i = 1; i < c.nrow(); i++)
+				var c = copy();
+
+			    int perm = c.rank_decompose( null, null );
+
+				var r = c[ 0, 0 ];
+
+				for ( int i = 1; i < c.Rows(); i++ )
 				{
-					r = r.mult(c.get(i,i));
+					r = r * c[ i, i ];
 				}
-				return (perm % 2 == 0 ? r : r.mult(Zahl.MINUS));
+
+			    return perm % 2 == 0 ? r : r * Symbolic.MINUS;
 		}
 	}
+
 	internal virtual Algebraic det2()
 	{
-		if (a.Length != a[0].Length)
+		if ( a.Length != a[0].Length )
 		{
-			return Zahl.ZERO;
+			return Symbolic.ZERO;
 		}
-		if (a.Length < 4)
+
+		if ( a.Length < 4 )
 		{
 			return det();
 		}
-		Algebraic d = unterdet(0,0).mult(a[0][0]);
-		for (int i = 1; i < a.Length; i++)
-		{
-			d = d.add(unterdet(i,0).mult(a[i][0]));
-		}
+
+        var d = a.Select( ( x, n ) => unterdet( n, 0 ) * x[0] ).Aggregate( ( s, x ) => s + x );
+
 		return d;
 	}
+
 	public virtual Algebraic unterdet(int i, int k)
 	{
 		if (i < 0 || i>a.Length || k < 0 || k>a[0].Length)
 		{
 			throw new JasymcaException("Operation not possible.");
 		}
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[a.Length-1][a[0].Length-1];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(a.Length - 1, a[0].Length - 1);
+		var b = CreateRectangularArray<Algebraic>(a.Length - 1, a[0].Length - 1);
 		int i1, i2, k1, k2;
 		for (i1 = 0,i2 = 0; i1 < a.Length - 1; i1++,i2++)
 		{
@@ -778,24 +882,28 @@ public class Matrix : Algebraic
 				b[i1][k1] = this.a[i2][k2];
 			}
 		}
+
 		Algebraic u = (new Matrix(b)).det2();
+
 		if ((i + k) % 2 == 0)
 		{
 			return u;
 		}
-		return u.mult(Zahl.MINUS);
+
+		return -u;
 	}
+
 	internal virtual int pivot(int k)
 	{
-		if (k >= ncol())
+		if (k >= Cols())
 		{
 			return k;
 		}
 		int _pivot = k;
-		double maxa = a[k][k].norm();
-		for (int i = k + 1; i < nrow(); i++)
+		var maxa = a[k][k].Norm();
+		for (int i = k + 1; i < Rows(); i++)
 		{
-			double dummy = a[i][k].norm();
+			var dummy = a[i][k].Norm();
 			if (dummy > maxa)
 			{
 				maxa = dummy;
@@ -816,190 +924,238 @@ public class Matrix : Algebraic
 		}
 		if (_pivot != k)
 		{
-			for (int j = k;j < ncol();j++)
+			for (int j = k;j < Cols();j++)
 			{
-				Algebraic dummy = a[_pivot][j];
+				var dummy = a[_pivot][j];
 				a[_pivot][j] = a[k][j];
 				a[k][j] = dummy;
 			}
 		}
 		return _pivot;
 	}
+
 	private bool row_zero(int k)
 	{
-		if (k >= nrow())
+		if (k >= Rows())
 		{
 			return true;
 		}
-		for (int i = 0; i < ncol(); i++)
+
+		for (int i = 0; i < Cols(); i++)
 		{
-			if (a[k][i] != Zahl.ZERO)
+			if (a[k][i] != Symbolic.ZERO)
 			{
 				return false;
 			}
 		}
+
 		return true;
 	}
-	public override bool exaktq()
+
+	public override bool IsNumber()
 	{
 		bool exakt = true;
-		for (int i = 0; i < a.Length; i++)
+
+		foreach (var t in a)
 		{
-			for (int k = 0; k < a[0].Length; k++)
-			{
-				exakt = exakt && a[i][k].exaktq();
-			}
+		    for (int k = 0; k < a[0].Length; k++)
+		    {
+		        exakt = exakt && t[k].IsNumber();
+		    }
 		}
-			return exakt;
+
+		return exakt;
 	}
+
 	private void remove_row(int i)
 	{
-		if (i >= nrow())
+		if (i >= Rows())
 		{
 			return;
 		}
-		Algebraic[][] b = new Algebraic[nrow() - 1][];
+
+		var b = new Algebraic[Rows() - 1][];
+
 		for (int k = 0; k < i; k++)
 		{
 			b[k] = a[k];
 		}
-		for (int k = i + 1; k < nrow(); k++)
+
+		for (int k = i + 1; k < Rows(); k++)
 		{
 			b[k - 1] = a[k];
 		}
+
 		a = b;
 	}
+
 	internal virtual void remove_col(int i)
 	{
-		if (i >= ncol())
+		if (i >= Cols())
 		{
 			return;
 		}
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[nrow()][ncol()-1];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(nrow(), ncol() - 1);
-		for (int j = 0; j < nrow(); j++)
+
+		var b = CreateRectangularArray<Algebraic>(Rows(), Cols() - 1);
+
+		for (int j = 0; j < Rows(); j++)
 		{
 			for (int k = 0; k < i; k++)
 			{
 				b[j][k] = a[j][k];
 			}
-			for (int k = i + 1; k < ncol(); k++)
+
+			for (int k = i + 1; k < Cols(); k++)
 			{
 				b[j][k - 1] = a[j][k];
 			}
 		}
+
 		a = b;
 	}
+
 	internal static Matrix elementary(int n, int i, int k, Algebraic m)
 	{
-		Matrix t = eye(n,n);
+		var t = Eye( n, n );
+
 		t.a[i][k] = m;
+
 		return t;
 	}
-	internal static Matrix elementary(int n, int i, int k)
+
+	internal static Matrix elementary( int n, int i, int k )
 	{
-		Matrix t = eye(n,n);
-		t.a[k][k] = t.a[i][i] = Zahl.ZERO;
-		t.a[i][k] = t.a[k][i] = Zahl.ONE;
+		var t = Eye( n, n );
+
+		t.a[k][k] = t.a[i][i] = Symbolic.ZERO;
+		t.a[i][k] = t.a[k][i] = Symbolic.ONE;
+
 		return t;
 	}
-	public virtual int rank_decompose(Matrix B, Matrix P)
+
+	public virtual int rank_decompose( Matrix B, Matrix P )
 	{
-		int m = nrow(), n = ncol(), perm = 0;
-		Matrix C = eye(m,m);
-		Matrix D = eye(m,m);
+		int m = Rows(), n = Cols(), perm = 0;
+
+		var C = Eye( m,  m);
+		var D = Eye( m, m );
+
 		for (int k = 0; k < m - 1; k++)
 		{
 			int _pivot = pivot(k);
+
 			if (_pivot != k)
 			{
-				Matrix E = elementary(m,k,_pivot);
-				C = (Matrix)C.mult(E);
-				D = (Matrix)D.mult(E);
+				var E = elementary( m, k, _pivot );
+
+				C = ( Matrix ) ( C * E );
+				D = ( Matrix ) ( D * E );
+
 				perm++;
 			}
+
 			int p = k;
-			for (p = k; p < n; p++)
+
+			for ( p = k; p < n; p++ )
 			{
-				if (!a[k][p].Equals(Zahl.ZERO))
+				if ( !a[k][p].Equals( Symbolic.ZERO ) )
 				{
 					break;
 				}
 			}
-			if (p < n)
+
+			if ( p < n )
 			{
 				for (int i = k + 1; i < m; i++)
 				{
-					if (!a[i][p].Equals(Zahl.ZERO))
+					if (!a[i][p].Equals(Symbolic.ZERO))
 					{
-						Algebraic f = a[i][p].div(a[k][p]);
-						a[i][p] = Zahl.ZERO;
-						for (int j = p + 1; j < n; j++)
+						var f = a[i][p] / a[k][p];
+
+						a[i][p] = Symbolic.ZERO;
+
+						for ( int j = p + 1; j < n; j++ )
 						{
-							a[i][j] = a[i][j].sub(f.mult(a[k][j]));
+							a[i][j] = a[i][j] - f * a[k][j];
 						}
-						C = (Matrix)C.mult(elementary(m,i,k,f));
+
+						C = ( Matrix ) ( C * elementary( m, i, k, f ) );
 					}
 				}
 			}
 		}
+
 		int nm = Math.Max(n,m);
-		for (int i = nm - 1; i >= 0; i--)
+
+		for ( int i = nm - 1; i >= 0; i-- )
 		{
-			if (row_zero(i))
-			{
-				remove_row(i);
-				C.remove_col(i);
-			}
+		    if ( !row_zero(i) ) continue;
+
+		    remove_row(i);
+
+		    C.remove_col(i);
 		}
-		if (B != null)
+
+		if ( B != null )
 		{
 			B.a = C.a;
 		}
-		if (P != null)
+
+		if ( P != null )
 		{
 			P.a = D.a;
 		}
+
 		return perm;
 	}
+
 	public virtual Matrix copy()
 	{
-		int nr = nrow(), nc = ncol();
-//JAVA TO C# CONVERTER NOTE: The following call to the 'RectangularArrays' helper class reproduces the rectangular array initialization that is automatic in Java:
-//ORIGINAL LINE: Algebraic[][] b = new Algebraic[nr][nc];
-		Algebraic[][] b = RectangularArrays.ReturnRectangularAlgebraicArray(nr, nc);
-		for (int i = 0; i < nr; i++)
+		int nr = Rows(), nc = Cols();
+
+		var b = CreateRectangularArray<Algebraic>( nr, nc );
+
+		for ( int i = 0; i < nr; i++ )
 		{
-			for (int k = 0; k < nc; k++)
+			for ( int k = 0; k < nc; k++ )
 			{
 				b[i][k] = a[i][k];
 			}
 		}
-			return new Matrix(b);
+
+		return new Matrix(b);
 	}
+
 	public virtual Matrix pseudoinverse()
 	{
-		if (!det().Equals(Zahl.ZERO))
+		if ( !det().Equals( Symbolic.ZERO ) )
 		{
 			return invert();
 		}
-		Matrix c = copy();
-		Matrix b = new Matrix(1,1);
+
+        var c = copy();
+        var b = new Matrix( 1, 1 );
+
 		c.rank_decompose(b, null);
-		int rank = c.nrow();
-		if (rank == nrow())
+
+		int rank = c.Rows();
+
+		if ( rank == Rows() )
 		{
-			Matrix ad = adjunkt();
-			return (Matrix) ad.mult(((Matrix)(mult(ad))).invert());
+			var ad = adjunkt();
+
+			return ( Matrix ) ( ad * ( ( Matrix )( this * ad ) ).invert() );
 		}
-		else if (rank == ncol())
+		else if ( rank == Cols() )
 		{
-			Matrix ad = adjunkt();
-			return (Matrix)((Matrix)(ad.mult(this))).invert().mult(ad);
+			var ad = adjunkt();
+
+			return ( Matrix ) ( ( ( Matrix )( ad * this ) ).invert() * ad );
 		}
-		Matrix ca = c.adjunkt();
-		Matrix ba = b.adjunkt();
-		return (Matrix) ca.mult(((Matrix)c.mult(ca)).invert()).mult(((Matrix)ba.mult(b)).invert()).mult(ba);
+
+		var ca = c.adjunkt();
+		var ba = b.adjunkt();
+
+		return ( Matrix ) ( ca.Mul( ( ( Matrix ) ( c * ca ) ).invert() ) * ( ( ( Matrix ) ( ba * b ) ).invert() ) * ba );
 	}
 }

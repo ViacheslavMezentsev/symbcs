@@ -2,58 +2,64 @@
 
 public class LambdaLINSOLVE : Lambda
 {
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda(Stack st) throws ParseException, JasymcaException
-	public override int lambda(Stack st)
+	public override int Eval(Stack stack)
 	{
-		int narg = getNarg(st);
-		if (narg != 2)
+		int narg = GetNarg(stack);
+
+	    if ( narg != 2 )
 		{
-			throw new ParseException("linsolve requires 2 arguments.");
+		    throw new ParseException( "linsolve requires 2 arguments." );
 		}
-		Algebraic M_in = getAlgebraic(st);
-		Algebraic b_in = getAlgebraic(st);
-		Matrix M = new Matrix(M_in);
-		Matrix b = (b_in is Vektor ? Matrix.column((Vektor)b_in) : new Matrix(b_in));
-		Algebraic r = ((Matrix)b.transpose().div(M.transpose())).transpose().reduce();
-		st.Push(r);
+
+        var M_in = GetAlgebraic( stack );
+        var b_in = GetAlgebraic( stack );
+
+	    var M = new Matrix( M_in );
+
+        var b = ( b_in is Vector ? Matrix.Column( ( Vector ) b_in ) : new Matrix( b_in ) );
+        var r = ( ( Matrix ) ( b.transpose() / M.transpose() ) ).transpose().Reduce();
+
+		stack.Push(r);
+
 		return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public int lambda2(Stack st) throws ParseException, JasymcaException
-	public virtual int lambda2(Stack st)
+
+	public virtual int lambda2(Stack stack)
 	{
-		int narg = getNarg(st);
-		if (narg != 2)
-		{
-			throw new ParseException("linsolve requires 2 arguments.");
-		}
-		Vektor expr = (Vektor)getVektor(st).rat();
-		Vektor vars = getVektor(st);
-		elim(expr, vars, 0);
-		subst(expr, vars, expr.length() - 1);
-		st.Push(expr);
-		return 0;
+        int narg = GetNarg( stack );
+
+        if ( narg != 2 )
+        {
+            throw new ParseException( "linsolve requires 2 arguments." );
+        }
+
+        var expr = ( Vector ) GetVektor( stack ).Rat();
+        var vars = GetVektor( stack );
+
+        elim( expr, vars, 0 );
+        subst( expr, vars, expr.Length() - 1 );
+        stack.Push( expr );
+
+        return 0;
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: private static void subst(Vektor expr, Vektor vars, int n) throws JasymcaException
-	private static void subst(Vektor expr, Vektor vars, int n)
+
+	private static void subst(Vector expr, Vector vars, int n)
 	{
 		if (n < 0)
 		{
 			return;
 		}
-		Algebraic pa = expr.get(n);
+		var pa = expr[n];
 		if (pa is Polynomial)
 		{
-			Polynomial p = (Polynomial)pa;
+			var p = (Polynomial)pa;
 			Variable v = null;
 			Algebraic c1 = null, c0 ;
-			for (int k = 0; k < vars.length(); k++)
+			for (int k = 0; k < vars.Length(); k++)
 			{
-				Variable va = ((Polynomial)vars.get(k)).v;
+				var va = ((Polynomial)vars[k])._v;
 				c1 = p.coefficient(va,1);
-				if (!c1.Equals(Zahl.ZERO))
+				if (!c1.Equals(Symbolic.ZERO))
 				{
 					v = va;
 					break;
@@ -61,44 +67,45 @@ public class LambdaLINSOLVE : Lambda
 			}
 			if (v != null)
 			{
-				expr.set(n, p.div(c1));
-				Algebraic val = p.coefficient(v,0).mult(Zahl.MINUS).div(c1);
+				expr[n] = p / c1;
+
+				var val = -p.coefficient(v,0) / c1;
+
 				for (int k = 0; k < n; k++)
 				{
-					Algebraic ps = expr.get(k);
+					var ps = expr[k];
 					if (ps is Polynomial)
 					{
-						expr.set(k, ((Polynomial)ps).value(v,val));
+						expr.set(k, ((Polynomial)ps).Value(v,val));
 					}
 				}
 			}
 		}
 		subst(expr,vars,n - 1);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: private static void elim(Vektor expr, Vektor vars, int n) throws JasymcaException
-	private static void elim(Vektor expr, Vektor vars, int n)
+
+	private static void elim(Vector expr, Vector vars, int n)
 	{
-		if (n >= expr.length())
+		if (n >= expr.Length())
 		{
 			return;
 		}
 		double maxc = 0.0;
 		int iv = 0, ie = 0;
 		Variable vp = null;
-		Algebraic f = Zahl.ONE;
+		Algebraic f = Symbolic.ONE;
 		Polynomial pm = null;
-		for (int i = 0; i < vars.length(); i++)
+		for (int i = 0; i < vars.Length(); i++)
 		{
-			Variable v = ((Polynomial)vars.get(i)).v;
-			for (int k = n; k < expr.length(); k++)
+			var v = ((Polynomial)vars[i])._v;
+			for (int k = n; k < expr.Length(); k++)
 			{
-				Algebraic pa = expr.get(k);
+				var pa = expr[k];
 				if (pa is Polynomial)
 				{
-					Polynomial p = (Polynomial)pa;
-					Algebraic c = p.coefficient(v, 1);
-					double nm = c.norm();
+					var p = (Polynomial)pa;
+					var c = p.coefficient(v, 1);
+					double nm = c.Norm();
 					if (nm > maxc)
 					{
 						maxc = nm;
@@ -115,123 +122,152 @@ public class LambdaLINSOLVE : Lambda
 		{
 			return;
 		}
-		expr.set(ie, expr.get(n));
+
+		expr.set(ie, expr[n]);
 		expr.set(n, pm);
-		for (int i = n + 1; i < expr.length(); i++)
+
+		for (int i = n + 1; i < expr.Length(); i++)
 		{
-			Algebraic p = expr.get(i);
+			var p = expr[i];
+
 			if (p is Polynomial)
 			{
-				Algebraic fc = ((Polynomial)p).coefficient(vp,1);
-				if (!fc.Equals(Zahl.ZERO))
+				var fc = ((Polynomial)p).coefficient(vp,1);
+
+				if (!fc.Equals(Symbolic.ZERO))
 				{
-					p = p.sub(pm.mult(fc.div(f)));
+					p = p - pm * fc / f;
 				}
 			}
+
 			expr.set(i, p);
 		}
+
 		elim(expr,vars,n + 1);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: private static void eliminierung(Matrix a, Vektor c) throws JasymcaException
-	private static void eliminierung(Matrix a, Vektor c)
+
+	private static void eliminierung(Matrix a, Vector c)
 	{
-		int n = c.length();
+		int n = c.Length();
+
 		for (int k = 0; k < n - 1; k++)
 		{
 			pivot(a,c,k);
+
 			for (int i = k + 1; i < n; i++)
 			{
-				Algebraic factor = a.get(i,k).div(a.get(k,k));
-				for (int j = k; j < n; j++)
+				var factor = a[ i, k ] / a[ k, k ];
+
+				for ( int j = k; j < n; j++ )
 				{
-					a.set(i,j, a.get(i,j).sub(factor.mult(a.get(k,j))));
+					a[ i, j ] = a[ i, j ] - factor * a[ k, j ];
 				}
-				c.set(i, c.get(i).sub(factor.mult(c.get(k))));
+
+				c[i] = c[i] - factor * c[k];
 			}
 		}
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Vektor substitution(Matrix a, Vektor c) throws JasymcaException
-	public static Vektor substitution(Matrix a, Vektor c)
+
+	public static Vector Substitution(Matrix a, Vector c)
 	{
-		int n = c.length();
-		Algebraic[] x = new Algebraic[n];
-		x[n - 1] = c.get(n - 1).div(a.get(n - 1,n - 1));
+		int n = c.Length();
+		var x = new Algebraic[n];
+
+		x[n - 1] = c[n - 1] / a[ n - 1, n - 1 ];
+
 		for (int i = n - 2; i >= 0; i--)
 		{
-			Algebraic sum = Zahl.ZERO;
+			Algebraic sum = Symbolic.ZERO;
+
 			for (int j = i + 1; j < n; j++)
 			{
-				sum = sum.add(a.get(i,j).mult(x[j]));
+				sum = ( sum + a[ i, j ] ) * x[j];
 			}
-			x[i] = c.get(i).sub(sum).div(a.get(i,i));
+
+			x[i] = ( c[i] - sum ) / a[ i, i ];
 		}
-		return new Vektor(x);
+
+		return new Vector(x);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: public static Vektor Gauss(Matrix a, Vektor c) throws JasymcaException
-	public static Vektor Gauss(Matrix a, Vektor c)
+
+	public static Vector Gauss(Matrix a, Vector c)
 	{
-		int n = c.length();
-		Algebraic[] x = new Algebraic[n];
+		int n = c.Length();
+		var x = new Algebraic[n];
+
 		for (int k = 0; k < n - 1; k++)
 		{
-			pivot(a,c,k);
-			if (!a.get(k,k).Equals(Zahl.ZERO))
+			pivot( a, c, k );
+
+			if ( a[ k, k ] != Symbolic.ZERO )
 			{
-				for (int i = k + 1; i < n; i++)
+				for ( int i = k + 1; i < n; i++ )
 				{
-					Algebraic factor = a.get(i,k).div(a.get(k,k));
-					for (int j = k + 1; j < n; j++)
+					var factor = a[ i, k ] / a[ k, k ];
+
+					for ( int j = k + 1; j < n; j++ )
 					{
-						a.set(i,j, a.get(i,j).sub(factor.mult(a.get(k,j))));
+						a[ i, j ] = a[ i, j ] - factor * a[ k, j ];
 					}
-					c.set(i, c.get(i).sub(factor.mult(c.get(k))));
+
+					c.set(i, c[i] - factor * c[k] );
 				}
 			}
 		}
-		x[n - 1] = c.get(n - 1).div(a.get(n - 1,n - 1));
-		for (int i = n - 2; i >= 0; i--)
+
+		x[n - 1] = c[ n - 1 ] /  a[ n - 1, n - 1 ];
+
+		for ( int i = n - 2; i >= 0; i-- )
 		{
-			Algebraic sum = Zahl.ZERO;
-			for (int j = i + 1; j < n; j++)
+			Algebraic sum = Symbolic.ZERO;
+
+			for ( int j = i + 1; j < n; j++ )
 			{
-				sum = sum.add(a.get(i,j).mult(x[j]));
+				sum = sum + a[ i, j ] * x[j];
 			}
-			x[i] = c.get(i).sub(sum).div(a.get(i,i));
+
+			x[i] = ( c[i] - sum ) / a[i,i];
 		}
-		return new Vektor(x);
+
+		return new Vector(x);
 	}
-//JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
-//ORIGINAL LINE: private static int pivot(Matrix a, Vektor c, int k) throws JasymcaException
-	private static int pivot(Matrix a, Vektor c, int k)
+
+	private static int pivot( Matrix a, Vector c, int k )
 	{
-		int pivot = k, n = c.length();
-		double maxa = a.get(k,k).norm();
-		for (int i = k + 1; i < n; i++)
+		int pivot = k, n = c.Length();
+
+	    var maxa = a[ k, k ].Norm();
+
+		for ( int i = k + 1; i < n; i++ )
 		{
-			double dummy = a.get(i,k).norm();
-			if (dummy > maxa)
+		    var dummy = a[ i, k ].Norm();
+
+			if ( dummy > maxa )
 			{
 				maxa = dummy;
 				pivot = i;
 			}
 		}
-		if (pivot != k)
+
+		if ( pivot != k )
 		{
-			for (int j = k;j < n;j++)
+			for ( int j = k; j < n; j++ )
 			{
-				var dummy = a.get(pivot,j);
-				a.set(pivot,j,a.get(k,j));
-				a.set(k,j, dummy);
+				var dummy = a[ pivot, j ];
+
+				a[ pivot, j ] = a[ k, j ];
+
+				a[ k, j ] = dummy;
 			}
 		    {
-		        var dummy = c.get(pivot);
-		        c.set(pivot, c.get(k));
-		        c.set(k, dummy);
+		        var dummy = c[ pivot ];
+
+		        c[ pivot ] = c[k];
+
+		        c[k] = dummy;
 		    }
 		}
+
 		return pivot;
 	}
 }

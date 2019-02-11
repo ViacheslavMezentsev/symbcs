@@ -4,38 +4,38 @@
 
     internal static Algebraic[] pqsolve( Algebraic p, Algebraic q )
     {
-        var r = p.mult( Zahl.MINUS ).div( Zahl.TWO );
+        var r = p * Symbolic.MINUS / Symbolic.TWO;
 
-        var s = FunctionVariable.create( "sqrt", r.mult(r).sub(q) );
+        var s = FunctionVariable.Create( "sqrt", r * r - q );
 
-        var result = new[] { r.add(s), r.sub(s) };
+        var result = new[] { r + s, r - s };
 
         return result;
     }
 
-    public static int degree( Algebraic p, Variable v )
+    public static int Degree( Algebraic p, Variable v )
     {
         if ( p is Polynomial )
         {
-            return ( ( Polynomial ) p ).degree(v);
+            return ( ( Polynomial ) p ).Degree(v);
         }
 
         if ( p is Rational )
         {
             var r = ( Rational ) p;
 
-            if ( r.den.depends(v) )
+            if ( r.den.Depends(v) )
             {
                 return 0;
             }
 
-            return degree( r.nom, v );
+            return Degree( r.nom, v );
         }
 
         return 0;
     }
 
-    public static Algebraic coefficient( Algebraic p, Variable v, int n )
+    public static Algebraic Coefficient( Algebraic p, Variable v, int n )
     {
         if ( p is Polynomial )
         {
@@ -44,34 +44,34 @@
 
         if ( p is Rational )
         {
-            Rational r = ( Rational ) p;
+            var r = ( Rational ) p;
 
-            if ( r.den.depends(v) )
+            if ( r.den.Depends(v) )
             {
                 throw new JasymcaException( "Cannot determine coefficient of " + v + " in " + r );
             }
 
-            return coefficient( r.nom, v, n ).div( r.den );
+            return Coefficient( r.nom, v, n ) / r.den;
         }
 
-        return n == 0 ? p : Zahl.ZERO;
+        return n == 0 ? p : Symbolic.ZERO;
     }
 
     public static void polydiv( Algebraic[] a, Variable v )
     {
-        int d0 = degree( a[0], v ), d1 = degree( a[1], v ), d = d0 - d1;
+        int d0 = Degree( a[0], v ), d1 = Degree( a[1], v ), d = d0 - d1;
 
         if ( d < 0 )
         {
             a[1] = a[0];
-            a[0] = Zahl.ZERO;
+            a[0] = Symbolic.ZERO;
 
             return;
         }
 
         if ( d1 == 0 )
         {
-            a[1] = Zahl.ZERO;
+            a[1] = Symbolic.ZERO;
             return;
         }
 
@@ -80,21 +80,21 @@
 
         for ( int i = 0; i < nom.Length; i++ )
         {
-            nom[i] = coefficient( a[0], v, i );
+            nom[i] = Coefficient( a[0], v, i );
         }
 
-        var den = coefficient( a[1], v, d1 );
+        var den = Coefficient( a[1], v, d1 );
 
         for ( int i = d, k = d0; i >= 0; i--, k-- )
         {
-            var cd = nom[k].div( den );
+            var cd = nom[k] / den;
 
             cdiv[i] = cd;
-            nom[k] = Zahl.ZERO;
+            nom[k] = Symbolic.ZERO;
 
             for ( int j = k - 1, l = d1 - 1; j > k - ( d1 + 1 ); j--, l-- )
             {
-                nom[j] = nom[j].sub( cd.mult( coefficient( a[1], v, l ) ) );
+                nom[j] = nom[j] - cd * Coefficient( a[1], v, l );
             }
         }
 
@@ -106,7 +106,7 @@
     {
         if ( n == 0 )
         {
-            return Zahl.ZERO;
+            return Symbolic.ZERO;
         }
 
         if ( n > c.Length )
@@ -120,7 +120,7 @@
 
         for ( int i = n - 2; i >= 0; i-- )
         {
-            p = p.mult(X).add( c[i] );
+            p = p * X + c[i];
         }
 
         return p;
@@ -131,7 +131,19 @@
         return horner( x, c, c.Length );
     }
 
-    public static Algebraic[] clone( Algebraic[] x )
+    public static Algebraic[] Clone( Vector vec )
+    {
+        var c = new Algebraic[ vec.Length() ];
+
+        for ( int n = 0; n < vec.Length(); n++ )
+        {
+            c[n] = vec[n];
+        }
+
+        return c;
+    }
+
+    public static Algebraic[] Clone( Algebraic[] x )
     {
         var c = new Algebraic[ x.Length ];
 
@@ -143,11 +155,11 @@
         return c;
     }
 
-    public static Algebraic[] reduce( Algebraic[] x )
+    public static Algebraic[] Reduce( Algebraic[] x )
     {
         int len = x.Length;
 
-        while ( len > 0 && ( x[ len - 1 ] == null || x[ len - 1 ].Equals( Zahl.ZERO ) ) )
+        while ( len > 0 && ( x[ len - 1 ] == null || x[ len - 1 ].Equals( Symbolic.ZERO ) ) )
         {
             len--;
         }
@@ -174,14 +186,14 @@
 
     public static Algebraic polydiv( Algebraic p1, Algebraic q1 )
     {
-        if ( q1 is Zahl )
+        if ( q1 is Symbolic )
         {
-            return p1.div( q1 );
+            return p1 / q1;
         }
 
-        if ( p1.Equals( Zahl.ZERO ) )
+        if ( p1.Equals( Symbolic.ZERO ) )
         {
-            return Zahl.ZERO;
+            return Symbolic.ZERO;
         }
 
         if ( !( p1 is Polynomial ) || !( q1 is Polynomial ) )
@@ -192,9 +204,9 @@
         var p = ( Polynomial ) p1;
         var q = ( Polynomial ) q1;
 
-        if ( p.v.Equals( q.v ) )
+        if ( p._v.Equals( q._v ) )
         {
-            int len = p.degree() - q.degree();
+            int len = p.Degree() - q.Degree();
 
             if ( len < 0 )
             {
@@ -202,38 +214,38 @@
             }
 
             var cdiv = new Algebraic[ len + 1 ];
-            var nom = clone( p.a );
-            var den = q.a[ q.a.Length - 1 ];
+            var nom = Clone( p.Coeffs );
+            var den = q[ q.Coeffs.Length - 1 ];
 
             for ( int i = len, k = nom.Length - 1; i >= 0; i--, k-- )
             {
                 cdiv[i] = polydiv( nom[k], den );
-                nom[k] = Zahl.ZERO;
+                nom[k] = Symbolic.ZERO;
 
-                for ( int j = k - 1, l = q.a.Length - 2; j > k - q.a.Length; j--, l-- )
+                for ( int j = k - 1, l = q.Coeffs.Length - 2; j > k - q.Coeffs.Length; j--, l-- )
                 {
-                    nom[j] = nom[j].sub( cdiv[i].mult( q.a[l] ) );
+                    nom[j] = nom[j] - cdiv[i] * q[l];
                 }
             }
 
-            return horner( p.v, cdiv );
+            return horner( p._v, cdiv );
         }
         else
         {
-            var cn = new Algebraic[ p.a.Length ];
+            var cn = new Algebraic[ p.Coeffs.Length ];
 
-            for ( int i = 0; i < p.a.Length; i++ )
+            for ( int i = 0; i < p.Coeffs.Length; i++ )
             {
-                cn[i] = polydiv( p.a[i], q1 );
+                cn[i] = polydiv( p[i], q1 );
             }
 
-            return horner( p.v, cn );
+            return horner( p._v, cn );
         }
     }
 
-    public static Algebraic mod( Algebraic p, Algebraic q, Variable r )
+    public static Algebraic Mod( Algebraic p, Algebraic q, Variable r )
     {
-        int len = degree( p, r ) - degree( q, r );
+        int len = Degree( p, r ) - Degree( q, r );
 
         if ( len < 0 )
         {
@@ -241,93 +253,95 @@
         }
 
         var cdiv = new Algebraic[ len + 1 ];
-        var nom = new Algebraic[ degree( p, r ) + 1 ];
+        var nom = new Algebraic[ Degree( p, r ) + 1 ];
 
         for ( int i = 0; i < nom.Length; i++ )
         {
-            nom[i] = coefficient( p, r, i );
+            nom[i] = Coefficient( p, r, i );
         }
 
-        var den = coefficient( q, r, degree( q, r ) );
+        var den = Coefficient( q, r, Degree( q, r ) );
 
         for ( int i = len, k = nom.Length - 1; i >= 0; i--, k-- )
         {
             cdiv[i] = polydiv( nom[ k ], den );
-            nom[k] = Zahl.ZERO;
+            nom[k] = Symbolic.ZERO;
 
-            for ( int j = k - 1, l = ( degree( q, r ) + 1 ) - 2; j > k - ( degree( q, r ) + 1 ); j--, l-- )
+            for ( int j = k - 1, l = ( Degree( q, r ) + 1 ) - 2; j > k - ( Degree( q, r ) + 1 ); j--, l-- )
             {
-                nom[j] = nom[j].sub( cdiv[i].mult( coefficient( q, r, l ) ) );
+                nom[j] = nom[j] - cdiv[i] * Coefficient( q, r, l );
             }
         }
 
         return horner( r, nom, nom.Length - 1 - len );
     }
 
-    public static Algebraic euclid( Algebraic p, Algebraic q, Variable r )
+    public static Algebraic Euclid( Algebraic p, Algebraic q, Variable r )
     {
-        int dp = degree( p, r );
-        int dq = degree( q, r );
+        int dp = Degree( p, r );
+        int dq = Degree( q, r );
 
-        var a = dp < dq ? p : p.mult( coefficient( q, r, dq ).pow_n( dp - dq + 1 ) );
+        var a = dp < dq ? p : p * Coefficient( q, r, dq )^( dp - dq + 1 );
         var b = q;
-        var c = mod( a, b, r );
-        var result = c.Equals( Zahl.ZERO ) ? b : euclid( b, c, r );
+        var c = Mod( a, b, r );
+        var result = c.Equals( Symbolic.ZERO ) ? b : Euclid( b, c, r );
 
         return result;
     }
 
     public static Algebraic poly_gcd( Algebraic p, Algebraic q )
     {
-        if ( p.Equals( Zahl.ZERO ) )
+        if ( p.Equals( Symbolic.ZERO ) )
         {
             return q;
         }
 
-        if ( q.Equals( Zahl.ZERO ) )
+        if ( q.Equals( Symbolic.ZERO ) )
         {
             return p;
         }
 
-        if ( p is Zahl || q is Zahl )
+        if ( p is Symbolic || q is Symbolic )
         {
-            return Zahl.ONE;
+            return Symbolic.ONE;
         }
 
-        var r = ( ( Polynomial ) q ).v.smaller( ( ( Polynomial ) p ).v ) ? ( ( Polynomial ) p ).v : ( ( Polynomial ) q ).v;
+        var r = ( ( Polynomial ) q )._v.Smaller( ( ( Polynomial ) p )._v ) ? ( ( Polynomial ) p )._v : ( ( Polynomial ) q )._v;
 
-        Algebraic pc = content( p, r ), qc = content( q, r );
-        var eu = euclid( polydiv( p, pc ), polydiv( q, qc ), r );
-        var re = polydiv( eu, content( eu, r ) ).mult( poly_gcd( pc, qc ) );
+        Algebraic pc = Content( p, r ), qc = Content( q, r );
 
-        if ( re is Zahl )
+        var eu = Euclid( polydiv( p, pc ), polydiv( q, qc ), r );
+
+        var re = polydiv( eu, Content( eu, r ) ) * poly_gcd( pc, qc );
+
+        if ( re is Symbolic )
         {
-            return Zahl.ONE;
+            return Symbolic.ONE;
         }
 
         var rp = ( Polynomial ) re;
         Algebraic res = rp;
 
-        if ( rp.a[ rp.degree() ] is Zahl )
+        if ( rp[ rp.Degree() ] is Symbolic )
         {
-            res = rp.div( rp.a[ rp.degree() ] );
+            res = rp / rp[ rp.Degree() ];
         }
 
         return res;
     }
 
-    public static Algebraic content( Algebraic p, Variable r )
+    public static Algebraic Content( Algebraic p, Variable r )
     {
-        if ( p is Zahl )
+        if ( p is Symbolic )
         {
             return p;
         }
 
-        var result = coefficient( p, r, 0 );
+        var result = Coefficient( p, r, 0 );
 
-        for ( int i = 0; i <= degree( p, r ) && !result.Equals( Zahl.ONE ); i++ )
+        for ( int i = 0; i <= Degree( p, r ) && !result.Equals( Symbolic.ONE ); i++ )
         {
-            result = poly_gcd( result, coefficient( p, r, i ) );
+            result = poly_gcd( result, Coefficient( p, r, i ) );
         }
 
         return result;

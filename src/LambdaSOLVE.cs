@@ -2,25 +2,25 @@
 
 internal class LambdaSOLVE : Lambda
 {
-    public override int lambda( Stack st )
+    public override int Eval( Stack st )
     {
-        int narg = getNarg( st );
+        int narg = GetNarg( st );
 
         if ( narg != 2 )
         {
             throw new ParseException( "solve requires 2 arguments." );
         }
 
-        var expr = getAlgebraic( st ).rat();
+        var expr = GetAlgebraic( st ).Rat();
 
         if ( !( expr is Polynomial || expr is Rational ) )
         {
             throw new JasymcaException( "Wrong format for Expression in solve." );
         }
 
-        var item = getVariable( st );
+        var item = GetVariable( st );
 
-        var r = solve( expr, item ).reduce();
+        var r = solve( expr, item ).Reduce();
 
         st.Push(r);
 
@@ -29,45 +29,45 @@ internal class LambdaSOLVE : Lambda
 
     public static Algebraic linfaktor( Algebraic expr, Variable item )
     {
-        if ( expr is Vektor )
+        if ( expr is Vector )
         {
-            var cn = new Algebraic[ ( ( Vektor ) expr ).length() ];
+            var cn = new Algebraic[ ( ( Vector ) expr ).Length() ];
 
-            for ( int i = 0; i < ( ( Vektor ) expr ).length(); i++ )
+            for ( int i = 0; i < ( ( Vector ) expr ).Length(); i++ )
             {
-                cn[i] = linfaktor( ( ( Vektor ) expr ).get(i), item );
+                cn[i] = linfaktor( ( ( Vector ) expr )[i], item );
             }
 
-            return new Vektor( cn );
+            return new Vector( cn );
         }
 
-        return ( new Polynomial( item ) ).sub( expr );
+        return ( new Polynomial( item ) ) - expr;
     }
 
-    public static Vektor solve( Algebraic expr, Variable item )
+    public static Vector solve( Algebraic expr, Variable item )
     {
-        debug( "Solve: " + expr + " = 0, Variable: " + item );
+        Debug( "Solve: " + expr + " = 0, Variable: " + item );
 
-        expr = ( new ExpandUser() ).f_exakt( expr );
-        expr = ( new TrigExpand() ).f_exakt( expr );
+        expr = ( new ExpandUser() ).SymEval( expr );
+        expr = ( new TrigExpand() ).SymEval( expr );
 
-        debug( "TrigExpand: " + expr );
+        Debug( "TrigExpand: " + expr );
 
-        expr = ( new NormExp() ).f_exakt( expr );
+        expr = ( new NormExp() ).SymEval( expr );
 
-        debug( "Norm: " + expr );
+        Debug( "Norm: " + expr );
 
-        expr = ( new CollectExp( expr ) ).f_exakt( expr );
+        expr = ( new CollectExp( expr ) ).SymEval( expr );
 
-        debug( "Collect: " + expr );
+        Debug( "Collect: " + expr );
 
-        expr = ( new SqrtExpand() ).f_exakt( expr );
+        expr = ( new SqrtExpand() ).SymEval( expr );
 
-        debug( "SqrtExpand: " + expr );
+        Debug( "SqrtExpand: " + expr );
 
         if ( expr is Rational )
         {
-            expr = ( new LambdaRAT() ).f_exakt( expr );
+            expr = ( new LambdaRAT() ).SymEval( expr );
 
             if ( expr is Rational )
             {
@@ -75,16 +75,16 @@ internal class LambdaSOLVE : Lambda
             }
         }
 
-        debug( "Canonic Expression: " + expr );
+        Debug( "Canonic Expression: " + expr );
 
-        if ( !( expr is Polynomial ) || !( ( Polynomial ) expr ).depends( item ) )
+        if ( !( expr is Polynomial ) || !( ( Polynomial ) expr ).Depends( item ) )
         {
             throw new JasymcaException( "Expression does not depend of variable." );
         }
 
         var p = ( Polynomial ) expr;
 
-        Vektor sol = null;
+        Vector sol = null;
 
         var dep = depvars( p, item );
 
@@ -97,31 +97,31 @@ internal class LambdaSOLVE : Lambda
         {
             var dvar = ( Variable ) dep[0];
 
-            debug( "Found one Variable: " + dvar );
+            Debug( "Found one Variable: " + dvar );
 
             sol = p.solve( dvar );
 
-            debug( "Solution: " + dvar + " = " + sol );
+            Debug( "Solution: " + dvar + " = " + sol );
 
             if ( !dvar.Equals( item ) )
             {
                 var s = new ArrayList();
 
-                for ( int i = 0; i < sol.length(); i++ )
+                for ( int i = 0; i < sol.Length(); i++ )
                 {
-                    debug( "Invert: " + sol.get(i) + " = " + dvar );
+                    Debug( "Invert: " + sol[i] + " = " + dvar );
 
-                    var sl = finvert( ( FunctionVariable ) dvar, sol.get(i) );
+                    var sl = finvert( ( FunctionVariable ) dvar, sol[i] );
 
-                    debug( "Result: " + sl + " = 0" );
+                    Debug( "Result: " + sl + " = 0" );
 
                     var t = solve( sl, item );
 
-                    debug( "Solution: " + item + " = " + t );
+                    Debug( "Solution: " + item + " = " + t );
 
-                    for ( int k = 0; k < t.length(); k++ )
+                    for ( int k = 0; k < t.Length(); k++ )
                     {
-                        var tn = t.get(k);
+                        var tn = t[k];
 
                         if ( !s.Contains( tn ) )
                         {
@@ -130,46 +130,46 @@ internal class LambdaSOLVE : Lambda
                     }
                 }
 
-                sol = Vektor.create(s);
+                sol = Vector.Create(s);
             }
         }
         else if ( dep.Count == 2 )
         {
-            debug( "Found two Variables: " + dep[0] + ", " + dep[1] );
+            Debug( "Found two Variables: " + dep[0] + ", " + dep[1] );
 
             if ( dep.Contains( item ) )
             {
                 var f = ( FunctionVariable ) ( dep[0].Equals( item ) ? dep[1] : dep[0] );
 
-                if ( f.fname.Equals( "sqrt" ) )
+                if ( f.Name.Equals( "sqrt" ) )
                 {
-                    debug( "Solving " + p + " for " + f );
+                    Debug( "Solving " + p + " for " + f );
 
                     sol = p.solve( f );
 
-                    debug( "Solution: " + f + " = " + sol );
+                    Debug( "Solution: " + f + " = " + sol );
 
                     var s = new ArrayList();
 
-                    for ( int i = 0; i < sol.length(); i++ )
+                    for ( int i = 0; i < sol.Length(); i++ )
                     {
-                        debug( "Invert: " + sol.get( i ) + " = " + f );
+                        Debug( "Invert: " + sol[i] + " = " + f );
 
-                        var sl = finvert( f, sol.get(i) );
+                        var sl = finvert( f, sol[i] );
 
-                        debug( "Result: " + sl + " = 0" );
+                        Debug( "Result: " + sl + " = 0" );
 
                         if ( sl is Polynomial && depvars( ( ( Polynomial ) sl ), item ).Count == 1 )
                         {
-                            debug( "Solving " + sl + " for " + item );
+                            Debug( "Solving " + sl + " for " + item );
 
                             var t = solve( sl, item );
 
-                            debug( "Solution: " + item + " = " + t );
+                            Debug( "Solution: " + item + " = " + t );
 
-                            for ( int k = 0; k < t.length(); k++ )
+                            for ( int k = 0; k < t.Length(); k++ )
                             {
-                                var tn = t.get(k);
+                                var tn = t[k];
 
                                 if ( !s.Contains( tn ) )
                                 {
@@ -183,7 +183,7 @@ internal class LambdaSOLVE : Lambda
                         }
                     }
 
-                    sol = Vektor.create(s);
+                    sol = Vector.Create(s);
                 }
                 else
                 {
@@ -207,12 +207,12 @@ internal class LambdaSOLVE : Lambda
     {
         var r = new ArrayList();
 
-        if ( !p.v.deriv( item ).Equals( Zahl.ZERO ) )
+        if ( !p._v.Derive( item ).Equals( Symbolic.ZERO ) )
         {
-            r.Add( p.v );
+            r.Add( p._v );
         }
 
-        foreach ( var t in p.a )
+        foreach ( var t in p.Coeffs )
         {
             if ( t is Polynomial )
             {
@@ -235,29 +235,29 @@ internal class LambdaSOLVE : Lambda
 
     internal static Algebraic finvert( FunctionVariable f, Algebraic b )
     {
-        if ( f.fname.Equals( "sqrt" ) )
+        if ( f.Name.Equals( "sqrt" ) )
         {
-            return b.mult( b ).sub( f.arg );
+            return b * b - f.Var;
         }
 
-        if ( f.fname.Equals( "exp" ) )
+        if ( f.Name.Equals( "exp" ) )
         {
-            return FunctionVariable.create( "log", b ).sub( f.arg );
+            return FunctionVariable.Create( "log", b ) - f.Var;
         }
 
-        if ( f.fname.Equals( "log" ) )
+        if ( f.Name.Equals( "log" ) )
         {
-            return FunctionVariable.create( "exp", b ).sub( f.arg );
+            return FunctionVariable.Create( "exp", b ) - f.Var;
         }
 
-        if ( f.fname.Equals( "tan" ) )
+        if ( f.Name.Equals( "tan" ) )
         {
-            return FunctionVariable.create( "atan", b ).sub( f.arg );
+            return FunctionVariable.Create( "atan", b ) - f.Var;
         }
 
-        if ( f.fname.Equals( "atan" ) )
+        if ( f.Name.Equals( "atan" ) )
         {
-            return FunctionVariable.create( "tan", b ).sub( f.arg );
+            return FunctionVariable.Create( "tan", b ) - f.Var;
         }
 
         throw new JasymcaException( "Could not invert " + f );

@@ -6,28 +6,35 @@ public class Exponential : Polynomial
 	public Variable expvar;
 	public Algebraic exp_b;
 
-	public Exponential(Algebraic a, Algebraic c, Variable x, Algebraic b)
+    public Exponential( Algebraic a, Algebraic c, Variable x, Algebraic b )
 	{
-		this.a = new Algebraic[2];
-		this.a[0] = c;
-		this.a[1] = a;
-		Algebraic[] z = new Algebraic[2];
-		z[0] = Zahl.ZERO;
+		this.Coeffs = new Algebraic[2];
+
+		this[0] = c;
+		this[1] = a;
+
+		var z = new Algebraic[2];
+
+		z[0] = Symbolic.ZERO;
 		z[1] = b;
-		object la = Lambda.pc.env.getValue("exp");
-		if (!(la is LambdaEXP))
+
+		var la = Lambda.pc.env.getValue( "exp" );
+
+	    if ( !( la is LambdaEXP ) )
 		{
 			la = new LambdaEXP();
 		}
-		this.v = new FunctionVariable("exp", new Polynomial(x, z),(LambdaAlgebraic)la);
+
+	    this._v = new FunctionVariable( "exp", new Polynomial( x, z ), ( LambdaAlgebraic ) la );
+
 		this.expvar = x;
 		this.exp_b = b;
 	}
 
-	public Exponential(Polynomial x) : base(x.v, x.a)
+	public Exponential(Polynomial x) : base(x._v, x.Coeffs)
 	{
-		this.expvar = ((Polynomial)((FunctionVariable)this.v).arg).v;
-		this.exp_b = ((Polynomial)((FunctionVariable)this.v).arg).a[1];
+		this.expvar = ((Polynomial)((FunctionVariable)this._v).Var)._v;
+		this.exp_b = ((Polynomial)((FunctionVariable)this._v).Var)[1];
 	}
 
 	public static Algebraic poly2exp(Algebraic x)
@@ -36,10 +43,10 @@ public class Exponential : Polynomial
 		{
 			return x;
 		}
-		if (x is Polynomial && ((Polynomial)x).degree() == 1 && ((Polynomial)x).v is FunctionVariable && ((FunctionVariable)(((Polynomial)x).v)).fname.Equals("exp"))
+		if (x is Polynomial && ((Polynomial)x).Degree() == 1 && ((Polynomial)x)._v is FunctionVariable && ((FunctionVariable)(((Polynomial)x)._v)).Name.Equals("exp"))
 		{
-			Algebraic arg = ((FunctionVariable)(((Polynomial)x).v)).arg;
-			if (arg is Polynomial && ((Polynomial)arg).degree() == 1 && ((Polynomial)arg).a[0].Equals(Zahl.ZERO))
+			Algebraic arg = ((FunctionVariable)(((Polynomial)x)._v)).Var;
+			if (arg is Polynomial && ((Polynomial)arg).Degree() == 1 && ((Polynomial)arg)[0].Equals(Symbolic.ZERO))
 			{
 				return new Exponential((Polynomial)x);
 			}
@@ -47,14 +54,14 @@ public class Exponential : Polynomial
 		return x;
 	}
 
-	public override Algebraic cc()
+	public override Algebraic Conj()
 	{
-		return new Exponential(a[1].cc(), a[0].cc(), expvar, exp_b.cc());
+		return new Exponential(this[1].Conj(), this[0].Conj(), expvar, exp_b.Conj());
 	}
 
 	internal static bool containsexp(Algebraic x)
 	{
-		if (x is Zahl)
+		if (x is Symbolic)
 		{
 			return false;
 		}
@@ -64,16 +71,16 @@ public class Exponential : Polynomial
 		}
 		if (x is Polynomial)
 		{
-			for (int i = 0; i < ((Polynomial)x).a.Length; i++)
+			for (int i = 0; i < ((Polynomial)x).Coeffs.Length; i++)
 			{
-				if (containsexp(((Polynomial)x).a[i]))
+				if (containsexp(((Polynomial)x)[i]))
 				{
 					return true;
 				}
 			}
-				if (((Polynomial)x).v is FunctionVariable)
+				if (((Polynomial)x)._v is FunctionVariable)
 				{
-					return containsexp(((FunctionVariable)((Polynomial)x).v).arg);
+					return containsexp(((FunctionVariable)((Polynomial)x)._v).Var);
 				}
 				return false;
 		}
@@ -81,11 +88,11 @@ public class Exponential : Polynomial
 		{
 			return containsexp(((Rational)x).nom) || containsexp(((Rational)x).den);
 		}
-		if (x is Vektor)
+		if (x is Vector)
 		{
-			for (int i = 0; i < ((Vektor)x).length(); i++)
+			for (int i = 0; i < ((Vector)x).Length(); i++)
 			{
-				if (containsexp(((Vektor)x).get(i)))
+				if (containsexp(((Vector)x)[i]))
 				{
 					return true;
 				}
@@ -95,158 +102,196 @@ public class Exponential : Polynomial
 		throw new JasymcaException("containsexp not suitable for x");
 	}
 
-	public override Algebraic add(Algebraic x)
+    public override bool Equals(object x)
+    {
+        return base.Equals(x);
+    }
+
+    protected override Algebraic Add( Algebraic x )
 	{
-		if (x is Zahl)
+		if ( x is Symbolic )
 		{
-			return new Exponential(a[1], x.add(a[0]), expvar, exp_b);
+			return new Exponential( this[1], x + this[0], expvar, exp_b );
 		}
-		if (x is Exponential)
+
+		if ( x is Exponential )
 		{
-			if (v.Equals(((Exponential)x).v))
+		    if ( _v.Equals( ( ( Exponential ) x )._v ) )
 			{
-				return poly2exp(base.add(x));
+				return poly2exp( this + x );
 			}
-			if (v.smaller(((Exponential)x).v))
+
+		    if ( _v.Smaller( ( ( Exponential ) x )._v ) )
 			{
-				return x.add(this);
+				return x + this;
 			}
-			return new Exponential(a[1], x.add(a[0]), expvar, exp_b);
+			return new Exponential( this[1], x + this[0], expvar, exp_b );
 		}
-		return poly2exp(base.add(x));
+		return poly2exp( this + x );
 	}
-	public override Algebraic mult(Algebraic x)
+
+    protected override Algebraic Mul(Algebraic x)
 	{
-		if (x.Equals(Zahl.ZERO))
+	    if ( x.Equals( Symbolic.ZERO ) )
 		{
 			return x;
 		}
-		if (x is Zahl)
+
+		if (x is Symbolic)
 		{
-			return new Exponential(a[1].mult(x), a[0].mult(x), expvar, exp_b);
+			return new Exponential( this[1] * x, this[0] * x, expvar, exp_b );
 		}
-		if (x is Exponential && expvar.Equals(((Exponential)x).expvar))
+
+	    if ( x is Exponential && expvar.Equals( ( ( Exponential ) x ).expvar ) )
 		{
-			Exponential xp = (Exponential)x;
-			Algebraic r = Zahl.ZERO;
-			Algebraic nex = exp_b.add(xp.exp_b);
-			if (nex.Equals(Zahl.ZERO))
+			var xp = (Exponential)x;
+
+			Algebraic r = Symbolic.ZERO;
+
+			var nex = exp_b + xp.exp_b;
+
+			if ( Equals(nex, Symbolic.ZERO) )
 			{
-				r = a[1].mult(xp.a[1]);
+				r = this[1] * xp[1];
 			}
 			else
 			{
-				r = new Exponential(a[1].mult(xp.a[1]),Zahl.ZERO,expvar, nex);
+				r = new Exponential( this[1] * xp[1], Symbolic.ZERO, expvar, nex );
 			}
-			r = r.add(a[0].mult(xp));
-			r = r.add(mult(xp.a[0]));
-			r = r.reduce();
+
+			r = r + this[0] * xp;
+
+			r = r + this * xp[0];
+
+			r = r.Reduce();
+
 			return r;
 		}
-		return poly2exp(base.mult(x));
+
+		return poly2exp( this * x );
 	}
 
-	public override Algebraic reduce()
+	public override Algebraic Reduce()
 	{
-		if (a[1].reduce().Equals(Zahl.ZERO))
+        if ( Equals(this[1].Reduce(), Symbolic.ZERO) )
+        {
+            return this[ 0 ].Reduce();
+        }
+
+        if ( Equals(exp_b, Symbolic.ZERO) )
+        {
+            return ( this[0] + this[1] ).Reduce();
+        }
+
+        return this;
+	}
+
+    protected override Algebraic Div(Algebraic x)
+	{
+	    if ( x is Symbolic )
 		{
-			return a[0].reduce();
+			return new Exponential( ( Polynomial ) ( this / x ) );
 		}
-		if (exp_b.Equals(Zahl.ZERO))
-		{
-			return a[0].add(a[1]).reduce();
-		}
-		return this;
+
+		return this / x;
 	}
 
-	public override Algebraic div(Algebraic x)
+	public override Algebraic Map( LambdaAlgebraic f )
 	{
-		if (x is Zahl)
-		{
-			return new Exponential((Polynomial)base.div(x));
-		}
-		return base.div(x);
+		return poly2exp( base.Map(f) );
 	}
 
-	public override Algebraic map(LambdaAlgebraic f)
+	public static Symbolic exp_gcd(ArrayList v, Variable x)
 	{
-		return poly2exp(base.map(f));
-	}
+		var gcd = Symbolic.ZERO;
 
-	public static Zahl exp_gcd(ArrayList v, Variable x)
-	{
-		Zahl gcd = Zahl.ZERO;
 		int k = 0;
-		for (int i = 0; i < v.Count; i++)
+
+		foreach (var t in v)
 		{
-			Algebraic a = (Algebraic)v[i];
-			Algebraic c;
-			if (Poly.degree(a,x) == 1 && (c = Poly.coefficient(a,x,1)) is Zahl)
-			{
-				k++;
-				gcd = gcd.gcd((Zahl)c);
-			}
+		    var a = (Algebraic)t;
+
+		    Algebraic c;
+
+		    if ( Poly.Degree( a, x ) == 1 && ( c = Poly.Coefficient( a, x, 1 ) ) is Symbolic )
+		    {
+		        k++;
+		        gcd = gcd.gcd( ( Symbolic ) c );
+		    }
 		}
-		return (k > 0 ? gcd : Zahl.ONE);
+
+	    return k > 0 ? gcd : Symbolic.ONE;
 	}
 
 	public static Algebraic reduce_exp(Algebraic p)
 	{
-		Algebraic[] a = new Algebraic[] {p};
+		var a = new[] {p};
+
 		a = reduce_exp(a);
+
 		return a[0];
 	}
 
 	public static Algebraic[] reduce_exp(Algebraic[] p)
 	{
-		ArrayList v = new ArrayList();
-		ArrayList vars = new ArrayList();
-		GetExpVars2 g = new GetExpVars2(v);
-		for (int i = 0; i < p.Length; i++)
+		var v = new ArrayList();
+		var vars = new ArrayList();
+
+		var g = new GetExpVars2(v);
+
+		foreach (var t in p)
 		{
-			g.f_exakt(p[i]);
+		    g.SymEval(t);
 		}
-		for (int i = 0; i < v.Count; i++)
+
+		foreach (var t in v)
 		{
-			Algebraic a = (Algebraic)v[i];
-			Variable x = null;
-			if (a is Polynomial)
-			{
-				x = ((Polynomial)a).v;
-			}
-			else
-			{
-				continue;
-			}
-			if (vars.Contains(x))
-			{
-				continue;
-			}
-			else
-			{
-				vars.Add(x);
-			}
-			Zahl gcd = exp_gcd(v, x);
-			if (!gcd.Equals(Zahl.ZERO) && !gcd.Equals(Zahl.ONE))
-			{
-				SubstExp sb = new SubstExp(gcd, x);
-				for (int k = 0; k < p.Length; k++)
-				{
-					p[k] = sb.f_exakt(p[k]);
-				}
-			}
+		    var a = ( Algebraic ) t;
+
+		    Variable x = null;
+
+		    if ( a is Polynomial )
+		    {
+		        x = ( ( Polynomial ) a )._v;
+		    }
+		    else
+		    {
+		        continue;
+		    }
+
+		    if ( vars.Contains(x) )
+		    {
+		        continue;
+		    }
+		    else
+		    {
+		        vars.Add(x);
+		    }
+
+		    var gcd = exp_gcd(v, x);
+
+		    if ( gcd != Symbolic.ZERO && gcd != Symbolic.ONE )
+		    {
+		        var sb = new SubstExp( gcd, x );
+
+		        for ( int k = 0; k < p.Length; k++ )
+		        {
+		            p[k] = sb.SymEval( p[k] );
+		        }
+		    }
 		}
+
 		return p;
 	}
 }
 
 internal class SubstExp : LambdaAlgebraic
 {
-	internal Zahl gcd;
+	internal Symbolic gcd;
 	internal Variable @var;
 	internal Variable t = new SimpleVariable("t_exponential");
 
-	public SubstExp(Zahl gcd, Variable @var)
+	public SubstExp(Symbolic gcd, Variable @var)
 	{
 		this.gcd = gcd;
 		this.@var = @var;
@@ -256,9 +301,9 @@ internal class SubstExp : LambdaAlgebraic
 	{
 		this.@var = @var;
 		ArrayList v = new ArrayList();
-		(new GetExpVars2(v)).f_exakt(expr);
+		(new GetExpVars2(v)).SymEval(expr);
 		this.gcd = Exponential.exp_gcd(v, @var);
-		if (gcd.Equals(Zahl.ZERO))
+		if (gcd.Equals(Symbolic.ZERO))
 		{
 			t = @var;
 		}
@@ -266,33 +311,33 @@ internal class SubstExp : LambdaAlgebraic
 
 	public virtual Algebraic ratsubst(Algebraic expr)
 	{
-		if (gcd.Equals(Zahl.ZERO))
+		if (gcd.Equals(Symbolic.ZERO))
 		{
 			return expr;
 		}
-		if (!expr.depends(@var))
+		if (!expr.Depends(@var))
 		{
 			return expr;
 		}
 		if (expr is Rational)
 		{
-			return ratsubst(((Rational)expr).nom).div(ratsubst(((Rational)expr).den));
+		    return ratsubst( ( ( Rational ) expr ).nom ) / ratsubst( ( ( Rational ) expr ).den );
 		}
 
-		if (expr is Polynomial && ((Polynomial)expr).v is FunctionVariable 
-            && ((FunctionVariable)((Polynomial)expr).v).fname.Equals("exp") 
-            && ((FunctionVariable)((Polynomial)expr).v).arg is Polynomial 
-            && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).v.Equals(@var) 
-            && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).degree() == 1 
-            && ((Polynomial)((FunctionVariable)((Polynomial)expr).v).arg).a[0].Equals(Zahl.ZERO))
+		if (expr is Polynomial && ((Polynomial)expr)._v is FunctionVariable 
+            && ((FunctionVariable)((Polynomial)expr)._v).Name.Equals("exp") 
+            && ((FunctionVariable)((Polynomial)expr)._v).Var is Polynomial 
+            && ((Polynomial)((FunctionVariable)((Polynomial)expr)._v).Var)._v.Equals(@var) 
+            && ((Polynomial)((FunctionVariable)((Polynomial)expr)._v).Var).Degree() == 1 
+            && ((Polynomial)((FunctionVariable)((Polynomial)expr)._v).Var)[0].Equals(Symbolic.ZERO))
 		{
 			Polynomial pexpr = (Polynomial)expr;
-			int degree = pexpr.degree();
+			int degree = pexpr.Degree();
 			Algebraic[] a = new Algebraic[degree+1];
 			for (int i = 0; i <= degree; i++)
 			{
-				Algebraic cf = pexpr.a[i];
-				if (cf.depends(@var))
+				Algebraic cf = pexpr[i];
+				if (cf.Depends(@var))
 				{
 					throw new JasymcaException("Rationalize failed: 2");
 				}
@@ -305,129 +350,173 @@ internal class SubstExp : LambdaAlgebraic
 
 	public virtual Algebraic rational(Algebraic expr)
 	{
-		return ratsubst(expr).div(gcd).div(new Polynomial(t)).reduce();
+		return ( ratsubst(expr) / gcd / new Polynomial(t) ).Reduce();
 	}
 
 	public virtual Algebraic rat_reverse(Algebraic expr)
 	{
-		if (gcd.Equals(Zahl.ZERO))
+		if (gcd.Equals(Symbolic.ZERO))
 		{
 			return expr;
 		}
-		Zahl gc = gcd;
-		Algebraic s = new Exponential(Zahl.ONE, Zahl.ZERO, @var, Zahl.ONE.mult(gc));
-		return expr.value(t, s);
+		Symbolic gc = gcd;
+		Algebraic s = new Exponential(Symbolic.ONE, Symbolic.ZERO, @var, Symbolic.ONE * gc );
+		return expr.Value(t, s);
 	}
 
-	internal override Algebraic f_exakt(Algebraic f)
+	internal override Algebraic SymEval(Algebraic f)
 	{
-		if (gcd.Equals(Zahl.ZERO))
+		if (gcd.Equals(Symbolic.ZERO))
 		{
 			return f;
 		}
 		if (f is Polynomial)
 		{
 			Polynomial p = (Polynomial)f;
-			if (p.v is FunctionVariable && ((FunctionVariable)p.v).fname.Equals("exp") && Poly.degree(((FunctionVariable)p.v).arg,@var) == 1)
+			if (p._v is FunctionVariable && ((FunctionVariable)p._v).Name.Equals("exp") && Poly.Degree(((FunctionVariable)p._v).Var,@var) == 1)
 			{
-				Algebraic arg = ((FunctionVariable)p.v).arg;
+				Algebraic arg = ((FunctionVariable)p._v).Var;
+
 				Algebraic[] new_coef = new Algebraic[2];
-				new_coef[1] = gcd.unexakt();
-				new_coef[0] = Zahl.ZERO;
+
+				new_coef[1] = gcd.ToComplex();
+				new_coef[0] = Symbolic.ZERO;
+
 				Algebraic new_arg = new Polynomial(@var, new_coef);
-				Algebraic subst = FunctionVariable.create("exp", new_arg);
-				Algebraic exp = Poly.coefficient(arg,@var,1).div(gcd);
-				if (!(exp is Zahl) && !((Zahl)exp).integerq())
+
+				Algebraic subst = FunctionVariable.Create("exp", new_arg);
+				Algebraic exp = Poly.Coefficient(arg,@var,1) / gcd;
+
+				if (!(exp is Symbolic) && !((Symbolic)exp).IsInteger())
 				{
 					throw new JasymcaException("Not integer exponent in exponential simplification.");
 				}
-				subst = subst.pow_n(((Zahl)exp).intval());
-				subst = subst.mult(FunctionVariable.create("exp", Poly.coefficient(arg,@var,0)));
-				int n = p.a.Length;
-				Algebraic r = f_exakt(p.a[n - 1]);
+
+				subst = subst ^ ( ( Symbolic ) exp ).ToInt();
+
+				subst = subst * FunctionVariable.Create("exp", Poly.Coefficient(arg,@var,0));
+
+				int n = p.Coeffs.Length;
+
+				Algebraic r = SymEval(p[n - 1]);
+
 				for (int i = n - 2; i >= 0; i--)
 				{
-					r = r.mult(subst).add(f_exakt(p.a[i]));
+					r = r * subst + SymEval( p[i] );
 				}
+
 				return r;
 			}
 		}
 
-		return f.map(this);
+		return f.Map(this);
 	}
 }
 
 internal class NormExp : LambdaAlgebraic
 {
-	internal override Algebraic f_exakt(Algebraic f)
+	internal override Algebraic SymEval(Algebraic f)
 	{
 		if (f is Rational)
 		{
-			Algebraic nom = f_exakt(((Rational)f).nom);
-			Algebraic den = f_exakt(((Rational)f).den);
-			if (den is Zahl)
+		    var r = ( Rational ) f;
+
+			var nom = SymEval( r.nom );
+			var den = SymEval( r.den );
+
+		    if ( den is Symbolic )
 			{
-				return f_exakt(nom.div(den));
+				return SymEval( nom / den );
 			}
-			if (den is Exponential && ((Polynomial)den).a[0].Equals(Zahl.ZERO) && ((Polynomial)den).a[1] is Zahl)
+
+		    if ( den is Exponential && ( ( Polynomial ) den )[0].Equals( Symbolic.ZERO ) && ( ( Polynomial ) den )[1] is Symbolic )
 			{
-				if (nom is Zahl || nom is Polynomial)
+				if ( nom is Symbolic || nom is Polynomial )
 				{
-					Exponential denx = (Exponential)den;
-					Exponential den_inv = new Exponential(Zahl.ONE.div(denx.a[1]),Zahl.ZERO, denx.expvar, denx.exp_b.mult(Zahl.MINUS));
-					return nom.mult(den_inv);
+				    var denx = ( Exponential ) den;
+
+					var den_inv = new Exponential( Symbolic.ONE / denx[1], Symbolic.ZERO, denx.expvar, -denx.exp_b );
+
+					return nom * den_inv;
 				}
 			}
-			f = nom.div(den);
+
+			f = nom / den;
+
 			return f;
 		}
+
 		if (f is Exponential)
 		{
-			return f.map(this);
+			return f.Map(this);
 		}
+
 		if (!(f is Polynomial))
 		{
-			return f.map(this);
+			return f.Map(this);
 		}
-		Polynomial fp = (Polynomial)f;
-		if (!(fp.v is FunctionVariable) || !((FunctionVariable)fp.v).fname.Equals("exp"))
+
+		var fp = (Polynomial)f;
+
+		if (!(fp._v is FunctionVariable) || !((FunctionVariable)fp._v).Name.Equals("exp"))
 		{
-			return f.map(this);
+			return f.Map(this);
 		}
-		Algebraic arg = ((FunctionVariable)fp.v).arg.reduce();
-		if (arg is Zahl)
+
+		var arg = ((FunctionVariable)fp._v).Var.Reduce();
+
+		if (arg is Symbolic)
 		{
-			return fp.value(FunctionVariable.create("exp",arg)).map(this);
+			return fp.value(FunctionVariable.Create("exp",arg)).Map(this);
 		}
-		if (!(arg is Polynomial) || !(((Polynomial)arg).degree() == 1))
+
+		if (!(arg is Polynomial) || ((Polynomial)arg).Degree() != 1)
 		{
-			return f.map(this);
+			return f.Map(this);
 		}
-		Algebraic r = Zahl.ZERO;
-		Algebraic a = ((Polynomial)arg).a[1];
-		for (int i = 1; i < fp.a.Length; i++)
+
+		Algebraic z = Symbolic.ZERO;
+
+		var a = ((Polynomial)arg)[1];
+
+		for (int i = 1; i < fp.Coeffs.Length; i++)
 		{
-			Algebraic b = ((Polynomial)arg).a[0];
-			Zahl I = new Unexakt((double)i);
-			Algebraic ebi = Zahl.ONE;
-			while (b is Polynomial && ((Polynomial)b).degree() == 1)
+			var b = ( ( Polynomial ) arg )[0];
+
+		    Symbolic I = new Complex( ( double ) i );
+
+			Algebraic ebi = Symbolic.ONE;
+
+		    while ( b is Polynomial && ( ( Polynomial ) b ).Degree() == 1 )
 			{
-				Algebraic f1 = FunctionVariable.create("exp", (new Polynomial(((Polynomial)b).v)).mult(((Polynomial)b).a[1].mult(I)));
-				f1 = Exponential.poly2exp(f1);
-				ebi = ebi.mult(f1);
-				b = ((Polynomial)b).a[0];
+                var p = ( Polynomial ) b;
+
+				var f1 = FunctionVariable.Create( "exp", new Polynomial( p._v ) * p[1] * I );
+
+			    f1 = Exponential.poly2exp( f1 );
+
+				ebi = ebi * f1;
+
+				b = ( ( Polynomial ) b )[0];
 			}
-			ebi = ebi.mult(FunctionVariable.create("exp", b.mult(I)));
-			Algebraic cf = f_exakt(fp.a[i].mult(ebi));
-			Algebraic f2 = FunctionVariable.create("exp", (new Polynomial(((Polynomial)arg).v)).mult(a.mult(I)));
-			f2 = Exponential.poly2exp(f2);
-			r = r.add(cf.mult(f2));
+
+		    ebi = ebi * FunctionVariable.Create( "exp", b * I );
+
+			var cf = SymEval( fp[i] * ebi );
+
+		    var f2 = FunctionVariable.Create( "exp", new Polynomial( ( ( Polynomial ) arg )._v ) * a * I );
+
+		    f2 = Exponential.poly2exp( f2 );
+
+			z = z + cf * f2;
 		}
-		if (fp.a.Length > 0)
+
+	    if ( fp.Coeffs.Length > 0 )
 		{
-			r = r.add(f_exakt(fp.a[0]));
+			z = z + SymEval( fp[0] );
 		}
-		return Exponential.poly2exp(r);
+
+		return Exponential.poly2exp(z);
 	}
 }
 
@@ -439,10 +528,10 @@ internal class CollectExp : LambdaAlgebraic
 	{
 		v = new ArrayList();
 
-		(new GetExpVars(v)).f_exakt(f);
+		(new GetExpVars(v)).SymEval(f);
 	}
 
-	internal override Algebraic f_exakt(Algebraic x1)
+	internal override Algebraic SymEval(Algebraic x1)
 	{
 		if (v.Count == 0)
 		{
@@ -451,7 +540,7 @@ internal class CollectExp : LambdaAlgebraic
 
 		if (!(x1 is Exponential))
 		{
-			return x1.map(this);
+			return x1.Map(this);
 		}
 
 		Exponential e = (Exponential)x1;
@@ -460,10 +549,10 @@ internal class CollectExp : LambdaAlgebraic
 
 		Algebraic exp_b = e.exp_b;
 
-		if (exp_b is Zahl && ((Zahl)exp_b).smaller(Zahl.ZERO))
+		if (exp_b is Symbolic && ((Symbolic)exp_b) < Symbolic.ZERO )
 		{
 			exp *= -1;
-			exp_b = exp_b.mult(Zahl.MINUS);
+			exp_b = -exp_b;
 		}
 
 		Variable x = e.expvar;
@@ -472,28 +561,28 @@ internal class CollectExp : LambdaAlgebraic
 		{
 			Polynomial y = (Polynomial)v[i];
 
-			if (y.v.Equals(x))
+			if (y._v.Equals(x))
 			{
-				Algebraic rat = exp_b.div(y.a[1]);
+				Algebraic rat = exp_b / y[1];
 
-				if (rat is Zahl && !((Zahl)rat).komplexq())
+				if (rat is Symbolic && !((Symbolic)rat).IsComplex())
 				{
-					int _cfs = cfs( ( ( Zahl ) rat ).unexakt().real );
+					int _cfs = cfs( ( ( Symbolic ) rat ).ToComplex().Re );
 
 					if (_cfs != 0 && _cfs != 1)
 					{
 						exp *= _cfs;
-						exp_b = exp_b.div(new Unexakt((double)_cfs));
+						exp_b = exp_b / new Complex((double)_cfs);
 					}
 				}
 			}
 		}
 
-        var p = ( new Polynomial( x ) ).mult( exp_b );
+        var p = ( new Polynomial( x ) ) * exp_b;
 
-        p = FunctionVariable.create( "exp", p ).pow_n( exp );
+        p = FunctionVariable.Create( "exp", p ).Pow( exp );
 
-        return p.mult( f_exakt( e.a[1] ) ).add( f_exakt( e.a[0] ) );
+        return p * SymEval( e[1] ) + SymEval( e[0] );
     }
 
 	internal virtual int cfs(double x)
@@ -532,18 +621,24 @@ internal class GetExpVars : LambdaAlgebraic
 		this.v = v;
 	}
 
-	internal override Algebraic f_exakt(Algebraic f)
+	internal override Algebraic SymEval(Algebraic f)
 	{
 		if (f is Exponential)
 		{
 			Algebraic x = new Polynomial(((Exponential)f).expvar);
-			x = x.mult(((Exponential)f).exp_b);
+
+		    x = x * ( ( Exponential ) f ).exp_b;
+
 			v.Add(x);
-			f_exakt(((Exponential)f).a[1]);
-			f_exakt(((Exponential)f).a[0]);
-			return Zahl.ONE;
+
+            // TODO: Check this
+            SymEval( ( ( Exponential ) f )[1] );
+            SymEval( ( ( Exponential ) f )[0] );
+
+			return Symbolic.ONE;
 		}
-		return f.map(this);
+
+		return f.Map(this);
 	}
 }
 
@@ -556,39 +651,39 @@ internal class GetExpVars2 : LambdaAlgebraic
 		this.v = v;
 	}
 
-	internal override Algebraic f_exakt(Algebraic f)
+	internal override Algebraic SymEval(Algebraic f)
 	{
 		if (f is Polynomial)
 		{
 			Polynomial p = (Polynomial)f;
-			if (p.v is FunctionVariable && ((FunctionVariable)p.v).fname.Equals("exp"))
+			if (p._v is FunctionVariable && ((FunctionVariable)p._v).Name.Equals("exp"))
 			{
-				v.Add(((FunctionVariable)p.v).arg);
+				v.Add(((FunctionVariable)p._v).Var);
 			}
-			for (int i = 0; i < p.a.Length; i++)
+			for (int i = 0; i < p.Coeffs.Length; i++)
 			{
-				f_exakt(p.a[i]);
+				SymEval(p[i]);
 			}
-			return Zahl.ONE;
+			return Symbolic.ONE;
 		}
-		return f.map(this);
+		return f.Map(this);
 	}
 }
 
 internal class DeExp : LambdaAlgebraic
 {
-	internal override Algebraic f_exakt(Algebraic f)
+	internal override Algebraic SymEval(Algebraic f)
 	{
 		if (f is Exponential)
 		{
 			Exponential x = (Exponential)f;
 			Algebraic[] cn = new Algebraic[2];
-			cn[0] = f_exakt(x.a[0]);
-			cn[1] = f_exakt(x.a[1]);
-			return new Polynomial(x.v, cn);
+			cn[0] = SymEval(x[0]);
+			cn[1] = SymEval(x[1]);
+			return new Polynomial(x._v, cn);
 		}
 
-		return f.map(this);
+		return f.Map(this);
 	}
 }
 
@@ -600,132 +695,136 @@ internal class LambdaEXP : LambdaAlgebraic
 		intrule = "exp(x)";
 	}
 
-	internal override Zahl f(Zahl x)
+	internal override Symbolic PreEval(Symbolic x)
 	{
-		Unexakt z = x.unexakt();
+		Complex z = x.ToComplex();
 
-		double r = JMath.exp(z.real);
+		double r = JMath.exp(z.Re);
 
-		if (z.imag != 0.0)
+		if (z.Im != 0.0)
 		{
-			return new Unexakt(r * Math.Cos(z.imag), r * Math.Sin(z.imag));
+			return new Complex(r * Math.Cos(z.Im), r * Math.Sin(z.Im));
 		}
 
-		return new Unexakt(r);
+		return new Complex(r);
 	}
 
-	internal override Algebraic f_exakt(Algebraic x)
+	internal override Algebraic SymEval(Algebraic x)
 	{
-		if (x.Equals(Zahl.ZERO))
+		if (x.Equals(Symbolic.ZERO))
 		{
-			return Zahl.ONE;
+			return Symbolic.ONE;
 		}
 
 		if (x is Polynomial 
-            && ((Polynomial)x).degree() == 1 
-            && ((Polynomial)x).a[0].Equals(Zahl.ZERO))
+            && ((Polynomial)x).Degree() == 1 
+            && ((Polynomial)x)[0].Equals(Symbolic.ZERO))
 		{
 			Polynomial xp = (Polynomial)x;
 
-			if (xp.v is SimpleVariable && ((SimpleVariable)xp.v).name.Equals("pi"))
+			if (xp._v is SimpleVariable && ((SimpleVariable)xp._v).name.Equals("pi"))
 			{
-				Algebraic q = xp.a[1].div(Zahl.IONE);
-				if (q is Zahl)
+				Algebraic q = xp[1] / Symbolic.IONE;
+
+				if (q is Symbolic)
 				{
-					return fzexakt((Zahl)q);
+					return fzexakt((Symbolic)q);
 				}
 			}
-			if (xp.a[1] is Zahl 
-                && xp.v is FunctionVariable 
-                && ((FunctionVariable)xp.v).fname.Equals("log"))
+			if (xp[1] is Symbolic 
+                && xp._v is FunctionVariable 
+                && ((FunctionVariable)xp._v).Name.Equals("log"))
 			{
-				if (((Zahl)xp.a[1]).integerq())
+				if (((Symbolic)xp[1]).IsInteger())
 				{
-					int n = ((Zahl)xp.a[1]).intval();
+					int n = ((Symbolic)xp[1]).ToInt();
 
-					return ((FunctionVariable)xp.v).arg.pow_n(n);
+					return ((FunctionVariable)xp._v).Var.Pow(n);
 				}
 			}
 		}
 		return null;
 	}
 
-	internal virtual Algebraic fzexakt(Zahl x)
+	internal virtual Algebraic fzexakt(Symbolic x)
 	{
-		if (x.smaller(Zahl.ZERO))
+		if ( x < Symbolic.ZERO )
 		{
-			Algebraic r = fzexakt((Zahl)x.mult(Zahl.MINUS));
+			var r = fzexakt( ( Symbolic ) ( -x ) );
+
 			if (r != null)
 			{
-				return r.cc();
+				return r.Conj();
 			}
 			return r;
 		}
 
-		if (x.integerq())
+		if ( x.IsInteger() )
 		{
-			if (x.intval() % 2 == 0)
+			if (x.ToInt() % 2 == 0)
 			{
-				return Zahl.ONE;
+				return Symbolic.ONE;
 			}
 			else
 			{
-				return Zahl.MINUS;
+				return Symbolic.MINUS;
 			}
 		}
 
-		Algebraic qs = x.add(new Unexakt(.5));
+		var qs = x + new Complex( 0.5 );
 
-		if (((Zahl)qs).integerq())
+		if (((Symbolic)qs).IsInteger())
 		{
-			if (((Zahl)qs).intval() % 2 == 0)
+			if (((Symbolic)qs).ToInt() % 2 == 0)
 			{
-				return Zahl.IMINUS;
+				return Symbolic.IMINUS;
 			}
 			else
 			{
-				return Zahl.IONE;
+				return Symbolic.IONE;
 			}
 		}
 
-		qs = x.mult(new Unexakt(4));
+		qs = x * new Complex(4);
 
-		if (((Zahl)qs).integerq())
+		if (((Symbolic)qs).IsInteger())
 		{
-			Algebraic sq2 = FunctionVariable.create("sqrt",new Unexakt(0.5));
-			switch (((Zahl)qs).intval() % 8)
+			Algebraic sq2 = FunctionVariable.Create("sqrt",new Complex(0.5));
+			switch (((Symbolic)qs).ToInt() % 8)
 			{
 				case 1:
-					return Zahl.ONE.add(Zahl.IONE).div(Zahl.SQRT2);
+					return ( Symbolic.ONE + Symbolic.IONE ) / Symbolic.SQRT2;
 				case 3:
-					return Zahl.MINUS.add(Zahl.IONE).div(Zahl.SQRT2);
+					return ( Symbolic.MINUS + Symbolic.IONE ) / Symbolic.SQRT2;
 				case 5:
-					return Zahl.MINUS.add(Zahl.IMINUS).div(Zahl.SQRT2);
+					return ( Symbolic.MINUS + Symbolic.IMINUS ) / Symbolic.SQRT2;
 				case 7:
-					return Zahl.ONE.add(Zahl.IMINUS).div(Zahl.SQRT2);
+					return ( Symbolic.ONE + Symbolic.IMINUS ) / Symbolic.SQRT2;
 			}
 		}
-		qs = x.mult(new Unexakt(6));
-		if (((Zahl)qs).integerq())
+
+		qs = x * new Complex(6);
+
+		if (((Symbolic)qs).IsInteger())
 		{
-			switch (((Zahl)qs).intval() % 12)
+			switch (((Symbolic)qs).ToInt() % 12)
 			{
 				case 1:
-					return Zahl.SQRT3.add(Zahl.IONE).div(Zahl.TWO);
+					return ( Symbolic.SQRT3 + Symbolic.IONE ) / Symbolic.TWO;
 				case 2:
-					return Zahl.ONE.add(Zahl.SQRT3.mult(Zahl.IONE)).div(Zahl.TWO);
+					return ( Symbolic.ONE + Symbolic.SQRT3 ) * Symbolic.IONE / Symbolic.TWO;
 				case 4:
-					return Zahl.SQRT3.mult(Zahl.IONE).add(Zahl.MINUS).div(Zahl.TWO);
+					return ( Symbolic.SQRT3 * Symbolic.IONE + Symbolic.MINUS ) / Symbolic.TWO;
 				case 5:
-					return Zahl.IONE.sub(Zahl.SQRT3).div(Zahl.TWO);
+					return ( Symbolic.IONE - Symbolic.SQRT3 ) / Symbolic.TWO;
 				case 7:
-					return Zahl.IMINUS.sub(Zahl.SQRT3).div(Zahl.TWO);
+					return ( Symbolic.IMINUS - Symbolic.SQRT3 ) /  Symbolic.TWO;
 				case 8:
-					return Zahl.SQRT3.mult(Zahl.IMINUS).sub(Zahl.ONE).div(Zahl.TWO);
+					return ( Symbolic.SQRT3 * Symbolic.IMINUS - Symbolic.ONE ) / Symbolic.TWO;
 				case 10:
-					return Zahl.SQRT3.mult(Zahl.IMINUS).add(Zahl.ONE).div(Zahl.TWO);
+					return ( Symbolic.SQRT3 * Symbolic.IMINUS + Symbolic.ONE ) / Symbolic.TWO;
 				case 11:
-					return Zahl.IMINUS.add(Zahl.SQRT3).div(Zahl.TWO);
+					return ( Symbolic.IMINUS + Symbolic.SQRT3 ) / Symbolic.TWO;
 			}
 		}
 		return null;
@@ -740,33 +839,33 @@ internal class LambdaLOG : LambdaAlgebraic
 		intrule = "x*log(x)-x";
 	}
 
-	internal override Zahl f(Zahl x)
+	internal override Symbolic PreEval(Symbolic x)
 	{
-		Unexakt z = x.unexakt();
-		if (z.real < 0 || z.imag != 0.0)
+		Complex z = x.ToComplex();
+		if (z.Re < 0 || z.Im != 0.0)
 		{
-			return new Unexakt(JMath.log(z.real * z.real + z.imag * z.imag) / 2, JMath.atan2(z.imag,z.real));
+			return new Complex(JMath.log(z.Re * z.Re + z.Im * z.Im) / 2, JMath.atan2(z.Im,z.Re));
 		}
-		return new Unexakt(JMath.log(z.real));
+		return new Complex(JMath.log(z.Re));
 	}
 
-	internal override Algebraic f_exakt(Algebraic x)
+	internal override Algebraic SymEval(Algebraic x)
 	{
-		if (x.Equals(Zahl.ONE))
+		if (x.Equals(Symbolic.ONE))
 		{
-			return Zahl.ZERO;
+			return Symbolic.ZERO;
 		}
-		if (x.Equals(Zahl.MINUS))
+		if (x.Equals(Symbolic.MINUS))
 		{
-			return Zahl.PI.mult(Zahl.IONE);
+			return Symbolic.PI * Symbolic.IONE;
 		}
 		if (x is Polynomial 
-            && ((Polynomial)x).degree() == 1 
-            && ((Polynomial)x).a[0].Equals(Zahl.ZERO) 
-            && ((Polynomial)x).v is FunctionVariable 
-            && ((FunctionVariable)((Polynomial)x).v).fname.Equals("exp"))
+            && ((Polynomial)x).Degree() == 1 
+            && ((Polynomial)x)[0].Equals(Symbolic.ZERO) 
+            && ((Polynomial)x)._v is FunctionVariable 
+            && ((FunctionVariable)((Polynomial)x)._v).Name.Equals("exp"))
 		{
-			return ((FunctionVariable)((Polynomial)x).v).arg.add(FunctionVariable.create("log",((Polynomial)x).a[1]));
+			return ((FunctionVariable)((Polynomial)x)._v).Var + FunctionVariable.Create("log",((Polynomial)x)[1]);
 		}
 		return null;
 	}

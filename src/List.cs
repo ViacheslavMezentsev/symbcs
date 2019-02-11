@@ -1,29 +1,17 @@
 ﻿using System.Collections;
 
-public class List : ArrayList
+public sealed class List : ArrayList
 {
-	public List()
-	{
-	}
-
-	public List( IEnumerable x )
-	{
-	    foreach ( var t in x )
-	    {
-	        Add(t);
-	    }
-	}
-
-    public virtual List clone()
-    {
-        var y = new List();
-
-        y.AddRange( this );
-
-        return y;
+    public List()
+    {        
     }
 
-	public virtual List take( int i, int k )
+    public List( IList list )
+    {
+        AddRange( list );
+    }
+
+	public List Take( int i, int k )
 	{
 		var list = new List();
 
@@ -35,11 +23,8 @@ public class List : ArrayList
 		return list;
 	}
 
-    public virtual void clear( int from, int to )
+    public void Remove( int from, int to )
     {
-        for ( var j = from; j < to; j++ )
-        {
-            RemoveAt( from );
-        }
+        RemoveRange( from, to - from );
     }
 }
