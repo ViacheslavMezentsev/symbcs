@@ -1,9 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "symcs", "symcs.csproj", "{724AAEA1-53B3-484F-B5DC-7AFA99D72625}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{968CCE34-1264-4889-84FB-C70924CDA9D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{60155003-171E-4285-AACF-58A93AE01342}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tiny.Symbolic", "Tiny.Symbolic\Tiny.Symbolic.csproj", "{AA913C74-C06C-46D5-9A56-9BBF98CC3089}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tiny.Numeric", "Tiny.Math\Tiny.Numeric.csproj", "{4ABC0D09-81C7-4D55-97F5-C1745ED0E8D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyCalc", "TinyCalc\TinyCalc.csproj", "{84FC4C3A-2914-40B2-B647-A57AB97DA715}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiny.Matlab", "Tiny.Matlab\Tiny.Matlab.csproj", "{16E46AB8-E607-4B30-A745-2A03FAED6811}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiny.Octave", "Tiny.Octave\Tiny.Octave.csproj", "{2DE18573-7D9E-47EE-B543-05832250DD2C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiny.Maxima", "Tiny.Maxima\Tiny.Maxima.csproj", "{268D0F31-06A6-4A84-90F0-3755FED68653}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,12 +25,43 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{724AAEA1-53B3-484F-B5DC-7AFA99D72625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{724AAEA1-53B3-484F-B5DC-7AFA99D72625}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{724AAEA1-53B3-484F-B5DC-7AFA99D72625}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{724AAEA1-53B3-484F-B5DC-7AFA99D72625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA913C74-C06C-46D5-9A56-9BBF98CC3089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA913C74-C06C-46D5-9A56-9BBF98CC3089}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA913C74-C06C-46D5-9A56-9BBF98CC3089}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA913C74-C06C-46D5-9A56-9BBF98CC3089}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4ABC0D09-81C7-4D55-97F5-C1745ED0E8D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4ABC0D09-81C7-4D55-97F5-C1745ED0E8D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4ABC0D09-81C7-4D55-97F5-C1745ED0E8D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4ABC0D09-81C7-4D55-97F5-C1745ED0E8D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84FC4C3A-2914-40B2-B647-A57AB97DA715}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84FC4C3A-2914-40B2-B647-A57AB97DA715}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84FC4C3A-2914-40B2-B647-A57AB97DA715}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84FC4C3A-2914-40B2-B647-A57AB97DA715}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16E46AB8-E607-4B30-A745-2A03FAED6811}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16E46AB8-E607-4B30-A745-2A03FAED6811}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16E46AB8-E607-4B30-A745-2A03FAED6811}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16E46AB8-E607-4B30-A745-2A03FAED6811}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DE18573-7D9E-47EE-B543-05832250DD2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DE18573-7D9E-47EE-B543-05832250DD2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DE18573-7D9E-47EE-B543-05832250DD2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DE18573-7D9E-47EE-B543-05832250DD2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{268D0F31-06A6-4A84-90F0-3755FED68653}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{268D0F31-06A6-4A84-90F0-3755FED68653}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{268D0F31-06A6-4A84-90F0-3755FED68653}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{268D0F31-06A6-4A84-90F0-3755FED68653}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AA913C74-C06C-46D5-9A56-9BBF98CC3089} = {968CCE34-1264-4889-84FB-C70924CDA9D1}
+		{4ABC0D09-81C7-4D55-97F5-C1745ED0E8D1} = {968CCE34-1264-4889-84FB-C70924CDA9D1}
+		{84FC4C3A-2914-40B2-B647-A57AB97DA715} = {60155003-171E-4285-AACF-58A93AE01342}
+		{16E46AB8-E607-4B30-A745-2A03FAED6811} = {968CCE34-1264-4889-84FB-C70924CDA9D1}
+		{2DE18573-7D9E-47EE-B543-05832250DD2C} = {968CCE34-1264-4889-84FB-C70924CDA9D1}
+		{268D0F31-06A6-4A84-90F0-3755FED68653} = {968CCE34-1264-4889-84FB-C70924CDA9D1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1B00EF3E-C955-4FA6-B86C-939F59C1A70D}
 	EndGlobalSection
 EndGlobal

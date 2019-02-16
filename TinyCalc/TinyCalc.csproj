@@ -1,0 +1,82 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net20;netcoreapp2.0;netstandard2.0</TargetFrameworks>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <StartupObject />
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <Authors>Viacheslav N. Mezentsev</Authors>
+    <Company>TinyCo</Company>
+    <Description>Tiny Symbolic C# Calculator (based on Jasymca)</Description>
+    <RepositoryUrl>https://github.com/ViacheslavMezentsev/symbcs</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>symbolic, c#, math</PackageTags>
+    <FileVersion>0.1.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="inc\acosh.m" />
+    <None Remove="inc\acsc.m" />
+    <None Remove="inc\acsch.m" />
+    <None Remove="inc\asec.m" />
+    <None Remove="inc\asech.m" />
+    <None Remove="inc\asinh.m" />
+    <None Remove="inc\cosh.m" />
+    <None Remove="inc\csc.m" />
+    <None Remove="inc\csch.m" />
+    <None Remove="inc\demoDE.m" />
+    <None Remove="inc\demoEN.m" />
+    <None Remove="inc\demoME_DE.m" />
+    <None Remove="inc\demoME_EN.m" />
+    <None Remove="inc\fzero.m" />
+    <None Remove="inc\invhilb.m" />
+    <None Remove="inc\linspace.m" />
+    <None Remove="inc\lsqcurvefit.m" />
+    <None Remove="inc\nchoosek.m" />
+    <None Remove="inc\poly.m" />
+    <None Remove="inc\polyfit.m" />
+    <None Remove="inc\polyval.m" />
+    <None Remove="inc\quad.m" />
+    <None Remove="inc\sec.m" />
+    <None Remove="inc\sech.m" />
+    <None Remove="inc\sinh.m" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="inc\acosh.m" />
+    <EmbeddedResource Include="inc\acsc.m" />
+    <EmbeddedResource Include="inc\acsch.m" />
+    <EmbeddedResource Include="inc\asec.m" />
+    <EmbeddedResource Include="inc\asech.m" />
+    <EmbeddedResource Include="inc\asinh.m" />
+    <EmbeddedResource Include="inc\cosh.m" />
+    <EmbeddedResource Include="inc\csc.m" />
+    <EmbeddedResource Include="inc\csch.m" />
+    <EmbeddedResource Include="inc\demoDE.m" />
+    <EmbeddedResource Include="inc\demoEN.m" />
+    <EmbeddedResource Include="inc\demoME_DE.m" />
+    <EmbeddedResource Include="inc\demoME_EN.m" />
+    <EmbeddedResource Include="inc\fzero.m" />
+    <EmbeddedResource Include="inc\invhilb.m" />
+    <EmbeddedResource Include="inc\linspace.m" />
+    <EmbeddedResource Include="inc\lsqcurvefit.m" />
+    <EmbeddedResource Include="inc\nchoosek.m" />
+    <EmbeddedResource Include="inc\poly.m" />
+    <EmbeddedResource Include="inc\polyfit.m" />
+    <EmbeddedResource Include="inc\polyval.m" />
+    <EmbeddedResource Include="inc\quad.m" />
+    <EmbeddedResource Include="inc\sec.m" />
+    <EmbeddedResource Include="inc\sech.m" />
+    <EmbeddedResource Include="inc\sinh.m" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tiny.Math\Tiny.Numeric.csproj" />
+    <ProjectReference Include="..\Tiny.Matlab\Tiny.Matlab.csproj" />
+    <ProjectReference Include="..\Tiny.Maxima\Tiny.Maxima.csproj" />
+    <ProjectReference Include="..\Tiny.Octave\Tiny.Octave.csproj" />
+    <ProjectReference Include="..\Tiny.Symbolic\Tiny.Symbolic.csproj" />
+  </ItemGroup>
+
+</Project>
