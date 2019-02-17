@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net20;netcoreapp2.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net20;net40;net45;netcoreapp2.0;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Theraot.Core" Version="3.0.2" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net20'">
+    <DefineConstants>LESSTHAN_NET30</DefineConstants>
+  </PropertyGroup>
 
 </Project>

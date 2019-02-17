@@ -4,8 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-using Tiny.Science.Engine;
-
 namespace TinyCalc
 {
     public static class Program
