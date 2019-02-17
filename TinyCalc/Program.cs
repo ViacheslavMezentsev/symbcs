@@ -4,38 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
+using Tiny.Science.Engine;
+
 namespace TinyCalc
 {
-    public class NesymcaMax : Nesymca
-    {
-        public NesymcaMax() : base( "Maxima" )
-        {
-        }
-    }
-
-    public class NesymcaOct : Nesymca
-    {
-        public NesymcaOct() : base( "Octave" )
-        {
-        }
-    }
-
-    public class NesymcaMat : Nesymca
-    {
-        public NesymcaMat() : base( "Matlab" )
-        {
-        }
-    }
-
     public static class Program
     {
         public static void Main()
         {
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.ForegroundColor = ConsoleColor.Black;
-
-            Console.Clear();
-
             var assembly = Assembly.GetExecutingAssembly();
 
             var attribute = assembly.GetCustomAttributes( false ).OfType<AssemblyTitleAttribute>().FirstOrDefault();
@@ -55,11 +31,11 @@ namespace TinyCalc
 
             Console.WriteLine();
 
-            var nesymca = new NesymcaOct();
-            //var nesymca = new NesymcaMax();
-            //var nesymca = new NesymcaMat();
+            var calc = new Calculator( "Octave" );
+            //var calc = new Calculator( "Maxima" );
+            //var calc = new Calculator( "Matlab" );
 
-            var thread = new Thread( nesymca.Run );
+            var thread = new Thread( calc.Run );
 
             thread.Start();
         }
