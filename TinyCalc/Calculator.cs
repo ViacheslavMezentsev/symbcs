@@ -115,7 +115,7 @@ namespace TinyCalc
             {
                 println( @"Mode {0} not available.", ui );
 
-                Environment.Exit( 0 );
+                Environment.Exit(0);
             }
         }
 

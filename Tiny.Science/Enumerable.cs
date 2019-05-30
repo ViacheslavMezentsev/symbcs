@@ -1076,21 +1076,24 @@ namespace System.Linq
 
         public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
+            if ( source == null )
             {
-                throw new ArgumentNullException(nameof(source));
+                throw new ArgumentNullException( nameof( source ) );
             }
 
             var str = source as string;
 
-            if (str == null)
+            if ( str == null )
             {
-                return new List<TSource>(source);
+                return new List<TSource>( source );
             }
 
-            var array = (TSource[])(object)str.ToCharArray();
-            var result = new List<TSource>(array.Length);
-            result.AddRange(array);
+            var array = ( TSource[] ) ( object ) str.ToCharArray();
+
+            var result = new List<TSource>( array.Length );
+
+            result.AddRange( array );
+
             return result;
         }
 
