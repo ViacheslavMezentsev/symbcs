@@ -24,13 +24,7 @@
             return true;
         }
 
-        internal virtual Algebraic Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        internal virtual Algebraic Value => value;
     }
 
     internal class Root : Constant
@@ -48,15 +42,17 @@
         {
             if ( !( v is Root ) )
             {
-                return base.Smaller( v );
+                return base.Smaller(v);
             }
 
-            if ( !poly.Equals( ( ( Root ) v ).poly ) )
+            var root = ( Root ) v;
+
+            if ( !poly.Equals( root.poly ) )
             {
-                return poly.Norm() < ( ( Root ) v ).poly.Norm();
+                return poly.Norm() < root.poly.Norm();
             }
 
-            return n < ( ( Root ) v ).n;
+            return n < root.n;
         }
 
         public override bool Equals( object x )
@@ -66,7 +62,7 @@
 
         public override string ToString()
         {
-            return string.Format( "Root({0}, {1})", new Vector( poly ), n );
+            return $"Root({new Vector(poly)}, {n})";
         }
 
         internal override Algebraic Value
@@ -75,7 +71,7 @@
             {
                 var roots = ( new Polynomial( new SimpleVariable( "x" ), poly ) ).roots();
 
-                return roots[ n ];
+                return roots[n];
             }
         }
     }
@@ -84,9 +80,11 @@
     {
         internal override Algebraic SymEval( Algebraic f )
         {
-            while ( f is Polynomial && ( ( Polynomial ) f )._v is Constant )
+            while ( f is Polynomial && ( ( Polynomial ) f ).Var is Constant )
             {
-                f = f.Value( ( ( Polynomial ) f )._v, ( ( Constant ) ( ( Polynomial ) f )._v ).Value );
+                var v = ( ( Polynomial ) f ).Var;
+
+                f = f.Value( v, ( ( Constant ) v ).Value );
             }
 
             return f.Map( this );

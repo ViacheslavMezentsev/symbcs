@@ -7,74 +7,65 @@ namespace Tiny.Science.Symbolic
 
         #region Properties
 
-        public string Name
-        {
-            get; private set;
-        }
-        public Algebraic Var
-        {
-            get; private set;
-        }
-        public LambdaAlgebraic AlgLambda
-        {
-            get; private set;
-        }
+        public string Name { get; }
+        public Algebraic Var { get; private set; }
+        public LambdaAlgebraic Body { get; }
 
         #endregion
 
         public FunctionVariable( string fname, Algebraic fvar, LambdaAlgebraic flambda )
         {
-            this.Name = fname;
-            this.Var = fvar;
-            this.AlgLambda = flambda;
+            Name = fname;
+            Var = fvar;
+            Body = flambda;
         }
 
         public override Algebraic Derive( Variable v )
         {
-            if ( Equals( v ) )
+            if ( Equals(v) )
             {
                 return Symbol.ONE;
             }
 
-            if ( !Var.Depends( v ) )
+            if ( !Var.Depends(v) )
             {
                 return Symbol.ZERO;
             }
 
-            if ( AlgLambda == null )
+            if ( Body == null )
             {
-                throw new SymbolicException( "Can not differentiate " + Name + "  : No definition." );
+                throw new SymbolicException( $"Can not differentiate {Name} : No definition." );
             }
 
-            var diffrule = AlgLambda.diffrule;
+            var diffrule = Body.diffrule;
 
             if ( diffrule == null )
             {
-                throw new SymbolicException( "Can not differentiate " + Name + " : No rule available." );
+                throw new SymbolicException( $"Can not differentiate {Name} : No rule available." );
             }
 
             var y = Lambda.evalx( diffrule, Var );
 
-            return y * Var.Derive( v );
+            return y * Var.Derive(v);
         }
 
         public virtual Algebraic Integrate( Variable x )
         {
             Var = Var.Reduce();
 
-            if ( AlgLambda == null )
+            if ( Body == null )
             {
-                throw new SymbolicException( "Can not integrate " + Name );
+                throw new SymbolicException( $"Can not integrate {Name}" );
             }
 
-            return AlgLambda.Integrate( Var, x );
+            return Body.Integrate( Var, x );
         }
 
         public static Algebraic Create( string f, Algebraic arg )
         {
             arg = arg.Reduce();
 
-            var fl = Session.Store.GetValue( f );
+            var fl = Session.Store.GetValue(f);
 
             if ( fl != null && fl is LambdaAlgebraic )
             {
@@ -103,30 +94,28 @@ namespace Tiny.Science.Symbolic
             return x is FunctionVariable && Name.Equals( ( ( FunctionVariable ) x ).Name ) && Var.Equals( ( ( FunctionVariable ) x ).Var );
         }
 
-        public override Algebraic Value( Variable @var, Algebraic x )
+        public override Algebraic Value( Variable v, Algebraic x )
         {
-            if ( Equals( @var ) )
+            if ( Equals(v) )
             {
                 return x;
             }
-            else
+
+            x = Var.Value( v, x );
+
+            var r = Body.SymEval(x);
+
+            if ( r != null )
             {
-                x = Var.Value( @var, x );
-
-                var r = AlgLambda.SymEval( x );
-
-                if ( r != null )
-                {
-                    return r;
-                }
-
-                if ( x is Complex )
-                {
-                    return AlgLambda.PreEval( ( Symbol ) x );
-                }
-
-                return new Polynomial( new FunctionVariable( Name, x, AlgLambda ) );
+                return r;
             }
+
+            if ( x is Complex )
+            {
+                return Body.PreEval( ( Symbol ) x );
+            }
+
+            return new Polynomial( new FunctionVariable( Name, x, Body ) );
         }
 
         public override bool Smaller( Variable v )
@@ -156,9 +145,9 @@ namespace Tiny.Science.Symbolic
                 var a = ( Polynomial ) Var;
                 var b = ( Polynomial ) ( ( FunctionVariable ) v ).Var;
 
-                if ( !a._v.Equals( b._v ) )
+                if ( !a.Var.Equals( b.Var ) )
                 {
-                    return a._v.Smaller( b._v );
+                    return a.Var.Smaller( b.Var );
                 }
 
                 if ( a.Degree() != b.Degree() )
@@ -166,17 +155,16 @@ namespace Tiny.Science.Symbolic
                     return a.Degree() < b.Degree();
                 }
 
-                for ( int i = a.Coeffs.Length - 1; i >= 0; i-- )
+                for ( var n = a.Coeffs.Length - 1; n >= 0; n-- )
                 {
-                    if ( !a[ i ].Equals( b[ i ] ) )
-                    {
-                        if ( a[ i ] is Symbol && b[ i ] is Symbol )
-                        {
-                            return ( ( Symbol ) a[ i ] ).Smaller( ( Symbol ) b[ i ] );
-                        }
+                    if ( a[n].Equals( b[n] ) ) continue;
 
-                        return a[ i ].Norm() < b[ i ].Norm();
+                    if ( a[n] is Symbol && b[n] is Symbol )
+                    {
+                        return ( ( Symbol ) a[n] ).Smaller( ( Symbol ) b[n] );
                     }
+
+                    return a[n].Norm() < b[n].Norm();
                 }
             }
 
@@ -187,10 +175,10 @@ namespace Tiny.Science.Symbolic
         {
             if ( Name.Equals( "exp" ) || Name.Equals( "log" ) || Name.Equals( "sqrt" ) )
             {
-                return new FunctionVariable( Name, Var.Conj(), AlgLambda );
+                return new FunctionVariable( Name, Var.Conj(), Body );
             }
 
-            throw new SymbolicException( "Can't calculate cc for Function " + Name );
+            throw new SymbolicException( $"Can\'t calculate cc for Function {Name}" );
         }
 
         public override string ToString()
@@ -201,10 +189,8 @@ namespace Tiny.Science.Symbolic
             {
                 return Name + a;
             }
-            else
-            {
-                return Name + "(" + a + ")";
-            }
+
+            return $"{Name}({a})";
         }
     }
 }

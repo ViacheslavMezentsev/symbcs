@@ -43,7 +43,7 @@
         {
             if ( p is Polynomial )
             {
-                return ( ( Polynomial ) p ).coefficient( v, n );
+                return ( ( Polynomial ) p ).GetCoeff( v, n );
             }
 
             if ( p is Rational )
@@ -208,7 +208,7 @@
             var p = ( Polynomial ) p1;
             var q = ( Polynomial ) q1;
 
-            if ( p._v.Equals( q._v ) )
+            if ( p.Var.Equals( q.Var ) )
             {
                 int len = p.Degree() - q.Degree();
 
@@ -232,7 +232,7 @@
                     }
                 }
 
-                return horner( p._v, cdiv );
+                return horner( p.Var, cdiv );
             }
             else
             {
@@ -243,7 +243,7 @@
                     cn[ i ] = polydiv( p[ i ], q1 );
                 }
 
-                return horner( p._v, cn );
+                return horner( p.Var, cn );
             }
         }
 
@@ -310,7 +310,7 @@
                 return Symbol.ONE;
             }
 
-            var r = ( ( Polynomial ) q )._v.Smaller( ( ( Polynomial ) p )._v ) ? ( ( Polynomial ) p )._v : ( ( Polynomial ) q )._v;
+            var r = ( ( Polynomial ) q ).Var.Smaller( ( ( Polynomial ) p ).Var ) ? ( ( Polynomial ) p ).Var : ( ( Polynomial ) q ).Var;
 
             Algebraic pc = Content( p, r ), qc = Content( q, r );
 

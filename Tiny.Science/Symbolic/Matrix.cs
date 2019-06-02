@@ -28,7 +28,7 @@ namespace Tiny.Science.Symbolic
             {
                 for ( int k = 0; k < ncol; k++ )
                 {
-                    a[ i ][ k ] = x;
+                    a[i][k] = x;
                 }
             }
         }
@@ -42,18 +42,18 @@ namespace Tiny.Science.Symbolic
             a = CreateRectangularArray<Algebraic>( nr, nc );
 
             nr = Math.Min( nr, b.Length );
-            nc = Math.Min( nc, b[ 0 ].Length );
+            nc = Math.Min( nc, b[0].Length );
 
             for ( int i = 0; i < nr; i++ )
             {
                 for ( int k = 0; k < nc; k++ )
                 {
-                    a[ i ][ k ] = new Complex( b[ i ][ k ] );
+                    a[i][k] = new Complex( b[i][k] );
                 }
             }
         }
 
-        public Matrix( double[][] b ) : this( b, b.Length, b[ 0 ].Length )
+        public Matrix( double[][] b ) : this( b, b.Length, b[0].Length )
         {
         }
 
@@ -103,21 +103,21 @@ namespace Tiny.Science.Symbolic
         {
             get
             {
-                if ( i < 0 || i >= a.Length || k < 0 || k >= a[ 0 ].Length )
+                if ( i < 0 || i >= a.Length || k < 0 || k >= a[0].Length )
                 {
                     throw new SymbolicException( "Index out of bounds." );
                 }
 
-                return a[ i ][ k ];
+                return a[i][k];
             }
             set
             {
-                if ( i < 0 || i >= a.Length || k < 0 || k >= a[ 0 ].Length )
+                if ( i < 0 || i >= a.Length || k < 0 || k >= a[0].Length )
                 {
                     throw new SymbolicException( "Index out of bounds." );
                 }
 
-                a[ i ][ k ] = value;
+                a[i][k] = value;
             }
         }
 
@@ -128,7 +128,7 @@ namespace Tiny.Science.Symbolic
 
         public virtual int Cols()
         {
-            return a[ 0 ].Length;
+            return a[0].Length;
         }
 
         public virtual double[][] GetDouble( int nr, int nc )
@@ -140,39 +140,33 @@ namespace Tiny.Science.Symbolic
 
             if ( nc == 0 )
             {
-                nc = a[ 0 ].Length;
+                nc = a[0].Length;
             }
 
             var b = CreateRectangularArray<double>( nr, nc );
 
             nr = Math.Min( nr, a.Length );
-            nc = Math.Min( nc, a[ 0 ].Length );
+            nc = Math.Min( nc, a[0].Length );
 
             for ( int i = 0; i < nr; i++ )
             {
                 for ( int k = 0; k < nc; k++ )
                 {
-                    var x = a[ i ][ k ];
+                    var x = a[i][k];
 
                     if ( !( x is Complex ) || x.IsComplex() )
                     {
                         throw new SymbolicException( "Not a real, double Matrix" );
                     }
 
-                    b[ i ][ k ] = ( ( Complex ) x ).Re;
+                    b[i][k] = ( ( Complex ) x ).Re;
                 }
             }
 
             return b;
         }
 
-        public virtual double[][] Double
-        {
-            get
-            {
-                return GetDouble( 0, 0 );
-            }
-        }
+        public virtual double[][] Double => GetDouble( 0, 0 );
 
         public virtual Algebraic col( int k )
         {
@@ -180,7 +174,7 @@ namespace Tiny.Science.Symbolic
 
             for ( int i = 0; i < a.Length; i++ )
             {
-                c[ i ][ 0 ] = a[ i ][ k - 1 ];
+                c[i][0] = a[i][ k - 1 ];
             }
 
             return new Matrix( c ).Reduce();
@@ -188,11 +182,11 @@ namespace Tiny.Science.Symbolic
 
         public virtual Algebraic row( int k )
         {
-            var c = new Algebraic[ a[ 0 ].Length ];
+            var c = new Algebraic[ a[0].Length ];
 
-            for ( int i = 0; i < a[ 0 ].Length; i++ )
+            for ( int i = 0; i < a[0].Length; i++ )
             {
-                c[ i ] = a[ k - 1 ][ i ];
+                c[i] = a[ k - 1 ][i];
             }
 
             return new Vector( c ).Reduce();
@@ -208,7 +202,7 @@ namespace Tiny.Science.Symbolic
                 {
                     for ( int k = 0; k < Cols(); k++ )
                     {
-                        e.a[ i ][ k ] = a[ i ][ k ];
+                        e.a[i][k] = a[i][k];
                     }
                 }
 
@@ -221,7 +215,7 @@ namespace Tiny.Science.Symbolic
                 {
                     foreach ( int c in idx.col )
                     {
-                        a[ r - 1 ][ c - 1 ] = x.a[ 0 ][ 0 ];
+                        a[ r - 1 ][ c - 1 ] = x.a[0][0];
                     }
                 }
 
@@ -234,7 +228,7 @@ namespace Tiny.Science.Symbolic
                 {
                     for ( int k = 0; k < idx.col.Length; k++ )
                     {
-                        a[ idx.row[ i ] - 1 ][ idx.col[ k ] - 1 ] = x.a[ i ][ k ];
+                        a[ idx.row[i] - 1 ][ idx.col[k] - 1 ] = x.a[i][k];
                     }
                 }
 
@@ -257,7 +251,7 @@ namespace Tiny.Science.Symbolic
             {
                 for ( int k = 0; k < idx.col.Length; k++ )
                 {
-                    x.a[ i ][ k ] = a[ idx.row[ i ] - 1 ][ idx.col[ k ] - 1 ];
+                    x.a[i][k] = a[ idx.row[i] - 1 ][ idx.col[k] - 1 ];
                 }
             }
             return x;
@@ -275,13 +269,13 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Conj()
         {
-            var b = CreateRectangularArray<Algebraic>( a.Length, a[ 0 ].Length );
+            var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
 
             for ( int i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    b[ i ][ k ] = a[ i ][ k ].Conj();
+                    b[i][k] = a[i][k].Conj();
                 }
             }
 
@@ -297,13 +291,13 @@ namespace Tiny.Science.Symbolic
 
             if ( x is Matrix && Equalsized( ( Matrix ) x ) )
             {
-                var b = CreateRectangularArray<Algebraic>( a.Length, a[ 0 ].Length );
+                var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
 
                 for ( int i = 0; i < a.Length; i++ )
                 {
-                    for ( int k = 0; k < a[ 0 ].Length; k++ )
+                    for ( int k = 0; k < a[0].Length; k++ )
                     {
-                        b[ i ][ k ] = a[ i ][ k ] + ( ( Matrix ) x ).a[ i ][ k ];
+                        b[i][k] = a[i][k] + ( ( Matrix ) x ).a[i][k];
                     }
                 }
 
@@ -327,13 +321,13 @@ namespace Tiny.Science.Symbolic
         {
             if ( x.IsScalar() )
             {
-                var b = CreateRectangularArray<Algebraic>( a.Length, a[ 0 ].Length );
+                var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
 
                 for ( int i = 0; i < a.Length; i++ )
                 {
-                    for ( int k = 0; k < a[ 0 ].Length; k++ )
+                    for ( int k = 0; k < a[0].Length; k++ )
                     {
-                        b[ i ][ k ] = a[ i ][ k ] * x;
+                        b[i][k] = a[i][k] * x;
                     }
                 }
 
@@ -347,17 +341,17 @@ namespace Tiny.Science.Symbolic
                 throw new SymbolicException( "Matrix dimensions wrong." );
             }
 
-            var b1 = CreateRectangularArray<Algebraic>( a.Length, xm.a[ 0 ].Length );
+            var b1 = CreateRectangularArray<Algebraic>( a.Length, xm.a[0].Length );
 
             for ( int i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < xm.a[ 0 ].Length; k++ )
+                for ( int k = 0; k < xm.a[0].Length; k++ )
                 {
-                    b1[ i ][ k ] = a[ i ][ 0 ] * xm.a[ 0 ][ k ];
+                    b1[i][k] = a[i][0] * xm.a[0][k];
 
                     for ( int l = 1; l < xm.a.Length; l++ )
                     {
-                        b1[ i ][ k ] = b1[ i ][ k ] + a[ i ][ l ] * xm.a[ l ][ k ];
+                        b1[i][k] = b1[i][k] + a[i][ l ] * xm.a[ l ][k];
                     }
                 }
             }
@@ -369,13 +363,13 @@ namespace Tiny.Science.Symbolic
         {
             if ( x.IsScalar() )
             {
-                var b = CreateRectangularArray<Algebraic>( a.Length, a[ 0 ].Length );
+                var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
 
                 for ( int i = 0; i < a.Length; i++ )
                 {
-                    for ( int k = 0; k < a[ 0 ].Length; k++ )
+                    for ( int k = 0; k < a[0].Length; k++ )
                     {
-                        b[ i ][ k ] = a[ i ][ k ] / x;
+                        b[i][k] = a[i][k] / x;
                     }
                 }
 
@@ -389,11 +383,11 @@ namespace Tiny.Science.Symbolic
         {
             var b = CreateRectangularArray<Algebraic>( nr, nc );
 
-            for ( int i = 0; i < nr; i++ )
+            for ( var i = 0; i < nr; i++ )
             {
-                for ( int k = 0; k < nc; k++ )
+                for ( var k = 0; k < nc; k++ )
                 {
-                    b[ i ][ k ] = i == k ? Symbol.ONE : Symbol.ZERO;
+                    b[i][k] = i == k ? Symbol.ONE : Symbol.ZERO;
                 }
             }
 
@@ -404,7 +398,7 @@ namespace Tiny.Science.Symbolic
         {
             if ( n == 0 )
             {
-                return Eye( a.Length, a[ 0 ].Length );
+                return Eye( a.Length, a[0].Length );
             }
 
             if ( n == 1 )
@@ -423,18 +417,18 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Reduce()
         {
-            return a.Length == 1 ? new Vector( a[ 0 ] ).Reduce() : this;
+            return a.Length == 1 ? new Vector( a[0] ).Reduce() : this;
         }
 
         public override Algebraic Derive( Variable item )
         {
             var b = CreateRectangularArray<Algebraic>( Rows(), Cols() );
 
-            for ( int i = 0; i < a.Length; i++ )
+            for ( var i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( var k = 0; k < a[0].Length; k++ )
                 {
-                    b[ i ][ k ] = a[ i ][ k ].Derive( item );
+                    b[i][k] = a[i][k].Derive( item );
                 }
             }
 
@@ -445,11 +439,11 @@ namespace Tiny.Science.Symbolic
         {
             var b = CreateRectangularArray<Algebraic>( Rows(), Cols() );
 
-            for ( int i = 0; i < a.Length; i++ )
+            for ( var i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( var k = 0; k < a[0].Length; k++ )
                 {
-                    b[ i ][ k ] = a[ i ][ k ].Integrate( item );
+                    b[i][k] = a[i][k].Integrate( item );
                 }
             }
 
@@ -478,11 +472,11 @@ namespace Tiny.Science.Symbolic
                 return false;
             }
 
-            for ( int i = 0; i < a.Length; i++ )
+            for ( var i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( var k = 0; k < a[0].Length; k++ )
                 {
-                    if ( !a[ i ][ k ].Equals( ( ( Matrix ) x ).a[ i ][ k ] ) )
+                    if ( !a[i][k].Equals( ( ( Matrix ) x ).a[i][k] ) )
                     {
                         return false;
                     }
@@ -494,21 +488,21 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Map( LambdaAlgebraic f, Algebraic arg )
         {
-            var b = CreateRectangularArray<Algebraic>( a.Length, a[ 0 ].Length );
+            var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
 
             if ( arg is Matrix && Equalsized( ( Matrix ) arg ) )
             {
-                for ( int i = 0; i < a.Length; i++ )
+                for ( var i = 0; i < a.Length; i++ )
                 {
-                    for ( int k = 0; k < a[ 0 ].Length; k++ )
+                    for ( var k = 0; k < a[0].Length; k++ )
                     {
                         var c = ( ( Matrix ) arg )[ i, k ];
 
-                        object r = a[ i ][ k ].Map( f, c );
+                        object r = a[i][k].Map( f, c );
 
                         if ( r is Algebraic )
                         {
-                            b[ i ][ k ] = ( Algebraic ) r;
+                            b[i][k] = ( Algebraic ) r;
                         }
                         else
                         {
@@ -519,14 +513,15 @@ namespace Tiny.Science.Symbolic
             }
             else
             {
-                for ( int i = 0; i < a.Length; i++ )
+                for ( var i = 0; i < a.Length; i++ )
                 {
-                    for ( int k = 0; k < a[ 0 ].Length; k++ )
+                    for ( var k = 0; k < a[0].Length; k++ )
                     {
-                        object r = a[ i ][ k ].Map( f, arg );
+                        object r = a[i][k].Map( f, arg );
+
                         if ( r is Algebraic )
                         {
-                            b[ i ][ k ] = ( Algebraic ) r;
+                            b[i][k] = ( Algebraic ) r;
                         }
                         else
                         {
@@ -535,17 +530,19 @@ namespace Tiny.Science.Symbolic
                     }
                 }
             }
+
             return new Matrix( b );
         }
+
         public override Algebraic Value( Variable item, Algebraic x )
         {
-            var b = CreateRectangularArray<Algebraic>( a.Length, a[ 0 ].Length );
+            var b = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
 
             for ( int i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    b[ i ][ k ] = a[ i ][ k ].Value( item, x );
+                    b[i][k] = a[i][k].Value( item, x );
                 }
             }
 
@@ -559,9 +556,9 @@ namespace Tiny.Science.Symbolic
 
             foreach ( var t in a )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    int l = StringFmt.Compact( t[ k ].ToString() ).Length;
+                    int l = StringFmt.Compact( t[k].ToString() ).Length;
 
                     if ( l > max )
                     {
@@ -576,9 +573,9 @@ namespace Tiny.Science.Symbolic
             {
                 r += "\n  ";
 
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    var c = StringFmt.Compact( t[ k ].ToString() );
+                    var c = StringFmt.Compact( t[k].ToString() );
 
                     r += c;
 
@@ -598,9 +595,9 @@ namespace Tiny.Science.Symbolic
 
             foreach ( var t in a )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    int l = StringFmt.Compact( t[ k ].ToString() ).Length;
+                    int l = StringFmt.Compact( t[k].ToString() ).Length;
 
                     if ( l > max )
                     {
@@ -616,10 +613,13 @@ namespace Tiny.Science.Symbolic
             for ( int i = 0; i < a.Length; i++ )
             {
                 p.print( "\n  " );
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    string r = StringFmt.Compact( a[ i ][ k ].ToString() );
+                    var r = StringFmt.Compact( a[i][k].ToString() );
+
                     p.print( r );
+
                     for ( int m = 0; m < max - r.Length; m++ )
                     {
                         p.print( " " );
@@ -627,40 +627,49 @@ namespace Tiny.Science.Symbolic
                 }
             }
         }
+
         public override Algebraic Map( LambdaAlgebraic f )
         {
-            var cn = CreateRectangularArray<Algebraic>( a.Length, a[ 0 ].Length );
+            var cn = CreateRectangularArray<Algebraic>( a.Length, a[0].Length );
+
             for ( int i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    cn[ i ][ k ] = f.SymEval( a[ i ][ k ] );
+                    cn[i][k] = f.SymEval( a[i][k] );
                 }
             }
+
             return new Matrix( cn );
         }
+
         public virtual Matrix transpose()
         {
-            var b = CreateRectangularArray<Algebraic>( a[ 0 ].Length, a.Length );
+            var b = CreateRectangularArray<Algebraic>( a[0].Length, a.Length );
+
             for ( int i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    b[ k ][ i ] = a[ i ][ k ];
+                    b[k][i] = a[i][k];
                 }
             }
+
             return new Matrix( b );
         }
+
         public virtual Matrix adjunkt()
         {
-            var b = CreateRectangularArray<Algebraic>( a[ 0 ].Length, a.Length );
+            var b = CreateRectangularArray<Algebraic>( a[0].Length, a.Length );
+
             for ( int i = 0; i < a.Length; i++ )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    b[ k ][ i ] = a[ i ][ k ].Conj();
+                    b[k][i] = a[i][k].Conj();
                 }
             }
+
             return new Matrix( b );
         }
 
@@ -677,15 +686,15 @@ namespace Tiny.Science.Symbolic
 
             if ( a.Length == 1 )
             {
-                b[ 0 ][ 0 ] = Symbol.ONE / _det;
+                b[0][0] = Symbol.ONE / _det;
             }
             else
             {
                 for ( int i = 0; i < a.Length; i++ )
                 {
-                    for ( int k = 0; k < a[ 0 ].Length; k++ )
+                    for ( int k = 0; k < a[0].Length; k++ )
                     {
-                        b[ i ][ k ] = unterdet( k, i ) / _det;
+                        b[i][k] = unterdet( k, i ) / _det;
                     }
                 }
             }
@@ -696,53 +705,68 @@ namespace Tiny.Science.Symbolic
         public virtual Algebraic min()
         {
             var r = new Algebraic[ Cols() ];
+
             for ( int i = 0; i < Cols(); i++ )
             {
-                var min = a[ 0 ][ i ];
+                var min = a[0][i];
+
                 if ( !( min is Symbol ) )
                 {
                     throw new SymbolicException( "MIN requires constant arguments." );
                 }
+
                 for ( int k = 1; k < Rows(); k++ )
                 {
-                    var x = a[ k ][ i ];
+                    var x = a[k][i];
+
                     if ( !( x is Symbol ) )
                     {
                         throw new SymbolicException( "MIN requires constant arguments." );
                     }
+
                     if ( ( ( Symbol ) x ).Smaller( ( Symbol ) min ) )
                     {
                         min = x;
                     }
                 }
-                r[ i ] = min;
+
+                r[i] = min;
             }
+
             return ( new Vector( r ) ).Reduce();
         }
+
         public virtual Algebraic max()
         {
             var r = new Algebraic[ Cols() ];
+
             for ( int i = 0; i < Cols(); i++ )
             {
-                var max = a[ 0 ][ i ];
+                var max = a[0][i];
+
                 if ( !( max is Symbol ) )
                 {
                     throw new SymbolicException( "MAX requires constant arguments." );
                 }
+
                 for ( int k = 1; k < Rows(); k++ )
                 {
-                    var x = a[ k ][ i ];
+                    var x = a[k][i];
+
                     if ( !( x is Symbol ) )
                     {
                         throw new SymbolicException( "MAX requires constant arguments." );
                     }
+
                     if ( ( ( Symbol ) max ).Smaller( ( Symbol ) x ) )
                     {
                         max = x;
                     }
                 }
-                r[ i ] = max;
+
+                r[i] = max;
             }
+
             return ( new Vector( r ) ).Reduce();
         }
 
@@ -754,7 +778,7 @@ namespace Tiny.Science.Symbolic
             {
                 for ( int k = 0; k < Cols(); k++ )
                 {
-                    if ( !Symbol.ZERO.Equals( a[ i ][ k ] ) )
+                    if ( !Symbol.ZERO.Equals( a[i][k] ) )
                     {
                         v.Add( new Complex( i * Rows() + k + 1.0 ) );
                     }
@@ -775,7 +799,7 @@ namespace Tiny.Science.Symbolic
         {
             var p = new Polynomial( x );
 
-            var m = ( Matrix ) ( this - Eye( a.Length, a[ 0 ].Length ) * p );
+            var m = ( Matrix ) ( this - Eye( a.Length, a[0].Length ) * p );
 
             p = ( Polynomial ) m.det2();
             p = ( Polynomial ) p.Rat();
@@ -788,7 +812,7 @@ namespace Tiny.Science.Symbolic
             Variable x = SimpleVariable.top;
 
             var p = CharPoly( x );
-            var ps = p.square_free_dec( p._v );
+            var ps = p.square_free_dec( p.Var );
 
             Vector r;
 
@@ -796,16 +820,16 @@ namespace Tiny.Science.Symbolic
 
             for ( int i = 0; i < ps.Length; i++ )
             {
-                if ( !( ps[ i ] is Polynomial ) )
+                if ( !( ps[i] is Polynomial ) )
                     continue;
 
-                r = ( ( Polynomial ) ps[ i ] ).Monic().roots();
+                r = ( ( Polynomial ) ps[i] ).Monic().roots();
 
                 for ( int k = 0; r != null && k < r.Length(); k++ )
                 {
                     for ( int j = 0; j <= i; j++ )
                     {
-                        v.Add( r[ k ] );
+                        v.Add( r[k] );
                     }
                 }
             }
@@ -815,7 +839,7 @@ namespace Tiny.Science.Symbolic
 
         public virtual Algebraic det()
         {
-            if ( a.Length != a[ 0 ].Length )
+            if ( a.Length != a[0].Length )
             {
                 return Symbol.ZERO;
             }
@@ -823,16 +847,16 @@ namespace Tiny.Science.Symbolic
             switch ( a.Length )
             {
                 case 1:
-                    return a[ 0 ][ 0 ];
+                    return a[0][0];
 
                 case 2:
 
-                    return a[ 0 ][ 0 ] * a[ 1 ][ 1 ] - a[ 0 ][ 1 ] * a[ 1 ][ 0 ];
+                    return a[0][0] * a[1][1] - a[0][1] * a[1][0];
 
                 case 3:
 
-                    return a[ 0 ][ 0 ] * a[ 1 ][ 1 ] * a[ 2 ][ 2 ] + a[ 0 ][ 1 ] * a[ 1 ][ 2 ] * a[ 2 ][ 0 ] + a[ 0 ][ 2 ] * a[ 1 ][ 0 ] * a[ 2 ][ 1 ]
-                        - ( a[ 0 ][ 2 ] * a[ 1 ][ 1 ] * a[ 2 ][ 0 ] + a[ 0 ][ 0 ] * a[ 1 ][ 2 ] * a[ 2 ][ 1 ] + a[ 0 ][ 1 ] * a[ 1 ][ 0 ] * a[ 2 ][ 2 ] );
+                    return a[0][0] * a[1][1] * a[2][2] + a[0][1] * a[1][2] * a[2][0] + a[0][2] * a[1][0] * a[2][1]
+                        - ( a[0][2] * a[1][1] * a[2][0] + a[0][0] * a[1][2] * a[2][1] + a[0][1] * a[1][0] * a[2][2] );
 
                 default:
                     var c = copy();
@@ -852,7 +876,7 @@ namespace Tiny.Science.Symbolic
 
         internal virtual Algebraic det2()
         {
-            if ( a.Length != a[ 0 ].Length )
+            if ( a.Length != a[0].Length )
             {
                 return Symbol.ZERO;
             }
@@ -862,36 +886,41 @@ namespace Tiny.Science.Symbolic
                 return det();
             }
 
-            var d = a.Select( ( x, n ) => unterdet( n, 0 ) * x[ 0 ] ).Aggregate( ( s, x ) => s + x );
+            var d = a.Select( ( x, n ) => unterdet( n, 0 ) * x[0] ).Aggregate( ( s, x ) => s + x );
 
             return d;
         }
 
         public virtual Algebraic unterdet( int i, int k )
         {
-            if ( i < 0 || i > a.Length || k < 0 || k > a[ 0 ].Length )
+            if ( i < 0 || i > a.Length || k < 0 || k > a[0].Length )
             {
                 throw new SymbolicException( "Operation not possible." );
             }
-            var b = CreateRectangularArray<Algebraic>( a.Length - 1, a[ 0 ].Length - 1 );
+
+            var b = CreateRectangularArray<Algebraic>( a.Length - 1, a[0].Length - 1 );
+
             int i1, i2, k1, k2;
+
             for ( i1 = 0, i2 = 0; i1 < a.Length - 1; i1++, i2++ )
             {
                 if ( i2 == i )
                 {
                     i2++;
                 }
-                for ( k1 = 0, k2 = 0; k1 < a[ 0 ].Length - 1; k1++, k2++ )
+
+                for ( k1 = 0, k2 = 0; k1 < a[0].Length - 1; k1++, k2++ )
                 {
                     if ( k2 == k )
                     {
                         k2++;
                     }
+
                     b[ i1 ][ k1 ] = this.a[ i2 ][ k2 ];
                 }
             }
 
-            Algebraic u = ( new Matrix( b ) ).det2();
+            var u = ( new Matrix( b ) ).det2();
 
             if ( ( i + k ) % 2 == 0 )
             {
@@ -907,20 +936,26 @@ namespace Tiny.Science.Symbolic
             {
                 return k;
             }
+
             int _pivot = k;
-            var maxa = a[ k ][ k ].Norm();
+
+            var maxa = a[k][k].Norm();
+
             for ( int i = k + 1; i < Rows(); i++ )
             {
-                var dummy = a[ i ][ k ].Norm();
+                var dummy = a[i][k].Norm();
+
                 if ( dummy > maxa )
                 {
                     maxa = dummy;
                     _pivot = i;
                 }
             }
+
             if ( maxa == 0.0 )
             {
                 int kn = pivot( k + 1 );
+
                 if ( kn == k + 1 )
                 {
                     return k;
@@ -930,15 +965,18 @@ namespace Tiny.Science.Symbolic
                     return kn;
                 }
             }
+
             if ( _pivot != k )
             {
                 for ( int j = k; j < Cols(); j++ )
                 {
-                    var dummy = a[ _pivot ][ j ];
-                    a[ _pivot ][ j ] = a[ k ][ j ];
-                    a[ k ][ j ] = dummy;
+                    var dummy = a[ _pivot ][j];
+
+                    a[ _pivot ][j] = a[k][j];
+                    a[k][j] = dummy;
                 }
             }
+
             return _pivot;
         }
 
@@ -951,7 +989,7 @@ namespace Tiny.Science.Symbolic
 
             for ( int i = 0; i < Cols(); i++ )
             {
-                if ( a[ k ][ i ] != Symbol.ZERO )
+                if ( a[k][i] != Symbol.ZERO )
                 {
                     return false;
                 }
@@ -966,9 +1004,9 @@ namespace Tiny.Science.Symbolic
 
             foreach ( var t in a )
             {
-                for ( int k = 0; k < a[ 0 ].Length; k++ )
+                for ( int k = 0; k < a[0].Length; k++ )
                 {
-                    exakt = exakt && t[ k ].IsNumber();
+                    exakt = exakt && t[k].IsNumber();
                 }
             }
 
@@ -986,12 +1024,12 @@ namespace Tiny.Science.Symbolic
 
             for ( int k = 0; k < i; k++ )
             {
-                b[ k ] = a[ k ];
+                b[k] = a[k];
             }
 
             for ( int k = i + 1; k < Rows(); k++ )
             {
-                b[ k - 1 ] = a[ k ];
+                b[ k - 1 ] = a[k];
             }
 
             a = b;
@@ -1010,12 +1048,12 @@ namespace Tiny.Science.Symbolic
             {
                 for ( int k = 0; k < i; k++ )
                 {
-                    b[ j ][ k ] = a[ j ][ k ];
+                    b[j][k] = a[j][k];
                 }
 
                 for ( int k = i + 1; k < Cols(); k++ )
                 {
-                    b[ j ][ k - 1 ] = a[ j ][ k ];
+                    b[j][ k - 1 ] = a[j][k];
                 }
             }
 
@@ -1026,7 +1064,7 @@ namespace Tiny.Science.Symbolic
         {
             var t = Eye( n, n );
 
-            t.a[ i ][ k ] = m;
+            t.a[i][k] = m;
 
             return t;
         }
@@ -1035,8 +1073,8 @@ namespace Tiny.Science.Symbolic
         {
             var t = Eye( n, n );
 
-            t.a[ k ][ k ] = t.a[ i ][ i ] = Symbol.ZERO;
-            t.a[ i ][ k ] = t.a[ k ][ i ] = Symbol.ONE;
+            t.a[k][k] = t.a[i][i] = Symbol.ZERO;
+            t.a[i][k] = t.a[k][i] = Symbol.ONE;
 
             return t;
         }
@@ -1066,7 +1104,7 @@ namespace Tiny.Science.Symbolic
 
                 for ( p = k; p < n; p++ )
                 {
-                    if ( !a[ k ][ p ].Equals( Symbol.ZERO ) )
+                    if ( !a[k][ p ].Equals( Symbol.ZERO ) )
                     {
                         break;
                     }
@@ -1076,15 +1114,15 @@ namespace Tiny.Science.Symbolic
                 {
                     for ( int i = k + 1; i < m; i++ )
                     {
-                        if ( !a[ i ][ p ].Equals( Symbol.ZERO ) )
+                        if ( !a[i][ p ].Equals( Symbol.ZERO ) )
                         {
-                            var f = a[ i ][ p ] / a[ k ][ p ];
+                            var f = a[i][ p ] / a[k][ p ];
 
-                            a[ i ][ p ] = Symbol.ZERO;
+                            a[i][ p ] = Symbol.ZERO;
 
                             for ( int j = p + 1; j < n; j++ )
                             {
-                                a[ i ][ j ] = a[ i ][ j ] - f * a[ k ][ j ];
+                                a[i][j] = a[i][j] - f * a[k][j];
                             }
 
                             C = ( Matrix ) ( C * elementary( m, i, k, f ) );
@@ -1097,8 +1135,7 @@ namespace Tiny.Science.Symbolic
 
             for ( int i = nm - 1; i >= 0; i-- )
             {
-                if ( !row_zero( i ) )
-                    continue;
+                if ( !row_zero( i ) ) continue;
 
                 remove_row( i );
 
@@ -1128,7 +1165,7 @@ namespace Tiny.Science.Symbolic
             {
                 for ( int k = 0; k < nc; k++ )
                 {
-                    b[ i ][ k ] = a[ i ][ k ];
+                    b[i][k] = a[i][k];
                 }
             }
 

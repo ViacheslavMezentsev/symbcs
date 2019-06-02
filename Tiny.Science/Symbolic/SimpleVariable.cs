@@ -12,7 +12,7 @@
 
         public override Algebraic Derive( Variable x )
         {
-            if ( Equals( x ) )
+            if ( Equals(x) )
             {
                 return Symbol.ONE;
             }

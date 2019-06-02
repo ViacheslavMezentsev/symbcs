@@ -189,7 +189,7 @@
             }
             else if ( y < 94906265.62 )
             {
-                ans = Math.log( y + Math.sqrt( y * y + 1.0 ) );
+                ans = Math.log( y + Math.Sqrt( y * y + 1.0 ) );
             }
             else
             {
@@ -210,7 +210,7 @@
             }
             else if ( x < 94906265.62 )
             {
-                ans = Math.log( x + Math.sqrt( x * x - 1.0 ) );
+                ans = Math.log( x + Math.Sqrt( x * x - 1.0 ) );
             }
             else
             {

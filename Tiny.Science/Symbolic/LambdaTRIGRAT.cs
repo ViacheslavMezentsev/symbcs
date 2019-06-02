@@ -76,11 +76,11 @@ namespace Tiny.Science.Symbolic
     {
         internal override Algebraic SymEval( Algebraic x )
         {
-            if ( x is Polynomial && ( ( Polynomial ) x )._v is FunctionVariable )
+            if ( x is Polynomial && ( ( Polynomial ) x ).Var is FunctionVariable )
             {
                 var xp = ( Polynomial ) x;
 
-                var f = ( FunctionVariable ) xp._v;
+                var f = ( FunctionVariable ) xp.Var;
 
                 var la = Session.Proc.Store.GetValue( f.Name );
 
@@ -128,7 +128,7 @@ namespace Tiny.Science.Symbolic
 
             var xp = ( Polynomial ) x;
 
-            var item = xp._v;
+            var item = xp.Var;
 
             if ( item is Root )
             {
@@ -173,7 +173,7 @@ namespace Tiny.Science.Symbolic
             {
                 var arg = ( Polynomial ) ( ( FunctionVariable ) item ).Var;
 
-                var sqfr = arg.square_free_dec( arg._v );
+                var sqfr = arg.square_free_dec( arg.Var );
 
                 var issquare = !( sqfr.Length > 0 && !sqfr[ 0 ].Equals( arg[ arg.Coeffs.Length - 1 ] ) );
 
@@ -285,11 +285,11 @@ namespace Tiny.Science.Symbolic
             {
                 var xr = ( Rational ) x;
 
-                if ( xr.den._v is FunctionVariable
-                    && ( ( FunctionVariable ) xr.den._v ).Name.Equals( "exp" )
-                    && ( ( FunctionVariable ) xr.den._v ).Var.IsComplex() )
+                if ( xr.den.Var is FunctionVariable
+                    && ( ( FunctionVariable ) xr.den.Var ).Name.Equals( "exp" )
+                    && ( ( FunctionVariable ) xr.den.Var ).Var.IsComplex() )
                 {
-                    var fv = ( FunctionVariable ) xr.den._v;
+                    var fv = ( FunctionVariable ) xr.den.Var;
 
                     int maxdeg = Math.max( Poly.Degree( xr.nom, fv ), Poly.Degree( xr.den, fv ) );
 
@@ -299,24 +299,24 @@ namespace Tiny.Science.Symbolic
                     }
                     else
                     {
-                        var fv2 = new FunctionVariable( "exp", ( ( FunctionVariable ) xr.den._v ).Var / Symbol.TWO, ( ( FunctionVariable ) xr.den._v ).AlgLambda );
+                        var fv2 = new FunctionVariable( "exp", ( ( FunctionVariable ) xr.den.Var ).Var / Symbol.TWO, ( ( FunctionVariable ) xr.den.Var ).Body );
 
                         Algebraic ex = new Polynomial( fv2, new Algebraic[] { Symbol.ZERO, Symbol.ZERO, Symbol.ONE } );
 
-                        var xr1 = xr.nom.Value( xr.den._v, ex ) / xr.den.Value( xr.den._v, ex );
+                        var xr1 = xr.nom.Value( xr.den.Var, ex ) / xr.den.Value( xr.den.Var, ex );
 
                         return SymEval( xr1 );
                     }
                 }
             }
 
-            if ( x is Polynomial && ( ( Polynomial ) x )._v is FunctionVariable )
+            if ( x is Polynomial && ( ( Polynomial ) x ).Var is FunctionVariable )
             {
                 var xp = ( Polynomial ) x;
 
                 Algebraic xf = null;
 
-                var fvar = ( FunctionVariable ) xp._v;
+                var fvar = ( FunctionVariable ) xp.Var;
 
                 if ( fvar.Name.Equals( "exp" ) )
                 {
@@ -349,15 +349,15 @@ namespace Tiny.Science.Symbolic
 
                     if ( arg is Polynomial
                         && ( ( Polynomial ) arg ).Degree() == 1
-                        && ( ( Polynomial ) arg )._v is FunctionVariable
+                        && ( ( Polynomial ) arg ).Var is FunctionVariable
                         && ( ( Polynomial ) arg )[ 0 ].Equals( Symbol.ZERO )
-                        && ( ( FunctionVariable ) ( ( Polynomial ) arg )._v ).Name.Equals( "sqrt" ) )
+                        && ( ( FunctionVariable ) ( ( Polynomial ) arg ).Var ).Name.Equals( "sqrt" ) )
                     {
                         sum = FunctionVariable.Create( "log", ( ( Polynomial ) arg )[ 1 ] );
 
                         factor = new Complex( 0.5 );
 
-                        arg = ( ( FunctionVariable ) ( ( Polynomial ) arg )._v ).Var;
+                        arg = ( ( FunctionVariable ) ( ( Polynomial ) arg ).Var ).Var;
 
                         xf = FunctionVariable.Create( "log", arg );
                     }

@@ -7,12 +7,12 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             switch ( narg )
             {
                 case 0:
-                    throw new SymbolicException( "Lambda functions expect argument." );
+                    throw new SymbolicException( "Lambda function expects argument." );
 
                 case 1:
                     var arg = GetAlgebraic( stack );
@@ -35,9 +35,9 @@ namespace Tiny.Science.Symbolic
 
                     var args = new Algebraic[ narg ];
 
-                    for ( int i = narg - 1; i >= 0; i-- )
+                    for ( var n = narg - 1; n >= 0; n-- )
                     {
-                        args[ i ] = GetAlgebraic( stack );
+                        args[n] = GetAlgebraic( stack );
                     }
 
                     stack.Push( SymEval( args ) );

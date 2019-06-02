@@ -35,8 +35,8 @@ namespace Tiny.Science.Symbolic
                 throw new ParseException( "linsolve requires 2 arguments." );
             }
 
-            var expr = ( Vector ) GetVektor( stack ).Rat();
-            var vars = GetVektor( stack );
+            var expr = ( Vector ) GetVector( stack ).Rat();
+            var vars = GetVector( stack );
 
             elim( expr, vars, 0 );
             subst( expr, vars, expr.Length() - 1 );
@@ -59,8 +59,8 @@ namespace Tiny.Science.Symbolic
                 Algebraic c1 = null, c0;
                 for ( int k = 0; k < vars.Length(); k++ )
                 {
-                    var va = ( ( Polynomial ) vars[ k ] )._v;
-                    c1 = p.coefficient( va, 1 );
+                    var va = ( ( Polynomial ) vars[ k ] ).Var;
+                    c1 = p.GetCoeff( va, 1 );
                     if ( !c1.Equals( Symbol.ZERO ) )
                     {
                         v = va;
@@ -71,7 +71,7 @@ namespace Tiny.Science.Symbolic
                 {
                     expr[ n ] = p / c1;
 
-                    var val = -p.coefficient( v, 0 ) / c1;
+                    var val = -p.GetCoeff( v, 0 ) / c1;
 
                     for ( int k = 0; k < n; k++ )
                     {
@@ -99,14 +99,14 @@ namespace Tiny.Science.Symbolic
             Polynomial pm = null;
             for ( int i = 0; i < vars.Length(); i++ )
             {
-                var v = ( ( Polynomial ) vars[ i ] )._v;
+                var v = ( ( Polynomial ) vars[ i ] ).Var;
                 for ( int k = n; k < expr.Length(); k++ )
                 {
                     var pa = expr[ k ];
                     if ( pa is Polynomial )
                     {
                         var p = ( Polynomial ) pa;
-                        var c = p.coefficient( v, 1 );
+                        var c = p.GetCoeff( v, 1 );
                         double nm = c.Norm();
                         if ( nm > maxc )
                         {
@@ -134,7 +134,7 @@ namespace Tiny.Science.Symbolic
 
                 if ( p is Polynomial )
                 {
-                    var fc = ( ( Polynomial ) p ).coefficient( vp, 1 );
+                    var fc = ( ( Polynomial ) p ).GetCoeff( vp, 1 );
 
                     if ( !fc.Equals( Symbol.ZERO ) )
                     {

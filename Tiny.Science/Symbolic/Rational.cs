@@ -23,7 +23,7 @@
 
         public override bool IsRat( Variable v )
         {
-            return nom.IsRat( v ) && den.IsRat( v );
+            return nom.IsRat(v) && den.IsRat(v);
         }
 
         public override Algebraic Reduce()
@@ -41,14 +41,15 @@
 
             pq = Exponential.reduce_exp( pq );
 
-            if ( !nom.Equals( pq[ 0 ] ) || !den.Equals( pq[ 1 ] ) )
+            if ( !nom.Equals( pq[0] ) || !den.Equals( pq[1] ) )
             {
-                return ( pq[ 0 ] / pq[ 1 ] ).Reduce();
+                return ( pq[0] / pq[1] ).Reduce();
             }
 
             if ( IsNumber() )
             {
                 var gcd = Poly.poly_gcd( den, nom );
+
                 if ( !gcd.Equals( Symbol.ONE ) )
                 {
                     var n = Poly.polydiv( nom, gcd );
@@ -68,6 +69,7 @@
                     }
                 }
             }
+
             return this;
         }
 
@@ -116,7 +118,7 @@
 
         public override string ToString()
         {
-            return string.Format( "({0}/{1})", nom, den );
+            return $"({nom}/{den})";
         }
 
         public override bool Equals( object x )
@@ -133,19 +135,19 @@
 
         public override Algebraic Derive( Variable v )
         {
-            return ( ( nom.Derive( v ) * den - den.Derive( v ) * nom ) / ( den * den ) ).Reduce();
+            return ( ( nom.Derive(v) * den - den.Derive(v) * nom ) / ( den * den ) ).Reduce();
         }
 
         public override Algebraic Integrate( Variable v )
         {
-            if ( !den.Depends( v ) )
+            if ( !den.Depends(v) )
             {
-                return nom.Integrate( v ) / den;
+                return nom.Integrate(v) / den;
             }
 
-            var quot = den.Derive( v ) / nom;
+            var quot = den.Derive(v) / nom;
 
-            if ( quot.Derive( v ).Equals( Symbol.ZERO ) )
+            if ( quot.Derive(v).Equals( Symbol.ZERO ) )
             {
                 return FunctionVariable.Create( "log", den ) / quot;
             }
@@ -154,25 +156,25 @@
 
             Poly.polydiv( q, v );
 
-            if ( q[ 0 ] != Symbol.ZERO && nom.IsRat( v ) && den.IsRat( v ) )
+            if ( q[0] != Symbol.ZERO && nom.IsRat(v) && den.IsRat(v) )
             {
-                return q[ 0 ].Integrate( v ) + ( q[ 1 ] / den ).Integrate( v );
+                return q[0].Integrate(v) + ( q[1] / den ).Integrate(v);
             }
 
-            if ( IsRat( v ) )
+            if ( IsRat(v) )
             {
                 Algebraic r = Symbol.ZERO;
 
                 var h = Horowitz( nom, den, v );
 
-                if ( h[ 0 ] is Rational )
+                if ( h[0] is Rational )
                 {
-                    r = r + h[ 0 ];
+                    r = r + h[0];
                 }
 
-                if ( h[ 1 ] is Rational )
+                if ( h[1] is Rational )
                 {
-                    r = r + new TrigInverseExpand().SymEval( ( ( Rational ) h[ 1 ] ).intrat( v ) );
+                    r = r + new TrigInverseExpand().SymEval( ( ( Rational ) h[1] ).intrat(v) );
                 }
 
                 return r;
@@ -193,7 +195,7 @@
 
         public override bool Depends( Variable v )
         {
-            return nom.Depends( v ) || den.Depends( v );
+            return nom.Depends(v) || den.Depends(v);
         }
 
         public override Algebraic Value( Variable v, Algebraic x )
@@ -217,22 +219,22 @@
 
             q = ( Polynomial ) q.Rat();
 
-            var d = Poly.poly_gcd( q, q.Derive( x ) );
+            var d = Poly.poly_gcd( q, q.Derive(x) );
             var b = Poly.polydiv( q, d );
 
-            int m = b is Polynomial ? ( ( Polynomial ) b ).Degree() : 0;
-            int n = d is Polynomial ? ( ( Polynomial ) d ).Degree() : 0;
+            var m = b is Polynomial ? ( ( Polynomial ) b ).Degree() : 0;
+            var n = d is Polynomial ? ( ( Polynomial ) d ).Degree() : 0;
 
-            var a = new SimpleVariable[ m ];
-            var X = new Polynomial( x );
+            var a = new SimpleVariable[m];
+            var X = new Polynomial(x);
 
             Algebraic A = Symbol.ZERO;
 
-            for ( int i = a.Length - 1; i >= 0; i-- )
+            for ( var i = a.Length - 1; i >= 0; i-- )
             {
-                a[ i ] = new SimpleVariable( "a" + i );
+                a[i] = new SimpleVariable( "a" + i );
 
-                A = A + new Polynomial( a[ i ] );
+                A = A + new Polynomial( a[i] );
 
                 if ( i > 0 )
                 {
@@ -240,15 +242,15 @@
                 }
             }
 
-            var c = new SimpleVariable[ n ];
+            var c = new SimpleVariable[n];
 
             Algebraic C = Symbol.ZERO;
 
-            for ( int i = c.Length - 1; i >= 0; i-- )
+            for ( var i = c.Length - 1; i >= 0; i-- )
             {
-                c[ i ] = new SimpleVariable( "c" + i );
+                c[i] = new SimpleVariable( "c" + i );
 
-                C = C + new Polynomial( c[ i ] );
+                C = C + new Polynomial( c[i] );
 
                 if ( i > 0 )
                 {
@@ -256,9 +258,9 @@
                 }
             }
 
-            var r = Poly.polydiv( C * b * d.Derive( x ), d );
+            var r = Poly.polydiv( C * b * d.Derive(x), d );
 
-            r = b * C.Derive( x ) - r + d * A;
+            r = b * C.Derive(x) - r + d * A;
 
             var aik = Matrix.CreateRectangularArray<Algebraic>( m + n, m + n );
 
@@ -266,20 +268,20 @@
 
             var co = new Algebraic[ m + n ];
 
-            for ( int i = 0; i < m + n; i++ )
+            for ( var i = 0; i < m + n; i++ )
             {
-                co[ i ] = Poly.Coefficient( p, x, i );
+                co[i] = Poly.Coefficient( p, x, i );
 
                 cf = Poly.Coefficient( r, x, i );
 
-                for ( int k = 0; k < m; k++ )
+                for ( var k = 0; k < m; k++ )
                 {
-                    aik[ i ][ k ] = cf.Derive( a[ k ] );
+                    aik[i][k] = cf.Derive( a[k] );
                 }
 
-                for ( int k = 0; k < n; k++ )
+                for ( var k = 0; k < n; k++ )
                 {
-                    aik[ i ][ k + m ] = cf.Derive( c[ k ] );
+                    aik[i][ k + m ] = cf.Derive( c[k] );
                 }
             }
 
@@ -287,9 +289,9 @@
 
             A = Symbol.ZERO;
 
-            for ( int i = m - 1; i >= 0; i-- )
+            for ( var i = m - 1; i >= 0; i-- )
             {
-                A = A + s[ i ];
+                A = A + s[i];
 
                 if ( i > 0 )
                 {
@@ -299,7 +301,7 @@
 
             C = Symbol.ZERO;
 
-            for ( int i = n - 1; i >= 0; i-- )
+            for ( var i = n - 1; i >= 0; i-- )
             {
                 C = C + s[ i + m ];
 
@@ -314,11 +316,11 @@
 
         internal virtual Algebraic intrat( Variable x )
         {
-            var de = den.Derive( x );
+            var de = den.Derive(x);
 
             if ( de is Symbol )
             {
-                return MakeLog( nom / de, x, -den[ 0 ] / de );
+                return MakeLog( nom / de, x, -den[0] / de );
             }
 
             var r = nom / de;
@@ -327,11 +329,11 @@
 
             Algebraic rs = Symbol.ZERO;
 
-            for ( int i = 0; i < xi.Length(); i++ )
+            for ( var i = 0; i < xi.Length(); i++ )
             {
-                var c = r.Value( x, xi[ i ] );
+                var c = r.Value( x, xi[i] );
 
-                rs = rs + MakeLog( c, x, xi[ i ] );
+                rs = rs + MakeLog( c, x, xi[i] );
             }
 
             return rs;
@@ -339,7 +341,7 @@
 
         internal virtual Algebraic MakeLog( Algebraic c, Variable x, Algebraic a )
         {
-            var arg = new Polynomial( x ) - a;
+            var arg = new Polynomial(x) - a;
 
             return FunctionVariable.Create( "log", arg ) * c;
         }

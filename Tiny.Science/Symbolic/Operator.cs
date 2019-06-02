@@ -9,45 +9,43 @@ namespace Tiny.Science.Symbolic
 {
     public class Operator
     {
-        public int precedence;
         internal int associativity;
         internal int type;
-
         internal string mnemonic;
+        internal Lambda func;
+
+        public int precedence;
         public string symbol;
-
-        internal Lambda func = null;
-
-        public static Operator[] OPS = new Operator[ 0 ];
+        public static Operator[] OPS = new Operator[0];
 
         public virtual bool unary()
         {
-            return ( type & Flags.UNARY ) != 0;
+            return ( type & Flags.Unary ) != 0;
         }
 
         public virtual bool binary()
         {
-            return ( type & Flags.BINARY ) != 0;
+            return ( type & Flags.Binary ) != 0;
         }
 
         public virtual bool ternary()
         {
-            return ( type & Flags.TERNARY ) != 0;
+            return ( type & Flags.Ternary ) != 0;
         }
 
         public virtual bool lvalue()
         {
-            return ( type & Flags.LVALUE ) != 0;
+            return ( type & Flags.LValue ) != 0;
         }
 
         public virtual bool list()
         {
-            return ( type & Flags.LIST ) != 0;
+            return ( type & Flags.List ) != 0;
         }
 
         public virtual bool left_right()
         {
-            return associativity == Flags.LEFT_RIGHT;
+            return associativity == Flags.LeftRight;
         }
 
         public Operator( string mnemonic, string symbol, int precedence, int associativity, int type )
@@ -74,7 +72,6 @@ namespace Tiny.Science.Symbolic
             var text = ( string ) text_in;
 
             return OPS.FirstOrDefault( op => text.StartsWith( op.symbol ) );
-
         }
 
         public static Operator get( object text_in, int pos )
@@ -92,21 +89,21 @@ namespace Tiny.Science.Symbolic
                 {
                     switch ( pos )
                     {
-                        case Flags.START:
+                        case Flags.Start:
                             if ( op.unary() && op.left_right() )
                             {
                                 return op;
                             }
                             continue;
 
-                        case Flags.END:
+                        case Flags.End:
                             if ( op.unary() && !op.left_right() )
                             {
                                 return op;
                             }
                             continue;
 
-                        case Flags.MID:
+                        case Flags.Mid:
                             if ( op.binary() || op.ternary() )
                             {
                                 return op;
@@ -145,7 +142,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack st )
         {
-            int narg = GetNarg( st );
+            var narg = GetNarg( st );
 
             var m = new Matrix( GetAlgebraic( st ) );
 
@@ -159,9 +156,12 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack st )
         {
-            int narg = GetNarg( st );
+            var narg = GetNarg( st );
+
             var m = new Matrix( GetAlgebraic( st ) );
+
             st.Push( m.transpose().Reduce() );
+
             return 0;
         }
     }
@@ -170,7 +170,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack st )
         {
-            int narg = GetNarg( st );
+            var narg = GetNarg( st );
             var arg = GetAlgebraic( st );
 
             if ( arg is Symbol )
@@ -280,6 +280,7 @@ namespace Tiny.Science.Symbolic
 
                 return Symbol.ZERO;
             }
+
             if ( y is Symbol && ( ( Symbol ) y ).IsInteger() )
             {
                 return x.Pow( ( ( Symbol ) y ).ToInt() );
@@ -367,7 +368,7 @@ namespace Tiny.Science.Symbolic
 
         internal override Symbol PreEval( Symbol x )
         {
-            return ( Symbol ) SymEval( x );
+            return ( Symbol ) SymEval(x);
         }
     }
 
@@ -385,7 +386,7 @@ namespace Tiny.Science.Symbolic
 
         internal override Symbol PreEval( Symbol x )
         {
-            return ( Symbol ) SymEval( x );
+            return ( Symbol ) SymEval(x);
         }
     }
 
@@ -401,7 +402,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 2 )
             {
@@ -425,7 +426,7 @@ namespace Tiny.Science.Symbolic
             }
             else
             {
-                stack.Push( ( new Matrix( a ) * new Matrix( b ) ).Reduce() );
+                stack.Push( ( new Matrix(a) * new Matrix(b) ).Reduce() );
             }
 
             return 0;
@@ -436,7 +437,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var a = GetAlgebraic( stack );
             var b = GetAlgebraic( stack );
@@ -453,7 +454,7 @@ namespace Tiny.Science.Symbolic
                 throw new SymbolicException( "Wrong arguments to function Matrixpow." );
             }
 
-            stack.Push( ( new Matrix( b ) ).mpow( ( ( Symbol ) a ).ToInt() ) );
+            stack.Push( ( new Matrix(b) ).mpow( ( ( Symbol ) a ).ToInt() ) );
 
             return 0;
         }
@@ -471,7 +472,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 2 )
             {
@@ -492,7 +493,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 2 )
             {

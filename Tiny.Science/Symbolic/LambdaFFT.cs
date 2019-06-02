@@ -9,7 +9,7 @@ namespace Tiny.Science.Symbolic
         public override int Eval( Stack st )
         {
             int narg = GetNarg( st );
-            var x = GetVektor( st );
+            var x = GetVector( st );
 
             x = ( Vector ) ( new ExpandConstants() ).SymEval( x );
 
@@ -175,7 +175,7 @@ namespace Tiny.Science.Symbolic
         public override int Eval( Stack st )
         {
             int narg = GetNarg( st );
-            var x = GetVektor( st );
+            var x = GetVector( st );
 
             x = ( Vector ) ( new ExpandConstants() ).SymEval( x );
 

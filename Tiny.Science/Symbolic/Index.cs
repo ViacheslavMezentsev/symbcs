@@ -75,8 +75,8 @@ namespace Tiny.Science.Symbolic
             }
             else if ( indx is Vector && ( ( Vector ) indx ).Length() == 2 )
             {
-                var r = ( ( Vector ) indx )[ 0 ];
-                var c = ( ( Vector ) indx )[ 1 ];
+                var r = ( ( Vector ) indx )[0];
+                var c = ( ( Vector ) indx )[1];
 
                 if ( r is Symbol && ( ( Symbol ) r ).IsInteger() && c is Symbol && ( ( Symbol ) c ).IsInteger() )
                 {
@@ -102,7 +102,7 @@ namespace Tiny.Science.Symbolic
             {
                 rdx = stack.Pop();
 
-                row = ":".Equals( rdx ) ? series( 1, x.Rows() ) : setseries( ( Algebraic ) rdx );
+                row = rdx.Equals( ":" ) ? series( 1, x.Rows() ) : setseries( ( Algebraic ) rdx );
 
                 cdx = stack.Pop();
             }
@@ -110,12 +110,12 @@ namespace Tiny.Science.Symbolic
             {
                 cdx = stack.Pop();
 
-                row = new int[ 1 ];
+                row = new int[1];
 
-                row[ 0 ] = 1;
+                row[0] = 1;
             }
 
-            col = ":".Equals( cdx ) ? series( 1, x.Cols() ) : setseries( ( Algebraic ) cdx );
+            col = cdx.Equals( ":" ) ? series( 1, x.Cols() ) : setseries( ( Algebraic ) cdx );
 
             return new Index( row, col );
         }
@@ -126,9 +126,9 @@ namespace Tiny.Science.Symbolic
 
             if ( c is Symbol && ( ( Symbol ) c ).IsInteger() )
             {
-                s = new int[ 1 ];
+                s = new int[1];
 
-                s[ 0 ] = ( ( Symbol ) c ).ToInt();
+                s[0] = ( ( Symbol ) c ).ToInt();
             }
             else if ( c is Vector )
             {
@@ -136,11 +136,11 @@ namespace Tiny.Science.Symbolic
 
                 for ( int i = 0; i < s.Length; i++ )
                 {
-                    var a = ( ( Vector ) c )[ i ];
+                    var a = ( ( Vector ) c )[i];
 
                     if ( a is Symbol && ( ( Symbol ) a ).IsInteger() )
                     {
-                        s[ i ] = ( ( Symbol ) a ).ToInt();
+                        s[i] = ( ( Symbol ) a ).ToInt();
                     }
                     else
                     {
@@ -162,7 +162,7 @@ namespace Tiny.Science.Symbolic
 
             for ( int i = 0; i < c.Length; i++ )
             {
-                c[ i ] = a + i;
+                c[i] = a + i;
             }
 
             return c;
@@ -176,27 +176,27 @@ namespace Tiny.Science.Symbolic
         {
             int narg = GetNarg( st );
 
-            Algebraic x = GetAlgebraic( st );
+            var x = GetAlgebraic( st );
 
-            Algebraic index_in = CreateVector.crv( st );
+            var index_in = CreateVector.Create( st );
 
             if ( index_in.IsConstant() )
             {
-                Matrix mx = new Matrix( ( Algebraic ) x );
+                var mx = new Matrix( ( Algebraic ) x );
 
-                Index idx = Index.createIndex( index_in, mx );
+                var idx = Index.createIndex( index_in, mx );
 
                 mx = mx.Extract( idx );
                 x = mx.Reduce();
             }
             else
             {
-                MatRef mr = new MatRef( ( Algebraic ) x );
+                var mr = new MatRef( ( Algebraic ) x );
 
                 x = new Polynomial( new FunctionVariable( "MR(" + x + ")", index_in, mr ) );
             }
 
-            st.Push( x );
+            st.Push(x);
 
             return 0;
         }
@@ -207,11 +207,14 @@ namespace Tiny.Science.Symbolic
         public override int Eval( Stack st )
         {
             int narg = GetNarg( st );
-            Algebraic x = GetAlgebraic( st );
-            Matrix mx = new Matrix( ( Algebraic ) x );
-            Index idx = Index.createIndex( st, mx );
+            var x = GetAlgebraic( st );
+
+            var mx = new Matrix( ( Algebraic ) x );
+            var idx = Index.createIndex( st, mx );
+
             mx = mx.Extract( idx );
             st.Push( mx.Reduce() );
+
             return 0;
         }
     }
@@ -222,15 +225,15 @@ namespace Tiny.Science.Symbolic
 
         public MatRef( Algebraic x )
         {
-            this.mx = new Matrix( x );
+            mx = new Matrix(x);
         }
 
         internal override Algebraic SymEval( Algebraic x )
         {
             if ( x.IsConstant() )
             {
-                Index idx = Index.createIndex( x, mx );
-                Matrix m = mx.Extract( idx );
+                var idx = Index.createIndex( x, mx );
+                var m = mx.Extract( idx );
 
                 return m.Reduce();
             }

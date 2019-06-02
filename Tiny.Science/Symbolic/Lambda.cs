@@ -13,9 +13,9 @@ namespace Tiny.Science.Symbolic
 {
     public static class Flags
     {
-        public const int UNARY = 1, BINARY = 2, TERNARY = 4, LVALUE = 8, LIST = 16;
-        public const int LEFT_RIGHT = 0, RIGHT_LEFT = 1;
-        public const int START = 0, MID = 1, END = 2;
+        public const int Unary = 1, Binary = 2, Ternary = 4, LValue = 8, List = 16;
+        public const int LeftRight = 0, RightLeft = 1;
+        public const int Start = 0, Mid = 1, End = 2;
         public const int KEYWORD = 1, REF_PAREN = 2, REF_BRACK = 4;
     }
 
@@ -23,7 +23,7 @@ namespace Tiny.Science.Symbolic
     {
         internal static int length = 1;
         internal static bool DEBUG = false;
-        internal string diffrule = null, intrule = null, trigrule = null;
+        internal string diffrule, intrule, trigrule = null;
 
         internal static void Debug( string text )
         {
@@ -50,7 +50,7 @@ namespace Tiny.Science.Symbolic
 
             if ( !( arg is Algebraic ) )
             {
-                throw new SymbolicException( "Expected algebraic, got: " + arg );
+                throw new SymbolicException( $"Expected algebraic, got: {arg}" );
             }
 
             return ( Algebraic ) arg;
@@ -67,7 +67,7 @@ namespace Tiny.Science.Symbolic
 
             if ( !( arg is Symbol ) )
             {
-                throw new ParseException( "Expected number, got " + arg );
+                throw new ParseException( $"Expected number, got {arg}" );
             }
 
             return ( Symbol ) arg;
@@ -79,7 +79,7 @@ namespace Tiny.Science.Symbolic
 
             if ( !( arg is int? ) )
             {
-                throw new SymbolicException( "Expected Integer, got: " + arg );
+                throw new SymbolicException( $"Expected Integer, got: {arg}" );
             }
 
             return ( int ) ( int? ) arg;
@@ -89,9 +89,9 @@ namespace Tiny.Science.Symbolic
         {
             var arg = stack.Pop();
 
-            if ( !( arg is string ) || ( ( string ) arg ).Length == 0 || ( ( string ) arg )[ 0 ] == ' ' )
+            if ( !( arg is string ) || ( ( string ) arg ).Length == 0 || ( ( string ) arg )[0] == ' ' )
             {
-                throw new SymbolicException( "Expected Symbol, got: " + arg );
+                throw new SymbolicException( $"Expected Symbol, got: {arg}" );
             }
 
             return ( string ) arg;
@@ -103,19 +103,19 @@ namespace Tiny.Science.Symbolic
 
             if ( !( arg is Polynomial ) )
             {
-                throw new ParseException( "Expected polynomial, got " + arg );
+                throw new ParseException( $"Expected polynomial, got {arg}" );
             }
 
             return ( Polynomial ) arg;
         }
 
-        internal static Vector GetVektor( Stack stack )
+        internal static Vector GetVector( Stack stack )
         {
             var arg = stack.Pop();
 
             if ( !( arg is Vector ) )
             {
-                throw new ParseException( "Expected vector, got " + arg );
+                throw new ParseException( $"Expected vector, got {arg}" );
             }
 
             return ( Vector ) arg;
@@ -125,7 +125,7 @@ namespace Tiny.Science.Symbolic
         {
             var p = GetPolynomial( stack );
 
-            return p._v;
+            return p.Var;
         }
 
         internal static int GetInteger( Stack stack )
@@ -134,7 +134,7 @@ namespace Tiny.Science.Symbolic
 
             if ( !( arg is Symbol ) || !( ( Symbol ) arg ).IsInteger() )
             {
-                throw new ParseException( "Expected integer, got " + arg );
+                throw new ParseException( $"Expected integer, got {arg}" );
             }
 
             return ( ( Symbol ) arg ).ToInt();
@@ -144,7 +144,7 @@ namespace Tiny.Science.Symbolic
         {
             if ( !( arg is Symbol ) || !( ( Symbol ) arg ).IsInteger() )
             {
-                throw new ParseException( "Expected integer, got " + arg );
+                throw new ParseException( $"Expected integer, got {arg}" );
             }
 
             return ( ( Symbol ) arg ).ToInt();
@@ -156,7 +156,7 @@ namespace Tiny.Science.Symbolic
 
             if ( !( arg is List ) )
             {
-                throw new ParseException( "Expected list, got " + arg );
+                throw new ParseException( $"Expected list, got {arg}" );
             }
 
             return ( List ) arg;
@@ -166,7 +166,7 @@ namespace Tiny.Science.Symbolic
         {
             try
             {
-                var pgm = Session.Parser.compile( rule );
+                var list = Session.Parser.compile( rule );
 
                 var save = Session.Proc.Store;
 
@@ -174,26 +174,27 @@ namespace Tiny.Science.Symbolic
                 {
                     Session.Store = new Store();
 
-                    Session.Store.PutValue( "x", new Polynomial( new SimpleVariable( "x" ) ) );
-                    Session.Store.PutValue( "X", new Polynomial( new SimpleVariable( "X" ) ) );
-                    Session.Store.PutValue( "a", new Polynomial( new SimpleVariable( "a" ) ) );
-                    Session.Store.PutValue( "b", new Polynomial( new SimpleVariable( "b" ) ) );
-                    Session.Store.PutValue( "c", new Polynomial( new SimpleVariable( "c" ) ) );
+                    var values = new[] { "x", "X", "a", "b", "c" };
+
+                    foreach ( var value in values )
+                    {
+                        Session.Store.PutValue( value, new Polynomial( new SimpleVariable( value ) ) );
+                    }
                 }
 
                 Session.Proc.Store = Session.Store;
-                Session.Proc.ProcessList( pgm, true );
+                Session.Proc.ProcessList( list, true );
                 Session.Proc.Store = save;
 
-                var y = GetAlgebraic( Session.Proc.Stack );
+                var res = GetAlgebraic( Session.Proc.Stack );
 
-                y = y.Value( new SimpleVariable( "x" ), x );
+                res = res.Value( new SimpleVariable( "x" ), x );
 
-                return y;
+                return res;
             }
             catch ( Exception ex )
             {
-                throw new SymbolicException( string.Format( "Could not evaluate expression {0}: {1}", rule, ex.Message ) );
+                throw new SymbolicException( $"Could not evaluate expression {rule}: {ex.Message}" );
             }
         }
     }
@@ -203,7 +204,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 3 )
             {
@@ -218,48 +219,44 @@ namespace Tiny.Science.Symbolic
                 throw new ParseException( "Wrong function definition." );
             }
 
-            var fname = ( ( string ) prot[ prot.Count - 1 ] ).Substring( 1 );
+            var fname = ( ( string ) prot[ prot.Count - 1 ] ).Substring(1);
 
             var vars_in = prot.Take( 0, prot.Count - 1 );
             var code_in = GetList( stack );
 
-            SimpleVariable[] vars = null;
-
-            if ( vars_in.Count != 0 )
-            {
-                int fnarg = ( int ) ( ( int? ) vars_in[ vars_in.Count - 1 ] );
-
-                vars = new SimpleVariable[ fnarg ];
-
-                for ( int i = 0; i < vars.Length; i++ )
-                {
-                    vars[ i ] = new SimpleVariable( ( string ) vars_in[ vars.Length - i - 1 ] );
-                }
-            }
-
-            var result = new SimpleVariable( ( ( string ) ret[ 0 ] ).Substring( 1 ) );
-
-            Lambda func = null;
-
+            var vars = new SimpleVariable[0];
             var env = new Store();
             var ups = new Stack();
 
-            foreach ( var t in vars )
+            if ( vars_in.Count != 0 )
             {
-                env.PutValue( t.name, new Polynomial( t ) );
+                var fnarg = ( int ) ( ( int? ) vars_in[ vars_in.Count - 1 ] );
+
+                vars = new SimpleVariable[ fnarg ];
+
+                for ( var n = 0; n < vars.Length; n++ )
+                {
+                    vars[n] = new SimpleVariable( ( string ) vars_in[ vars.Length - n - 1 ] );
+
+                    env.PutValue( vars[n].name, new Polynomial( vars[n] ) );
+                }
             }
+
+            var result = new SimpleVariable( ( ( string ) ret[0] ).Substring(1) );
 
             object y = null;
 
             if ( vars.Length == 1 )
             {
-                int res = UserProgram.process_block( code_in, ups, env, true );
+                var res = UserProgram.process_block( code_in, ups, env, true );
 
                 if ( res != Processor.ERROR )
                 {
                     y = env.GetValue( result.name );
                 }
             }
+
+            Lambda func;
 
             if ( y is Algebraic )
             {
@@ -279,12 +276,12 @@ namespace Tiny.Science.Symbolic
 
     internal class UserProgram : Lambda
     {
-        internal string fname;
-        internal List body;
-        internal SimpleVariable[] args;
-        internal SimpleVariable result;
-        internal Store env = null;
-        internal Stack ups = null;
+        private string _fname;
+        private List _body;
+        private SimpleVariable[] _args;
+        private SimpleVariable _result;
+        private Store _env;
+        private Stack _ups;
 
         public UserProgram()
         {
@@ -292,57 +289,57 @@ namespace Tiny.Science.Symbolic
 
         public UserProgram( string fname, SimpleVariable[] args, List body, SimpleVariable result, Store env, Stack ups )
         {
-            this.fname = fname;
-            this.args = args;
-            this.body = body;
-            this.result = result;
-            this.env = env;
-            this.ups = ups;
+            _fname = fname;
+            _args = args;
+            _body = body;
+            _result = result;
+            _env = env;
+            _ups = ups;
         }
 
-        public override int Eval( Stack st )
+        public override int Eval( Stack stack )
         {
-            int narg = GetNarg( st );
+            var narg = GetNarg( stack );
 
-            if ( args.Length != narg )
+            if ( _args.Length != narg )
             {
-                throw new SymbolicException( fname + " requires " + args.Length + " Arguments." );
+                throw new SymbolicException( $"{_fname} requires {_args.Length} Arguments." );
             }
 
-            foreach ( var t in args )
+            foreach ( var arg in _args )
             {
-                var a = st.Pop();
+                var value = stack.Pop();
 
-                env.PutValue( t.name, a );
+                _env.PutValue( arg.name, value );
             }
 
-            int ret = process_block( body, ups, env, result != null );
+            var ret = process_block( _body, _ups, _env, _result != null );
 
             if ( ret != Processor.ERROR )
             {
-                var y = result != null ? env.GetValue( result.name ) : ups.Pop();
+                var y = _result != null ? _env.GetValue( _result.name ) : _ups.Pop();
 
-                if ( y is Algebraic && result != null )
+                if ( y is Algebraic && _result != null )
                 {
-                    ( ( Algebraic ) y ).Name = result.name;
+                    ( ( Algebraic ) y ).Name = _result.name;
                 }
 
                 if ( y != null )
                 {
-                    st.Push( y );
+                    stack.Push( y );
                 }
             }
 
             return 0;
         }
 
-        internal static int process_block( List code, Stack st, Store env, bool clear_stack )
+        internal static int process_block( List code, Stack stack, Store env, bool clear_stack )
         {
             var save = Session.Proc.Store;
             var old_stack = Session.Proc.Stack;
 
             Session.Proc.Store = env;
-            Session.Proc.Stack = st;
+            Session.Proc.Stack = stack;
 
             int ret;
 
@@ -350,7 +347,7 @@ namespace Tiny.Science.Symbolic
             {
                 ret = Session.Proc.ProcessList( code, true );
             }
-            catch ( Exception )
+            catch
             {
                 ret = Processor.ERROR;
             }
@@ -360,10 +357,7 @@ namespace Tiny.Science.Symbolic
 
             if ( clear_stack )
             {
-                while ( st.Count > 0 )
-                {
-                    st.Pop();
-                }
+                stack.Clear();
             }
 
             return ret;
@@ -371,83 +365,86 @@ namespace Tiny.Science.Symbolic
     }
 
     internal class UserFunction : LambdaAlgebraic
-    {
-        internal string fname;
-        internal Algebraic body;
-        internal SimpleVariable[] sv;
-        internal SimpleVariable result;
-        internal Store env = null;
+    {        
+        private SimpleVariable _result;
+        private Store _store;
+
+        public string Name { get; }
+        public Algebraic Body { get; }
+        public SimpleVariable[] Args { get; }
 
         public UserFunction()
         {
+            Args = new SimpleVariable[0];
         }
 
-        public UserFunction( string fname, SimpleVariable[] sv, Algebraic body, SimpleVariable result, Store env )
+        public UserFunction( string name, SimpleVariable[] args, Algebraic body, SimpleVariable result, Store store )
         {
-            this.fname = fname;
-            this.sv = sv;
-            this.body = body;
-            this.result = result;
-            this.env = env;
+            _result = result;
+            _store = store;
+
+            Name = name;
+            Args = args;
+            Body = body;
         }
 
         internal override Symbol PreEval( Symbol x )
         {
-            var y = SymEval( x );
+            var y = SymEval(x);
 
             if ( y is Symbol )
             {
                 return ( Symbol ) y;
             }
 
-            y = ( new ExpandConstants() ).SymEval( y );
+            y = ( new ExpandConstants() ).SymEval(y);
 
             if ( y is Symbol )
             {
                 return ( Symbol ) y;
             }
 
-            throw new SymbolicException( "Can not evaluate Function " + fname + " to number, got " + y + " for " + x );
+            throw new SymbolicException( $"Can not evaluate Function {Name} to number, got {y} for {x}" );
         }
 
         internal override Algebraic SymEval( Algebraic x )
         {
-            if ( sv.Length != 1 )
+            if ( Args.Length != 1 )
             {
                 throw new SymbolicException( "Wrong number of arguments." );
             }
 
-            var y = body.Value( sv[ 0 ], x );
+            var y = Body.Value( Args[0], x );
 
             return y;
         }
 
         internal override Algebraic SymEval( Algebraic x, Algebraic y )
         {
-            if ( sv.Length != 2 )
+            if ( Args.Length != 2 )
             {
                 throw new SymbolicException( "Wrong number of arguments." );
             }
 
-            var z = body.Value( sv[ 0 ], y );
+            var z = Body.Value( Args[0], y );
 
-            z = z.Value( sv[ 1 ], x );
+            z = z.Value( Args[1], x );
 
             return z;
         }
 
         internal override Algebraic SymEval( Algebraic[] x )
         {
-            if ( sv.Length != x.Length )
+            if ( Args.Length != x.Length )
             {
                 throw new SymbolicException( "Wrong number of arguments." );
             }
 
-            var y = body;
+            var y = Body;
 
-            for ( int i = 0; i < x.Length; i++ )
+            for ( var n = 0; n < x.Length; n++ )
             {
-                y = y.Value( sv[ x.Length - i - 1 ], x[ i ] );
+                y = y.Value( Args[ x.Length - n - 1 ], x[n] );
             }
 
             return y;
@@ -455,45 +452,45 @@ namespace Tiny.Science.Symbolic
 
         internal virtual Algebraic fv( Vector x )
         {
-            var env = Session.Proc.Store;
+            var save = Session.Proc.Store;
 
-            Session.Proc.Store = env;
+            Session.Proc.Store = _store;
 
-            var r = body;
+            var r = Body;
 
-            Session.Proc.Store = env;
-
-            for ( int i = 0; i < sv.Length; i++ )
+            for ( var n = 0; n < Args.Length; n++ )
             {
-                r = r.Value( sv[ i ], x[ i ] );
+                r = r.Value( Args[n], x[n] );
             }
+
+            Session.Proc.Store = save;
 
             return r;
         }
 
         public override Algebraic Integrate( Algebraic arg, Variable x )
         {
-            if ( !( body is Algebraic ) )
+            if ( !( Body is Algebraic ) )
             {
-                throw new SymbolicException( "Can not integrate function " + fname );
+                throw new SymbolicException( $"Can not integrate function {Name}" );
             }
 
-            if ( !( arg.Depends( x ) ) )
+            if ( !( arg.Depends(x) ) )
             {
                 throw new SymbolicException( "Expression in function does not depend on Variable." );
             }
 
-            if ( sv.Length == 1 )
+            if ( Args.Length == 1 )
             {
-                return body.Value( sv[ 0 ], arg ).Integrate( x );
+                return Body.Value( Args[0], arg ).Integrate(x);
             }
 
-            if ( arg is Vector && ( ( Vector ) arg ).Length() == sv.Length )
+            if ( arg is Vector && ( ( Vector ) arg ).Length() == Args.Length )
             {
-                return fv( ( Vector ) arg ).Integrate( x );
+                return fv( ( Vector ) arg ).Integrate(x);
             }
 
-            throw new SymbolicException( "Wrong argument to function " + fname );
+            throw new SymbolicException( $"Wrong argument to function {Name}" );
         }
     }
 
@@ -503,7 +500,7 @@ namespace Tiny.Science.Symbolic
 
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var exp = GetAlgebraic( stack );
 
@@ -563,31 +560,30 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var a = new Algebraic[ narg ][];
 
-            for ( int i = 0; i < narg; i++ )
+            for ( var n = 0; n < narg; n++ )
             {
                 var b = GetAlgebraic( stack );
 
                 if ( b is Vector )
                 {
-                    a[ i ] = ( ( Vector ) b ).ToArray();
+                    a[n] = ( ( Vector ) b ).ToArray();
                 }
                 else
                 {
-                    a[ i ] = new Algebraic[ 1 ];
-                    a[ i ][ 0 ] = b;
+                    a[n] = new[] {b};
                 }
 
-                if ( a[ i ].GetLength( 0 ) != a[ 0 ].GetLength( 0 ) )
+                if ( a[n].GetLength(0) != a[0].GetLength(0) )
                 {
                     throw new SymbolicException( "Matrix rows must have equal length." );
                 }
             }
 
-            stack.Push( ( new Matrix( a ) ).Reduce() );
+            stack.Push( ( new Matrix(a) ).Reduce() );
 
             return 0;
         }
@@ -597,19 +593,20 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int nargs = GetNarg( stack );
+            var nargs = GetNarg( stack );
 
             if ( nargs == 1 )
             {
-                var arg = stack.Pop();
+                var arg = stack.Pop().ToString();
 
-                if ( "$short".Equals( arg.ToString() ) )
+                if ( arg.Equals( "$short" ) )
                 {
                     Session.Fmt = new NumFmtVar( 10, 5 );
 
                     return 0;
                 }
-                else if ( "$long".Equals( arg.ToString() ) )
+
+                if ( arg.Equals( "$long" ) )
                 {
                     Session.Fmt = new NumFmtLong();
 
@@ -618,10 +615,11 @@ namespace Tiny.Science.Symbolic
 
                 throw new SymbolicException( "Usage: format long | short | base significant" );
             }
-            else if ( nargs == 2 )
+
+            if ( nargs == 2 )
             {
-                int bas = GetInteger( stack );
-                int nsign = GetInteger( stack );
+                var bas = GetInteger( stack );
+                var nsign = GetInteger( stack );
 
                 if ( bas < 2 || nsign < 1 )
                 {
@@ -641,7 +639,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int nargs = GetNarg( stack );
+            var nargs = GetNarg( stack );
 
             while ( nargs-- > 0 )
             {
@@ -649,9 +647,9 @@ namespace Tiny.Science.Symbolic
 
                 if ( arg is string )
                 {
-                    var s = ( ( string ) arg ).Substring( 1 );
+                    var value = ( ( string ) arg ).Substring(1);
 
-                    Session.Proc.Store.PutValue( s, new Polynomial( new SimpleVariable( s ) ) );
+                    Session.Proc.Store.PutValue( value, new Polynomial( new SimpleVariable( value ) ) );
                 }
             }
 
@@ -663,7 +661,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int nargs = GetNarg( stack );
+            var nargs = GetNarg( stack );
 
             while ( nargs-- > 0 )
             {
@@ -671,9 +669,9 @@ namespace Tiny.Science.Symbolic
 
                 if ( arg is string )
                 {
-                    var s = ( ( string ) arg ).Substring( 1 );
+                    var s = ( ( string ) arg ).Substring(1);
 
-                    Session.Proc.Store.Remove( s );
+                    Session.Proc.Store.Remove(s);
                 }
             }
 
@@ -685,14 +683,14 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int nr = GetNarg( stack );
+            var narg = GetNarg( stack );
             int nrow = 1, ncol = 1;
 
-            var m = new Matrix( nr, 1 );
+            var m = new Matrix( narg, 1 );
 
-            while ( nr-- > 0 )
+            while ( narg-- > 0 )
             {
-                var row = crv( stack );
+                var row = Create( stack );
 
                 var idx = new Index( nrow, ncol, row );
 
@@ -706,26 +704,26 @@ namespace Tiny.Science.Symbolic
             return 0;
         }
 
-        internal static Algebraic crv( Stack stack )
+        internal static Algebraic Create( Stack stack )
         {
-            int nc = GetNarg( stack );
+            var narg = GetNarg( stack );
 
-            if ( nc == 1 )
+            if ( narg == 1 )
             {
                 return GetAlgebraic( stack );
             }
 
-            var m = new Matrix( 1, nc );
+            var m = new Matrix( 1, narg );
 
             int nrow = 1, ncol = 1;
 
-            while ( nc-- > 0 )
+            while ( narg-- > 0 )
             {
                 var x = GetAlgebraic( stack );
 
                 var idx = new Index( nrow, ncol, x );
 
-                m.Insert( new Matrix( x ), idx );
+                m.Insert( new Matrix(x), idx );
 
                 ncol = idx.col_max + 1;
             }
@@ -738,7 +736,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             Algebraic a, b, c = GetAlgebraic( stack );
 
@@ -765,13 +763,13 @@ namespace Tiny.Science.Symbolic
                 throw new ParseException( "CreateVector requires numbers." );
             }
 
-            int n = ( int ) ( ( ( Symbol ) na ).ToComplex().Re + 1.0 );
+            var n = ( int ) ( ( ( Symbol ) na ).ToComplex().Re + 1.0 );
 
-            var coord = new Algebraic[ n ];
+            var coord = new Algebraic[n];
 
-            for ( int i = 0; i < n; i++ )
+            for ( var i = 0; i < n; i++ )
             {
-                coord[ i ] = a + b * new Complex( i );
+                coord[i] = a + b * new Complex(i);
             }
 
             stack.Push( new Vector( coord ) );
@@ -784,15 +782,15 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg < 1 )
             {
                 throw new SymbolicException( "Usage: EYE( nrow, ncol )." );
             }
 
-            int nrow = GetInteger( stack );
-            int ncol = nrow;
+            var nrow = GetInteger( stack );
+            var ncol = nrow;
 
             if ( narg > 1 )
             {
@@ -809,15 +807,15 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg < 1 )
             {
                 throw new SymbolicException( "Usage: ZEROS( nrow, ncol )." );
             }
 
-            int nrow = GetInteger( stack );
-            int ncol = nrow;
+            var nrow = GetInteger( stack );
+            var ncol = nrow;
 
             if ( narg > 1 )
             {
@@ -834,15 +832,15 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg < 1 )
             {
                 throw new SymbolicException( "Usage: ONES( nrow, ncol )." );
             }
 
-            int nrow = GetInteger( stack );
-            int ncol = nrow;
+            var nrow = GetInteger( stack );
+            var ncol = nrow;
 
             if ( narg > 1 )
             {
@@ -859,41 +857,42 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg < 1 )
             {
                 throw new SymbolicException( "Usage: RAND( nrow, ncol )." );
             }
 
-            int nrow = GetInteger( stack );
-            int ncol = nrow;
+            var nrow = GetInteger( stack );
+            var ncol = nrow;
 
             if ( narg > 1 )
             {
                 ncol = GetInteger( stack );
             }
 
-            var a = Matrix.CreateRectangularArray<Algebraic>( nrow, ncol );
+            var m = Matrix.CreateRectangularArray<Algebraic>( nrow, ncol );
 
-            for ( int i = 0; i < nrow; i++ )
+            for ( var n = 0; n < nrow; n++ )
             {
-                for ( int k = 0; k < ncol; k++ )
+                for ( var k = 0; k < ncol; k++ )
                 {
-                    a[ i ][ k ] = new Complex( Math.random() );
+                    m[n][k] = new Complex( Math.random() );
                 }
             }
 
-            stack.Push( new Matrix( a ).Reduce() );
+            stack.Push( new Matrix(m).Reduce() );
 
             return 0;
         }
     }
+
     internal class LambdaDIAG : Lambda
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg < 1 )
             {
@@ -902,7 +901,7 @@ namespace Tiny.Science.Symbolic
 
             var x = GetAlgebraic( stack ).Reduce();
 
-            int k = 0;
+            var k = 0;
 
             if ( narg > 1 )
             {
@@ -916,56 +915,56 @@ namespace Tiny.Science.Symbolic
 
             if ( x is Vector )
             {
-                var xv = ( Vector ) x;
+                var v = ( Vector ) x;
 
                 if ( k >= 0 )
                 {
-                    var m = new Matrix( xv.Length() + k, xv.Length() + k );
+                    var m = new Matrix( v.Length() + k, v.Length() + k );
 
-                    for ( int i = 0; i < xv.Length(); i++ )
+                    for ( var n = 0; n < v.Length(); n++ )
                     {
-                        m[ i, i + k ] = xv[ i ];
+                        m[ n, n + k ] = v[n];
                     }
 
-                    stack.Push( m );
+                    stack.Push(m);
                 }
                 else
                 {
-                    var m = new Matrix( xv.Length() - k, xv.Length() - k );
+                    var m = new Matrix( v.Length() - k, v.Length() - k );
 
-                    for ( int i = 0; i < xv.Length(); i++ )
+                    for ( var n = 0; n < v.Length(); n++ )
                     {
-                        m[ i - k, i ] = xv[ i ];
+                        m[ n - k, n ] = v[n];
                     }
 
-                    stack.Push( m );
+                    stack.Push(m);
                 }
             }
             else if ( x is Matrix )
             {
-                var xm = ( Matrix ) x;
+                var m = ( Matrix ) x;
 
-                if ( k >= 0 && k < xm.Cols() )
+                if ( k >= 0 && k < m.Cols() )
                 {
-                    var a = new Algebraic[ xm.Cols() - k ];
+                    var a = new Algebraic[ m.Cols() - k ];
 
-                    for ( int i = 0; i < a.Length; i++ )
+                    for ( var n = 0; n < a.Length; n++ )
                     {
-                        a[ i ] = xm[ i, i + k ];
+                        a[n] = m[ n, n + k ];
                     }
 
-                    stack.Push( new Vector( a ) );
+                    stack.Push( new Vector(a) );
                 }
-                else if ( k < 0 && ( -k ) < xm.Rows() )
+                else if ( k < 0 && ( -k ) < m.Rows() )
                 {
-                    var a = new Algebraic[ xm.Rows() + k ];
+                    var a = new Algebraic[ m.Rows() + k ];
 
-                    for ( int i = 0; i < a.Length; i++ )
+                    for ( var n = 0; n < a.Length; n++ )
                     {
-                        a[ i ] = xm[ i - k, i ];
+                        a[n] = m[ n - k, n ];
                     }
 
-                    stack.Push( new Vector( a ) );
+                    stack.Push( new Vector(a) );
                 }
                 else
                 {
@@ -985,35 +984,35 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg < 2 )
             {
                 throw new ParseException( "GCD requires at least 2 arguments." );
             }
 
-            var _gcd = GetAlgebraic( stack );
+            var a = GetAlgebraic( stack );
 
-            for ( int i = 1; i < narg; i++ )
+            for ( var n = 1; n < narg; n++ )
             {
-                _gcd = gcd( _gcd, GetAlgebraic( stack ) );
+                a = gcd( a, GetAlgebraic( stack ) );
             }
 
-            stack.Push( _gcd );
+            stack.Push(a);
 
             return 0;
         }
 
-        internal virtual Algebraic gcd( Algebraic x, Algebraic y )
+        private Algebraic gcd( Algebraic x, Algebraic y )
         {
             if ( !x.IsNumber() )
             {
-                x = ( new LambdaRAT() ).SymEval( x );
+                x = ( new LambdaRAT() ).SymEval(x);
             }
 
             if ( !y.IsNumber() )
             {
-                y = ( new LambdaRAT() ).SymEval( y );
+                y = ( new LambdaRAT() ).SymEval(y);
             }
 
             if ( x is Symbol && y is Symbol )
@@ -1051,9 +1050,9 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
-            object x = stack.Pop();
+            var x = stack.Pop();
 
             if ( x is List )
             {
@@ -1067,7 +1066,7 @@ namespace Tiny.Science.Symbolic
                 x = ( new SqrtExpand() ).SymEval( ( Algebraic ) x );
             }
 
-            stack.Push( x );
+            stack.Push(x);
 
             return 0;
         }
@@ -1077,7 +1076,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             stack.Push( GetAlgebraic( stack ).RealPart() );
 
@@ -1089,7 +1088,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             stack.Push( GetAlgebraic( stack ).ImagPart() );
 
@@ -1101,9 +1100,13 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
-            stack.Push( GetAlgebraic( stack ).Conj() );
+            var arg = GetAlgebraic( stack );
+            
+            var res = arg.Conj();
+
+            stack.Push( res );
 
             return 0;
         }
@@ -1113,11 +1116,11 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var x = GetAlgebraic( stack );
 
-            object atan2 = Session.Proc.Store.GetValue( "atan2" );
+            var atan2 = Session.Proc.Store.GetValue( "atan2" );
 
             if ( !( atan2 is LambdaAlgebraic ) )
             {
@@ -1134,7 +1137,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var y = GetAlgebraic( stack ).Rat();
 
@@ -1160,7 +1163,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg == 0 )
             {
@@ -1179,11 +1182,11 @@ namespace Tiny.Science.Symbolic
             {
                 if ( f is Polynomial )
                 {
-                    v = ( ( Polynomial ) f )._v;
+                    v = ( ( Polynomial ) f ).Var;
                 }
                 else if ( f is Rational )
                 {
-                    v = ( ( Rational ) f ).den._v;
+                    v = ( ( Rational ) f ).den.Var;
                 }
                 else
                 {
@@ -1191,7 +1194,7 @@ namespace Tiny.Science.Symbolic
                 }
             }
 
-            var df = f.Derive( v );
+            var df = f.Derive(v);
 
             if ( df is Rational && !df.IsNumber() )
             {
@@ -1208,7 +1211,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 3 )
             {
@@ -1219,7 +1222,7 @@ namespace Tiny.Science.Symbolic
             var b = GetPolynomial( stack );
             var c = GetAlgebraic( stack );
 
-            var bx = b._v;
+            var bx = b.Var;
 
             while ( bx is FunctionVariable )
             {
@@ -1227,21 +1230,21 @@ namespace Tiny.Science.Symbolic
 
                 if ( !( arg is Polynomial ) )
                 {
-                    throw new SymbolicException( "Can not solve " + b + " for a variable." );
+                    throw new SymbolicException( $"Can not solve {b} for a variable." );
                 }
 
-                bx = ( ( Polynomial ) arg )._v;
+                bx = ( ( Polynomial ) arg ).Var;
             }
 
             var sol = LambdaSOLVE.solve( a - b, bx );
 
             var res = new Algebraic[ sol.Length() ];
 
-            for ( int i = 0; i < sol.Length(); i++ )
+            for ( var n = 0; n < sol.Length(); n++ )
             {
-                var y = sol[ i ];
+                var y = sol[n];
 
-                res[ i ] = c.Value( bx, y );
+                res[n] = c.Value( bx, y );
             }
 
             stack.Push( ( new Vector( res ) ).Reduce() );
@@ -1254,7 +1257,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 3 )
             {
@@ -1267,7 +1270,7 @@ namespace Tiny.Science.Symbolic
 
             if ( c_in.IsScalar() )
             {
-                stack.Push( a.coefficient( b, GetInteger( c_in ) ) );
+                stack.Push( a.GetCoeff( b, GetInteger( c_in ) ) );
             }
             else if ( c_in is Vector )
             {
@@ -1275,12 +1278,12 @@ namespace Tiny.Science.Symbolic
 
                 var v = new Algebraic[ c.Length() ];
 
-                for ( int i = 0; i < v.Length; i++ )
+                for ( var n = 0; n < v.Length; n++ )
                 {
-                    v[ i ] = a.coefficient( b, GetInteger( c[ i ] ) );
+                    v[n] = a.GetCoeff( b, GetInteger( c[n] ) );
                 }
 
-                stack.Push( new Vector( v ) );
+                stack.Push( new Vector(v) );
             }
             else
             {
@@ -1295,7 +1298,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg == 1 )
             {
@@ -1303,12 +1306,12 @@ namespace Tiny.Science.Symbolic
 
                 if ( x.IsScalar() && !x.IsConstant() )
                 {
-                    throw new SymbolicException( "Unknown variable dimension: " + x );
+                    throw new SymbolicException( $"Unknown variable dimension: {x}" );
                 }
 
-                var m = new Matrix( x );
+                var m = new Matrix(x);
 
-                bool addcols = ( m.Cols() > 1 );
+                var addcols = ( m.Cols() > 1 );
 
                 if ( narg > 1 )
                 {
@@ -1317,27 +1320,28 @@ namespace Tiny.Science.Symbolic
                         addcols = false;
                     }
                 }
+
                 if ( addcols )
                 {
-                    var s = m.col( 1 );
+                    var s = m.col(1);
 
-                    for ( int i = 2; i <= m.Cols(); i++ )
+                    for ( var n = 2; n <= m.Cols(); n++ )
                     {
-                        s = s + m.col( i );
+                        s = s + m.col(n);
                     }
 
-                    stack.Push( s );
+                    stack.Push(s);
                 }
                 else
                 {
-                    var s = m.row( 1 );
+                    var s = m.row(1);
 
-                    for ( int i = 2; i <= m.Rows(); i++ )
+                    for ( var n = 2; n <= m.Rows(); n++ )
                     {
-                        s = s + m.row( i );
+                        s = s + m.row(n);
                     }
 
-                    stack.Push( s );
+                    stack.Push(s);
                 }
 
                 return 0;
@@ -1351,8 +1355,8 @@ namespace Tiny.Science.Symbolic
             var exp = GetAlgebraic( stack );
             var v = GetVariable( stack );
 
-            int lo = GetInteger( stack );
-            int hi = GetInteger( stack );
+            var lo = GetInteger( stack );
+            var hi = GetInteger( stack );
 
             Algebraic sum = Symbol.ZERO;
 
@@ -1371,7 +1375,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 3 )
             {
@@ -1380,13 +1384,13 @@ namespace Tiny.Science.Symbolic
 
             var exp = GetAlgebraic( stack );
             var v = GetVariable( stack );
-            var list = GetVektor( stack );
+            var list = GetVector( stack );
 
             Algebraic sum = Symbol.ZERO;
 
-            for ( int i = 0; i < list.Length(); i++ )
+            for ( var n = 0; n < list.Length(); n++ )
             {
-                sum = sum + exp.Value( v, list[ i ] );
+                sum = sum + exp.Value( v, list[n] );
             }
 
             stack.Push( sum );
@@ -1399,7 +1403,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int size = GetNarg( stack );
+            var size = GetNarg( stack );
 
             if ( size != 3 && size != 2 )
             {
@@ -1436,12 +1440,12 @@ namespace Tiny.Science.Symbolic
                 }
                 else
                 {
-                    a[ 0 ] = Poly.polydiv( p1, p2 );
-                    a[ 1 ] = ( p1 - a[ 0 ] ) * p2;
+                    a[0] = Poly.polydiv( p1, p2 );
+                    a[1] = ( p1 - a[0] ) * p2;
                 }
             }
 
-            stack.Push( new Vector( a ) );
+            stack.Push( new Vector(a) );
 
             return 0;
         }
@@ -1451,7 +1455,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 4 )
             {
@@ -1462,22 +1466,22 @@ namespace Tiny.Science.Symbolic
             var v = GetVariable( stack );
             var pt = GetAlgebraic( stack );
 
-            int n = GetInteger( stack );
+            var pow = GetInteger( stack );
 
             var r = exp.Value( v, pt );
-            var t = ( new Polynomial( v ) ) - pt;
+            var t = ( new Polynomial(v) ) - pt;
 
             double nf = 1.0;
 
-            for ( int i = 1; i <= n; i++ )
+            for ( var n = 1; n <= pow; n++ )
             {
-                exp = exp.Derive( v );
+                exp = exp.Derive(v);
 
-                nf *= i;
-                r = r + ( exp.Value( v, pt ) * t ^ i ) / new Complex( nf );
+                nf *= n;
+                r = r + ( exp.Value( v, pt ) * t ^ n ) / new Complex( nf );
             }
 
-            stack.Push( r );
+            stack.Push(r);
 
             return 0;
         }
@@ -1487,11 +1491,11 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int size = GetNarg( stack );
+            var size = GetNarg( stack );
 
             if ( size < 2 )
             {
-                throw new ParseException( "Usage: SAVE (filename,arg1, arg2,...,argi)" );
+                throw new ParseException( "Usage: SAVE (filename,arg1,arg2,...,argi)" );
             }
 
             var filename = stack.Pop();
@@ -1500,11 +1504,11 @@ namespace Tiny.Science.Symbolic
             {
                 var stream = Session.GetFileOutputStream( ( string ) filename, true );
 
-                for ( var i = 1; i < size; i++ )
+                for ( var n = 1; n < size; n++ )
                 {
                     var name = ( string ) stack.Pop();
 
-                    if ( "ALL".Equals( name ) )
+                    if ( name.Equals( "ALL" ) )
                     {
                         var en = Session.Proc.Store.Keys.GetEnumerator();
 
@@ -1512,17 +1516,13 @@ namespace Tiny.Science.Symbolic
                         {
                             var key = en.Current;
 
-                            if ( "pi".Equals( ( string ) key ) )
-                                continue;
+                            if ( "pi".Equals( ( string ) key ) ) continue;
 
                             var val = Session.Proc.Store.GetValue( ( string ) key );
 
-                            if ( val is Lambda )
-                                continue;
+                            if ( val is Lambda ) continue;
 
-                            var line = string.Format( "{0}:{1};\n", key, val );
-
-                            var bytes = Encoding.UTF8.GetBytes( line );
+                            var bytes = Encoding.UTF8.GetBytes( $"{key}:{val};\n" );
 
                             stream.Write( bytes, 0, bytes.Length );
                         }
@@ -1531,9 +1531,7 @@ namespace Tiny.Science.Symbolic
                     {
                         var val = Session.Proc.Store.GetValue( name );
 
-                        var line = string.Format( "{0}:{1};\n", name, val );
-
-                        var bytes = Encoding.UTF8.GetBytes( line );
+                        var bytes = Encoding.UTF8.GetBytes( $"{name}:{val};\n" );
 
                         stream.Write( bytes, 0, bytes.Length );
                     }
@@ -1541,11 +1539,11 @@ namespace Tiny.Science.Symbolic
 
                 stream.Close();
 
-                Session.Proc?.println( "Wrote variables to " + filename );
+                Session.Proc?.println( $"Wrote variables to {filename}" );
             }
             catch ( Exception ex )
             {
-                throw new SymbolicException( "Could not write to " + filename + " : " + ex.Message );
+                throw new SymbolicException( $"Could not write to {filename} : {ex.Message}" );
             }
 
             return 0;
@@ -1556,7 +1554,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             if ( narg != 1 )
             {
@@ -1567,18 +1565,18 @@ namespace Tiny.Science.Symbolic
 
             if ( !( filename is string ) )
             {
-                throw new SymbolicException( filename + " not a valid filename." );
+                throw new SymbolicException( $"{filename} not a valid filename." );
             }
 
             try
             {
                 ReadFile( ( string ) filename );
 
-                Session.Proc?.println( "Loaded Variables from " + filename );
+                Session.Proc?.println( $"Loaded Variables from {filename}" );
             }
-            catch ( Exception e )
+            catch ( Exception ex )
             {
-                throw new SymbolicException( "Could not read from " + filename + " :" + e.ToString() );
+                throw new SymbolicException( $"Could not read from {filename}: {ex}" );
             }
 
             return 0;
@@ -1591,7 +1589,7 @@ namespace Tiny.Science.Symbolic
 
             var names = assembly.GetManifestResourceNames();
 
-            var resName = names.FirstOrDefault( p => p == "symcs.inc." + fname );
+            var resName = names.FirstOrDefault( p => p == $"symcs.inc.{fname}" );
 
             if ( resName != null )
             {
@@ -1604,8 +1602,7 @@ namespace Tiny.Science.Symbolic
             {
                 var full = Path.GetFullPath( Path.Combine( path, fname ) );
 
-                if ( !File.Exists( full ) )
-                    continue;
+                if ( !File.Exists( full ) ) continue;
 
                 Stream stream = new FileStream( full, FileMode.Open );
 
@@ -1614,7 +1611,7 @@ namespace Tiny.Science.Symbolic
                 return;
             }
 
-            throw new IOException( "Could not find " + fname + "." );
+            throw new IOException( $"Could not find {fname}." );
         }
 
         public static void Read( Stream stream )
@@ -1654,7 +1651,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var arg = GetAlgebraic( stack ).Reduce();
 
@@ -1694,13 +1691,13 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var f = GetAlgebraic( stack );
 
             if ( f is Symbol )
             {
-                stack.Push( f );
+                stack.Push(f);
                 return 0;
             }
 
@@ -1709,13 +1706,15 @@ namespace Tiny.Science.Symbolic
                 throw new ParseException( "Argument to sqfr() must be polynomial." );
             }
 
-            f = ( ( Polynomial ) f ).Rat();
+            var poly = ( Polynomial ) f;
 
-            var fs = ( ( Polynomial ) f ).square_free_dec( ( ( Polynomial ) f )._v );
+            f = poly.Rat();
+
+            var fs = poly.square_free_dec( poly.Var );
 
             if ( fs == null )
             {
-                stack.Push( f );
+                stack.Push(f);
                 return 0;
             }
 
@@ -1729,7 +1728,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
             var x = GetAlgebraic( stack );
 
             if ( x is Vector )
@@ -1743,28 +1742,28 @@ namespace Tiny.Science.Symbolic
             }
 
             var p = ( Polynomial ) ( ( Polynomial ) x ).Rat();
-            var ps = p.square_free_dec( p._v );
+            var ps = p.square_free_dec( p.Var );
 
             Vector r;
             var v = new ArrayList();
 
-            for ( int i = 0; i < ps.Length; i++ )
+            for ( var i = 0; i < ps.Length; i++ )
             {
-                if ( ps[ i ] is Polynomial )
+                if ( ps[i] is Polynomial )
                 {
-                    r = ( ( Polynomial ) ps[ i ] ).Monic().roots();
+                    r = ( ( Polynomial ) ps[i] ).Monic().roots();
 
-                    for ( int k = 0; r != null && k < r.Length(); k++ )
+                    for ( var k = 0; r != null && k < r.Length(); k++ )
                     {
-                        for ( int j = 0; j <= i; j++ )
+                        for ( var j = 0; j <= i; j++ )
                         {
-                            v.Add( r[ k ] );
+                            v.Add( r[k] );
                         }
                     }
                 }
             }
 
-            stack.Push( Vector.Create( v ) );
+            stack.Push( Vector.Create(v) );
 
             return 0;
         }
@@ -1774,7 +1773,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var m = new Matrix( GetAlgebraic( stack ) );
 
@@ -1788,7 +1787,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var m = new Matrix( GetAlgebraic( stack ) );
 
@@ -1802,7 +1801,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var m = new Matrix( GetAlgebraic( stack ) );
 
@@ -1816,7 +1815,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var m = new Matrix( GetAlgebraic( stack ) );
 
@@ -1830,20 +1829,20 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
-            int n = GetInteger( stack );
+            var narg = GetNarg( stack );
+            var n = GetInteger( stack );
 
             var a = Matrix.CreateRectangularArray<Algebraic>( n, n );
 
-            for ( int i = 0; i < n; i++ )
+            for ( var i = 0; i < n; i++ )
             {
-                for ( int k = 0; k < n; k++ )
+                for ( var k = 0; k < n; k++ )
                 {
-                    a[ i ][ k ] = new Number( 1L, ( long ) ( i + k + 1 ) );
+                    a[i][k] = new Number( 1L, i + k + 1 );
                 }
             }
 
-            stack.Push( new Matrix( a ) );
+            stack.Push( new Matrix(a) );
 
             return 0;
         }
@@ -1853,7 +1852,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var m = ( new Matrix( GetAlgebraic( stack ) ) ).copy();
 
@@ -1869,12 +1868,12 @@ namespace Tiny.Science.Symbolic
 
             if ( length >= 2 )
             {
-                stack.Push( B );
-                stack.Push( m );
+                stack.Push(B);
+                stack.Push(m);
 
                 if ( length == 3 )
                 {
-                    stack.Push( P );
+                    stack.Push(P);
                 }
             }
 
@@ -1902,27 +1901,27 @@ namespace Tiny.Science.Symbolic
             }
             catch ( SymbolicException )
             {
-                if ( !( arg.Depends( x ) ) )
+                if ( !( arg.Depends(x) ) )
                 {
                     throw new SymbolicException( "Expression in function does not depend on Variable." );
                 }
 
-                if ( !( arg is Polynomial ) || ( ( Polynomial ) arg ).Degree() != 2 || !( ( Polynomial ) arg ).IsRat( x ) )
+                if ( !( arg is Polynomial ) || ( ( Polynomial ) arg ).Degree() != 2 || !( ( Polynomial ) arg ).IsRat(x) )
                 {
                     throw new SymbolicException( "Can not integrate function " );
                 }
 
-                Algebraic xp = new Polynomial( x );
+                Algebraic xp = new Polynomial(x);
 
                 var X = ( Polynomial ) arg;
                 var y = evalx( intrule2, xp );
 
                 y = y.Value( new SimpleVariable( "X" ), X );
-                y = y.Value( new SimpleVariable( "a" ), X[ 2 ] );
-                y = y.Value( new SimpleVariable( "b" ), X[ 1 ] );
-                y = y.Value( new SimpleVariable( "c" ), X[ 0 ] );
+                y = y.Value( new SimpleVariable( "a" ), X[2] );
+                y = y.Value( new SimpleVariable( "b" ), X[1] );
+                y = y.Value( new SimpleVariable( "c" ), X[0] );
 
-                y = ( new SqrtExpand() ).SymEval( y );
+                y = ( new SqrtExpand() ).SymEval(y);
 
                 return y;
             }
@@ -1936,13 +1935,13 @@ namespace Tiny.Science.Symbolic
             {
                 if ( z.Re < 0.0 )
                 {
-                    return new Complex( 0, Math.sqrt( -z.Re ) );
+                    return new Complex( 0, Math.Sqrt( -z.Re ) );
                 }
 
-                return new Complex( Math.sqrt( z.Re ) );
+                return new Complex( Math.Sqrt( z.Re ) );
             }
 
-            var sr = Math.sqrt( Math.sqrt( z.Re * z.Re + z.Im * z.Im ) );
+            var sr = Math.Sqrt( Math.Sqrt( z.Re * z.Re + z.Im * z.Im ) );
 
             var phi = Math.atan2( z.Im, z.Re ) / 2.0;
 
@@ -1968,12 +1967,12 @@ namespace Tiny.Science.Symbolic
 
             if ( x is Polynomial
                 && ( ( Polynomial ) x ).Degree() == 1
-                && ( ( Polynomial ) x )[ 0 ].Equals( Symbol.ZERO )
-                && ( ( Polynomial ) x )[ 1 ].Equals( Symbol.ONE )
-                && ( ( Polynomial ) x )._v is FunctionVariable
-                && ( ( FunctionVariable ) ( ( Polynomial ) x )._v ).Name.Equals( "exp" ) )
+                && ( ( Polynomial ) x )[0].Equals( Symbol.ZERO )
+                && ( ( Polynomial ) x )[1].Equals( Symbol.ONE )
+                && ( ( Polynomial ) x ).Var is FunctionVariable
+                && ( ( FunctionVariable ) ( ( Polynomial ) x ).Var ).Name.Equals( "exp" ) )
             {
-                return FunctionVariable.Create( "exp", ( ( FunctionVariable ) ( ( Polynomial ) x )._v ).Var / Symbol.TWO );
+                return FunctionVariable.Create( "exp", ( ( FunctionVariable ) ( ( Polynomial ) x ).Var ).Var / Symbol.TWO );
             }
 
             return null;
@@ -1995,8 +1994,8 @@ namespace Tiny.Science.Symbolic
                     return r;
                 }
 
-                var nom = ( ( Number ) x ).real[ 0 ].longValue();
-                var den = ( ( Number ) x ).real[ 1 ].longValue();
+                var nom = ( ( Number ) x ).real[0].longValue();
+                var den = ( ( Number ) x ).real[1].longValue();
 
                 long a0 = introot( nom ), a1 = nom / ( a0 * a0 );
                 long b0 = introot( den ), b1 = den / ( b0 * b0 );
@@ -2127,12 +2126,12 @@ namespace Tiny.Science.Symbolic
 
             var p = ( Polynomial ) x1;
 
-            if ( p._v is SimpleVariable )
+            if ( p.Var is SimpleVariable )
             {
                 return p.Map( this );
             }
 
-            var f = ( FunctionVariable ) p._v;
+            var f = ( FunctionVariable ) p.Var;
 
             var lx = Session.Proc.Store.GetValue( f.Name );
 
@@ -2143,37 +2142,38 @@ namespace Tiny.Science.Symbolic
 
             var la = ( UserFunction ) lx;
 
-            if ( !( la.body is Algebraic ) )
+            if ( !( la.Body is Algebraic ) )
             {
                 return x1;
             }
 
-            var body = la.body;
+            var body = la.Body;
 
             Algebraic x;
 
-            if ( la.sv.Length == 1 )
+            if ( la.Args.Length == 1 )
             {
-                x = body.Value( la.sv[ 0 ], f.Var );
+                x = body.Value( la.Args[0], f.Var );
             }
-            else if ( f.Var is Vector && ( ( Vector ) f.Var ).Length() == la.sv.Length )
+            else if ( f.Var is Vector && ( ( Vector ) f.Var ).Length() == la.Args.Length )
             {
                 x = la.fv( ( Vector ) f.Var );
             }
             else
             {
-                throw new SymbolicException( "Wrong argument to function " + la.fname );
+                throw new SymbolicException( $"Wrong argument to function {la.Name}" );
             }
 
             Algebraic r = Symbol.ZERO;
 
-            for ( int i = p.Coeffs.Length - 1; i > 0; i-- )
+            for ( var n = p.Coeffs.Length - 1; n > 0; n-- )
             {
-                r = ( r + SymEval( p[ i ] ) ) * x;
+                r = ( r + SymEval( p[n] ) ) * x;
             }
+
             if ( p.Coeffs.Length > 0 )
             {
-                r = r + SymEval( p[ 0 ] );
+                r = r + SymEval( p[0] );
             }
 
             return r;
@@ -2184,16 +2184,16 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var val = new object[ narg ];
 
-            for ( int i = 0; i < narg; i++ )
+            for ( var n = 0; n < narg; n++ )
             {
-                val[ i ] = stack.Pop();
+                val[n] = stack.Pop();
             }
 
-            for ( int i = narg - 1; i >= 0; i-- )
+            for ( var n = narg - 1; n >= 0; n-- )
             {
                 var name = GetSymbol( stack );
 
@@ -2204,40 +2204,40 @@ namespace Tiny.Science.Symbolic
 
                 name = name.Substring( 1 );
 
-                bool idxq = stack.Count > 0 && stack.Peek() is int?;
+                var idxq = stack.Count > 0 && stack.Peek() is int?;
 
                 if ( !idxq )
                 {
-                    Session.Proc.Store.PutValue( name, val[ i ] );
+                    Session.Proc.Store.PutValue( name, val[n] );
 
-                    if ( val[ i ] is Algebraic )
+                    if ( val[n] is Algebraic )
                     {
-                        ( ( Algebraic ) val[ i ] ).Name = name;
+                        ( ( Algebraic ) val[n] ).Name = name;
                     }
                 }
                 else
                 {
-                    if ( !( val[ i ] is Algebraic ) )
+                    if ( !( val[n] is Algebraic ) )
                     {
-                        throw new SymbolicException( "No index allowed here: " + val[ i ] );
+                        throw new SymbolicException( "No index allowed here: " + val[n] );
                     }
 
-                    var rhs = new Matrix( ( Algebraic ) val[ i ] );
+                    var rhs = new Matrix( ( Algebraic ) val[n] );
                     var lhs = new Matrix( ( Algebraic ) Session.Proc.Store.GetValue( name ) );
 
                     var idx = Index.createIndex( stack, lhs );
 
                     lhs.Insert( rhs, idx );
 
-                    val[ i ] = lhs.Reduce();
+                    val[n] = lhs.Reduce();
 
-                    Session.Proc.Store.PutValue( name, val[ i ] );
+                    Session.Proc.Store.PutValue( name, val[n] );
                 }
             }
 
-            for ( int i = 0; i < narg; i++ )
+            for ( var n = 0; n < narg; n++ )
             {
-                stack.Push( val[ i ] );
+                stack.Push( val[n] );
             }
 
             return 0;
@@ -2245,7 +2245,7 @@ namespace Tiny.Science.Symbolic
 
         internal static int lambdap( Stack stack, Lambda op )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             var y = stack.Pop();
 
@@ -2265,7 +2265,7 @@ namespace Tiny.Science.Symbolic
 
         internal static int lambdai( Stack st, bool sign, bool pre )
         {
-            int narg = GetNarg( st );
+            var narg = GetNarg( st );
 
             var name = GetSymbol( st );
 
@@ -2278,10 +2278,10 @@ namespace Tiny.Science.Symbolic
 
             if ( !pre )
             {
-                p = Session.Proc.Store.GetValue( name.Substring( 1 ) );
+                p = Session.Proc.Store.GetValue( name.Substring(1) );
             }
 
-            var t = new List { name, name.Substring( 1 ), Symbol.ONE, 2, Operator.get( sign ? "+" : "-" ).Lambda, 1, Operator.get( "=" ).Lambda };
+            var t = new List { name, name.Substring(1), Symbol.ONE, 2, Operator.get( sign ? "+" : "-" ).Lambda, 1, Operator.get( "=" ).Lambda };
 
             Session.Proc.ProcessList( t, true );
 
@@ -2293,7 +2293,7 @@ namespace Tiny.Science.Symbolic
                 }
 
                 st.Pop();
-                st.Push( p );
+                st.Push(p);
             }
 
             return 0;
@@ -2314,7 +2314,7 @@ namespace Tiny.Science.Symbolic
     {
         public override int Eval( Stack stack )
         {
-            int narg = GetNarg( stack );
+            var narg = GetNarg( stack );
 
             while ( narg-- > 0 )
             {
@@ -2325,7 +2325,7 @@ namespace Tiny.Science.Symbolic
                     throw new SymbolicException( "Usage: ADDPATH( dir1, dir2, ... )" );
                 }
 
-                Session.Proc.Store.AddPath( ( ( string ) s ).Substring( 1 ) );
+                Session.Proc.Store.AddPath( ( ( string ) s ).Substring(1) );
             }
 
             return 0;
@@ -2338,7 +2338,7 @@ namespace Tiny.Science.Symbolic
         {
             var s = string.Join( ":", Store.Paths.Cast<string>().ToArray() );
 
-            Session.Proc.println( s );
+            Session.Proc.println(s);
 
             return 0;
         }

@@ -2,11 +2,11 @@
 {
 	internal static string Compact(string s)
 	{
-		while (s.Length > 0 && s[0] == '(' && s[s.Length - 1] == ')')
+		while ( s.Length > 0 && s[0] == '(' && s[ s.Length - 1 ] == ')' )
 		{
-			var r = s.Substring(1, s.Length - 1 - 1);
+			var r = s.Substring( 1, s.Length - 1 - 1 );
 
-			if (!balanced(r))
+			if ( !balanced(r) )
 			{
 				break;
 			}
@@ -21,7 +21,7 @@
 	{
 		int nopen = 0;
 
-		foreach (char t in r)
+		foreach ( char t in r )
 		{
 		    switch (t)
 		    {
@@ -36,6 +36,7 @@
 		            {
 		                return false;
 		            }
+
 		            break;
 		    }
 		}

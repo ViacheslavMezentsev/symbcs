@@ -114,9 +114,8 @@ namespace Tiny.Science.Numeric
             {
                 int i;
 
-                for ( i = magnitude.Length - 1; i >= 0 && magnitude[ i ] == 0; --i )
+                for ( i = magnitude.Length - 1; i >= 0 && magnitude[i] == 0; --i )
                 {
-                    ;
                 }
 
                 if ( i >= 0 )
@@ -138,6 +137,40 @@ namespace Tiny.Science.Numeric
             {
                 setNegative();
             }
+        }
+
+        #endregion
+
+        #region Operators
+
+        public static BigInteger operator +( BigInteger lhs, BigInteger rhs )
+        {
+            return lhs.add( rhs );
+        }
+
+        public static BigInteger operator -( BigInteger lhs, BigInteger rhs )
+        {
+            return lhs.subtract( rhs );
+        }
+
+        public static BigInteger operator -( BigInteger self )
+        {
+            return neg( self );
+        }
+
+        public static BigInteger operator *( BigInteger lhs, BigInteger rhs )
+        {
+            return lhs.multiply( rhs );
+        }
+
+        public static BigInteger operator /( BigInteger lhs, BigInteger rhs )
+        {
+            return lhs.divide( rhs );
+        }
+
+        public static BigInteger operator ^( BigInteger lhs, int rhs )
+        {
+            return lhs.pow( rhs );
         }
 
         #endregion
@@ -442,10 +475,7 @@ namespace Tiny.Science.Numeric
 
         private int Add
         {
-            set
-            {
-                setAdd( this, value );
-            }
+            set => setAdd( this, value );
         }
 
         private void set( long y )

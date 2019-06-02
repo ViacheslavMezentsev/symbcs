@@ -30,7 +30,7 @@ namespace Tiny.Science.Symbolic
                 {
                     throw new ParseException( "Wrong type of arguments to algsys." );
                 }
-                v.Add( ( ( Polynomial ) p )._v );
+                v.Add( ( ( Polynomial ) p ).Var );
             }
             st.Push( solvesys( ( ( Vector ) expr ).ToList(), v ) );
             return 0;

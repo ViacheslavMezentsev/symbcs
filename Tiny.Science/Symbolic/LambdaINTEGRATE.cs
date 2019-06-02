@@ -27,11 +27,11 @@ namespace Tiny.Science.Symbolic
             {
                 if ( f is Polynomial )
                 {
-                    v = ( ( Polynomial ) f )._v;
+                    v = ( ( Polynomial ) f ).Var;
                 }
                 else if ( f is Rational )
                 {
-                    v = ( ( Rational ) f ).den._v;
+                    v = ( ( Rational ) f ).den.Var;
                 }
                 else
                 {
@@ -155,7 +155,7 @@ namespace Tiny.Science.Symbolic
                 {
                     var a = new[] { nom, den };
 
-                    Poly.polydiv( a, den._v );
+                    Poly.polydiv( a, den.Var );
 
                     if ( !a[ 0 ].Depends( x ) )
                     {

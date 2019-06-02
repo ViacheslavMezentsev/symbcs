@@ -61,7 +61,7 @@ namespace Tiny.Science.Symbolic
 
         internal static long kleinsterTeiler( long X, long start )
         {
-            long stop = ( long ) Math.ceil( Math.sqrt( ( double ) X ) );
+            long stop = ( long ) Math.ceil( Math.Sqrt( ( double ) X ) );
 
             if ( start > stop )
             {

@@ -209,9 +209,9 @@ namespace Tiny.Science.Symbolic
         {
             var r = new ArrayList();
 
-            if ( !p._v.Derive( item ).Equals( Symbol.ZERO ) )
+            if ( !p.Var.Derive( item ).Equals( Symbol.ZERO ) )
             {
-                r.Add( p._v );
+                r.Add( p.Var );
             }
 
             foreach ( var t in p.Coeffs )

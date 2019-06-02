@@ -396,7 +396,7 @@ namespace Tiny.Science.Numeric
             return setHI( x, lx );
         }
 
-        public static double sqrt( double x )
+        public static double Sqrt( double x )
         {
             long ix = BitConverter.DoubleToInt64Bits( x );
 
@@ -975,7 +975,7 @@ namespace Tiny.Science.Numeric
             t = w * 0.5;
             p = t * ( pS0 + t * ( pS1 + t * ( pS2 + t * ( pS3 + t * ( pS4 + t * pS5 ) ) ) ) );
             q = one + t * ( qS1 + t * ( qS2 + t * ( qS3 + t * qS4 ) ) );
-            s = sqrt( t );
+            s = Sqrt( t );
             if ( ix >= 0x3FEF3333 )
             {
                 w = p / q;
@@ -1032,7 +1032,7 @@ namespace Tiny.Science.Numeric
                 z = ( one + x ) * 0.5;
                 p = z * ( pS0 + z * ( pS1 + z * ( pS2 + z * ( pS3 + z * ( pS4 + z * pS5 ) ) ) ) );
                 q = one + z * ( qS1 + z * ( qS2 + z * ( qS3 + z * qS4 ) ) );
-                s = sqrt( z );
+                s = Sqrt( z );
                 r = p / q;
                 w = r * s - pio2_lo;
                 return PI - 2.0 * ( s + w );
@@ -1040,7 +1040,7 @@ namespace Tiny.Science.Numeric
             else
             {
                 z = ( one - x ) * 0.5;
-                s = sqrt( z );
+                s = Sqrt( z );
                 df = s;
                 df = setLO( df, 0 );
                 c = ( z - df * df ) / ( s + df );
@@ -1712,7 +1712,7 @@ namespace Tiny.Science.Numeric
                 {
                     if ( hx >= 0 )
                     {
-                        return sqrt( x );
+                        return Sqrt( x );
                     }
                 }
             }

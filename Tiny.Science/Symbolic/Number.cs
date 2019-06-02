@@ -16,25 +16,25 @@ namespace Tiny.Science.Symbolic
 
         public Number( long nom, long den )
         {
-            real = new BigInteger[ 2 ];
+            real = new BigInteger[2];
 
-            real[ 0 ] = BigInteger.valueOf( nom );
-            real[ 1 ] = BigInteger.valueOf( den );
+            real[0] = BigInteger.valueOf( nom );
+            real[1] = BigInteger.valueOf( den );
         }
 
         public Number( BigInteger r )
         {
-            real = new BigInteger[ 2 ];
+            real = new BigInteger[2];
 
-            real[ 0 ] = r;
-            real[ 1 ] = BigInteger.ONE;
+            real[0] = r;
+            real[1] = BigInteger.ONE;
         }
 
         public Number( BigInteger[] real, BigInteger[] imag )
         {
             this.real = reducev( real );
 
-            if ( imag != null && !imag[ 0 ].Equals( BigInteger.ZERO ) )
+            if ( imag != null && !imag[0].Equals( BigInteger.ZERO ) )
             {
                 this.imag = reducev( imag );
             }
@@ -46,11 +46,11 @@ namespace Tiny.Science.Symbolic
 
         public Number( double x, double y )
         {
-            real = reducev( double2rat( x ) );
+            real = reducev( double2rat(x) );
 
             if ( y != 0.0 )
             {
-                imag = reducev( double2rat( y ) );
+                imag = reducev( double2rat(y) );
             }
         }
 
@@ -65,13 +65,13 @@ namespace Tiny.Science.Symbolic
                 exp++;
             }
 
-            BigInteger y = BigInteger.valueOf( ( long ) ( Math.round( x ) ) );
+            var y = BigInteger.valueOf( Math.round(x) );
 
             if ( exp > 0 )
             {
-                BigInteger ten = BigInteger.valueOf( 10L );
+                var ten = BigInteger.valueOf( 10L );
 
-                y = y.multiply( ten.pow( exp ) );
+                y = y * ten ^ exp;
             }
 
             return y;
@@ -83,18 +83,13 @@ namespace Tiny.Science.Symbolic
 
             if ( x == 0 )
             {
-                br = new BigInteger[ 2 ];
-
-                br[ 0 ] = BigInteger.ZERO;
-                br[ 1 ] = BigInteger.ONE;
-
-                return br;
+                return new[] { BigInteger.ZERO, BigInteger.ONE };
             }
 
             if ( x < 0.0 )
             {
                 br = double2rat( -x );
-                br[ 0 ] = br[ 0 ].negate();
+                br[0] = -br[0];
 
                 return br;
             }
@@ -105,7 +100,7 @@ namespace Tiny.Science.Symbolic
 
             if ( a != null )
             {
-                double epstry = a.ToComplex().Re;
+                var epstry = a.ToComplex().Re;
 
                 if ( epstry > 0 )
                 {
@@ -115,33 +110,23 @@ namespace Tiny.Science.Symbolic
 
             if ( x < 1 / eps )
             {
-                double[] y = cfs( x, eps );
+                var y = cfs( x, eps );
 
-                br = new BigInteger[ 2 ];
-
-                br[ 0 ] = double2big( y[ 0 ] );
-                br[ 1 ] = double2big( y[ 1 ] );
-
-                return br;
+                return new[] { double2big( y[0] ), double2big( y[1] ) };
             }
 
-            br = new BigInteger[ 2 ];
-
-            br[ 0 ] = double2big( x );
-            br[ 1 ] = BigInteger.ONE;
-
-            return br;
+            return new[] { double2big(x), BigInteger.ONE };
         }
 
         private double[] cfs( double x, double tol )
         {
             var a = new ArrayList();
 
-            var y = new double[ 2 ];
+            var y = new double[2];
 
             tol = Math.abs( x * tol );
 
-            var aa = Math.floor( x );
+            var aa = Math.floor(x);
 
             a.Add( aa );
 
@@ -149,7 +134,7 @@ namespace Tiny.Science.Symbolic
 
             cfsd( a, y );
 
-            while ( Math.abs( x - y[ 0 ] / y[ 1 ] ) > tol )
+            while ( Math.abs( x - y[0] / y[1] ) > tol )
             {
                 ra = 1.0 / ( ra - aa );
                 aa = Math.floor( ra );
@@ -164,20 +149,20 @@ namespace Tiny.Science.Symbolic
         {
             int i = a.Count - 1;
 
-            double N = ( double ) ( ( double? ) a[ i ] ), Z = 1.0, N1;
+            double N = ( double ) ( ( double? ) a[i] ), Z = 1.0, N1;
 
             i--;
 
             while ( i >= 0 )
             {
-                N1 = ( double ) ( ( double? ) a[ i ] ) * N + Z;
+                N1 = ( double ) ( ( double? ) a[i] ) * N + Z;
                 Z = N;
                 N = N1;
                 i--;
             }
 
-            y[ 0 ] = N;
-            y[ 1 ] = Z;
+            y[0] = N;
+            y[1] = Z;
         }
 
         internal virtual Number cfs( double tol1 )
@@ -189,7 +174,7 @@ namespace Tiny.Science.Symbolic
 
             tol = ( Number ) ( this * new Number( tol1 ) );
 
-            aa = real[ 0 ].divide( real[ 1 ] );
+            aa = real[0] / real[1];
 
             list.Add( aa );
 
@@ -202,7 +187,7 @@ namespace Tiny.Science.Symbolic
             {
                 ra = ( Number ) ( ONE / ( ra - new Number( aa ) ) );
 
-                aa = ra.real[ 0 ].divide( ra.real[ 1 ] );
+                aa = ra.real[0] / ra.real[1];
                 list.Add( aa );
                 y = new Number( cfs( list ) );
 
@@ -214,44 +199,44 @@ namespace Tiny.Science.Symbolic
 
         private BigInteger[] cfs( ArrayList a )
         {
-            int i = a.Count - 1;
+            var i = a.Count - 1;
 
-            BigInteger N = ( BigInteger ) a[ i ], Z = BigInteger.ONE, N1;
+            BigInteger N = ( BigInteger ) a[i], Z = BigInteger.ONE, N1;
 
             i--;
 
             while ( i >= 0 )
             {
-                N1 = ( ( BigInteger ) a[ i ] ).multiply( N ).add( Z );
+                N1 = ( BigInteger ) a[i] * N + Z;
                 Z = N;
                 N = N1;
                 i--;
             }
 
-            BigInteger[] r = new BigInteger[] { N, Z };
+            var r = new[] { N, Z };
 
             return r;
         }
 
         private BigInteger[] reducev( BigInteger[] y )
         {
-            BigInteger[] x = new BigInteger[ 2 ];
+            var x = new BigInteger[2];
 
-            x[ 0 ] = y[ 0 ];
-            x[ 1 ] = y[ 1 ];
+            x[0] = y[0];
+            x[1] = y[1];
 
-            BigInteger gcd = x[ 0 ].gcd( x[ 1 ] );
+            var gcd = x[0].gcd( x[1] );
 
             if ( !gcd.Equals( BigInteger.ONE ) )
             {
-                x[ 0 ] = x[ 0 ].divide( gcd );
-                x[ 1 ] = x[ 1 ].divide( gcd );
+                x[0] = x[0] / gcd;
+                x[1] = x[1] / gcd;
             }
 
-            if ( x[ 1 ].compareTo( BigInteger.ZERO ) < 0 )
+            if ( x[1].compareTo( BigInteger.ZERO ) < 0 )
             {
-                x[ 0 ] = x[ 0 ].negate();
-                x[ 1 ] = x[ 1 ].negate();
+                x[0] = -x[0];
+                x[1] = -x[1];
             }
 
             return x;
@@ -279,9 +264,9 @@ namespace Tiny.Science.Symbolic
 
         private double floatValue( BigInteger[] x )
         {
-            var q = x[ 0 ].divideAndRemainder( x[ 1 ] );
+            var q = x[0].divideAndRemainder( x[1] );
 
-            return q[ 0 ].ToDouble() + q[ 1 ].ToDouble() / x[ 1 ].ToDouble();
+            return q[0].ToDouble() + q[1].ToDouble() / x[1].ToDouble();
         }
 
         public virtual Complex ToFloat()
@@ -301,10 +286,10 @@ namespace Tiny.Science.Symbolic
                 return x;
             }
 
-            BigInteger[] r = new BigInteger[ 2 ];
+            var r = new BigInteger[2];
 
-            r[ 0 ] = x[ 0 ].multiply( y[ 1 ] ).add( y[ 0 ].multiply( x[ 1 ] ) );
-            r[ 1 ] = x[ 1 ].multiply( y[ 1 ] );
+            r[0] = x[0] * y[1] + y[0] * x[1];
+            r[1] = x[1] * y[1];
 
             return r;
         }
@@ -316,10 +301,10 @@ namespace Tiny.Science.Symbolic
                 return x;
             }
 
-            BigInteger[] r = new BigInteger[ 2 ];
+            var r = new BigInteger[2];
 
-            r[ 0 ] = y[ 0 ].negate();
-            r[ 1 ] = y[ 1 ];
+            r[0] = -y[0];
+            r[1] = y[1];
 
             return add( x, r );
         }
@@ -331,12 +316,7 @@ namespace Tiny.Science.Symbolic
                 return null;
             }
 
-            BigInteger[] r = new BigInteger[ 2 ];
-
-            r[ 0 ] = x[ 0 ].multiply( y[ 0 ] );
-            r[ 1 ] = x[ 1 ].multiply( y[ 1 ] );
-
-            return r;
+            return new[] { x[0] * y[0], x[1] * y[1] };
         }
 
         private BigInteger[] div( BigInteger[] x, BigInteger[] y )
@@ -351,12 +331,7 @@ namespace Tiny.Science.Symbolic
                 throw new SymbolicException( "Division by Zero." );
             }
 
-            BigInteger[] r = new BigInteger[ 2 ];
-
-            r[ 0 ] = x[ 0 ].multiply( y[ 1 ] );
-            r[ 1 ] = x[ 1 ].multiply( y[ 0 ] );
-
-            return r;
+            return new[] { x[0] * y[1], x[1] * y[0] };
         }
 
         private bool Equals( BigInteger[] x, BigInteger[] y )
@@ -371,7 +346,7 @@ namespace Tiny.Science.Symbolic
                 return false;
             }
 
-            return x[ 0 ].Equals( y[ 0 ] ) && x[ 1 ].Equals( y[ 1 ] );
+            return x[0].Equals( y[0] ) && x[1].Equals( y[1] );
         }
 
         protected override Algebraic Add( Algebraic x )
@@ -381,7 +356,7 @@ namespace Tiny.Science.Symbolic
                 return x + this;
             }
 
-            Number X = ( ( Symbol ) x ).ToNumber();
+            var X = ( ( Symbol ) x ).ToNumber();
 
             return new Number( add( real, X.real ), add( imag, X.imag ) );
         }
@@ -393,7 +368,7 @@ namespace Tiny.Science.Symbolic
                 return x * this;
             }
 
-            Number X = ( ( Symbol ) x ).ToNumber();
+            var X = ( ( Symbol ) x ).ToNumber();
 
             return new Number( sub( mult( real, X.real ), mult( imag, X.imag ) ), add( mult( imag, X.real ), mult( real, X.imag ) ) );
         }
@@ -402,14 +377,14 @@ namespace Tiny.Science.Symbolic
         {
             if ( !( x is Symbol ) )
             {
-                return base.Div( x );
+                return base.Div(x);
             }
 
-            Number X = ( ( Symbol ) x ).ToNumber();
+            var X = ( ( Symbol ) x ).ToNumber();
 
-            BigInteger[] N = add( mult( X.real, X.real ), mult( X.imag, X.imag ) );
+            var N = add( mult( X.real, X.real ), mult( X.imag, X.imag ) );
 
-            if ( N == null || N[ 0 ].Equals( BigInteger.ZERO ) )
+            if ( N == null || N[0].Equals( BigInteger.ZERO ) )
 
             {
                 throw new SymbolicException( "Division by Zero." );
@@ -420,20 +395,20 @@ namespace Tiny.Science.Symbolic
 
         private BigInteger lsm( BigInteger x, BigInteger y )
         {
-            return x.multiply( y ).divide( x.gcd( y ) );
+            return ( x * y ) / x.gcd(y);
         }
 
         public override Algebraic[] Div( Algebraic q1, Algebraic[] result )
         {
             if ( result == null )
             {
-                result = new Algebraic[ 2 ];
+                result = new Algebraic[2];
             }
 
             if ( !( q1 is Symbol ) )
             {
-                result[ 0 ] = Symbol.ZERO;
-                result[ 1 ] = this;
+                result[0] = Symbol.ZERO;
+                result[1] = this;
 
                 return result;
             }
@@ -442,86 +417,87 @@ namespace Tiny.Science.Symbolic
 
             if ( !IsComplex() && q.IsComplex() )
             {
-                result[ 0 ] = Symbol.ZERO;
-                result[ 1 ] = this;
+                result[0] = Symbol.ZERO;
+                result[1] = this;
+
                 return result;
             }
 
             if ( IsComplex() && !q.IsComplex() )
             {
-                result[ 0 ] = Div( q );
-                result[ 1 ] = Symbol.ZERO;
+                result[0] = Div(q);
+                result[1] = Symbol.ZERO;
 
                 return result;
             }
 
             if ( IsComplex() && q.IsComplex() )
             {
-                result[ 0 ] = ImagPart() / q.ImagPart();
-                result[ 1 ] = this - result[ 0 ] * q;
+                result[0] = ImagPart() / q.ImagPart();
+                result[1] = this - result[0] * q;
 
                 return result;
             }
 
             if ( IsInteger() && q.IsInteger() )
             {
-                var d = real[ 0 ].divideAndRemainder( q.real[ 0 ] );
+                var d = real[0].divideAndRemainder( q.real[0] );
 
-                result[ 0 ] = new Number( d[ 0 ] );
-                result[ 1 ] = new Number( d[ 1 ] );
+                result[0] = new Number( d[0] );
+                result[1] = new Number( d[1] );
 
                 return result;
             }
 
-            result[ 0 ] = Div( q );
-            result[ 1 ] = Symbol.ZERO;
+            result[0] = Div(q);
+            result[1] = Symbol.ZERO;
 
             return result;
         }
 
         private string b2string( BigInteger[] x )
         {
-            if ( x[ 1 ].Equals( BigInteger.ONE ) )
+            if ( x[1].Equals( BigInteger.ONE ) )
             {
-                return x[ 0 ].ToString();
+                return x[0].ToString();
             }
 
-            return x[ 0 ] + "/" + x[ 1 ];
+            return x[0] + "/" + x[1];
         }
 
         public override string ToString()
         {
-            if ( imag == null || imag[ 0 ].Equals( BigInteger.ZERO ) )
+            if ( imag == null || imag[0].Equals( BigInteger.ZERO ) )
             {
                 return "" + b2string( real );
             }
 
-            if ( real[ 0 ].Equals( BigInteger.ZERO ) )
+            if ( real[0].Equals( BigInteger.ZERO ) )
             {
                 return b2string( imag ) + "*i";
             }
 
-            return "(" + b2string( real ) + ( imag[ 0 ].compareTo( BigInteger.ZERO ) > 0 ? "+" : "" ) + b2string( imag ) + "*i)";
+            return "(" + b2string( real ) + ( imag[0].compareTo( BigInteger.ZERO ) > 0 ? "+" : "" ) + b2string( imag ) + "*i)";
         }
 
         public override bool IsInteger()
         {
-            return real[ 1 ].Equals( BigInteger.ONE ) && imag == null;
+            return real[1].Equals( BigInteger.ONE ) && imag == null;
         }
 
         public override bool Smaller( Symbol x )
         {
-            return ToComplex().Smaller( x );
+            return ToComplex().Smaller(x);
         }
 
         public override bool IsComplex()
         {
-            return imag != null && !imag[ 0 ].Equals( BigInteger.ZERO );
+            return imag != null && !imag[0].Equals( BigInteger.ZERO );
         }
 
         public override bool IsImaginary()
         {
-            return imag != null && !imag[ 0 ].Equals( BigInteger.ZERO ) && real[ 0 ].Equals( BigInteger.ZERO );
+            return imag != null && !imag[0].Equals( BigInteger.ZERO ) && real[0].Equals( BigInteger.ZERO );
         }
 
         public override bool Equals( object x )
@@ -531,7 +507,7 @@ namespace Tiny.Science.Symbolic
                 return Equals( real, ( ( Number ) x ).real ) && Equals( imag, ( ( Number ) x ).imag );
             }
 
-            return ToFloat().Equals( x );
+            return ToFloat().Equals(x);
         }
 
         public override double Norm()
@@ -551,12 +527,12 @@ namespace Tiny.Science.Symbolic
                 return ToFloat().Abs();
             }
 
-            BigInteger[] r = new BigInteger[ 2 ];
+            var r = new BigInteger[2];
 
-            r[ 0 ] = real[ 0 ].compareTo( BigInteger.ZERO ) < 0 ? real[ 0 ].negate() : real[ 0 ];
-            r[ 1 ] = real[ 1 ];
+            r[0] = real[0].compareTo( BigInteger.ZERO ) < 0 ? real[0].negate() : real[0];
+            r[1] = real[1];
 
-            return new Number( r );
+            return new Number(r);
         }
 
         public virtual Number gcd( Number x )
@@ -569,6 +545,7 @@ namespace Tiny.Science.Symbolic
             {
                 return this;
             }
+
             if ( IsComplex() && x.IsComplex() )
             {
                 var r = ( ( Number ) RealPart() ).gcd( ( Number ) x.RealPart() );
@@ -594,13 +571,13 @@ namespace Tiny.Science.Symbolic
             }
             else
             {
-                return ( Number ) ( new Number( real[ 0 ].multiply( x.real[ 1 ] ).gcd( real[ 1 ].multiply( x.real[ 0 ] ) ) ) ).Div( new Number( real[ 1 ].multiply( x.real[ 1 ] ) ) );
+                return ( Number ) ( new Number( real[0] * ( x.real[1] ).gcd( real[1] * x.real[0] ) ) ).Div( new Number( real[1] * x.real[1] ) );
             }
         }
 
         public override int ToInt()
         {
-            return real[ 0 ].intValue();
+            return real[0].intValue();
         }
     }
 }

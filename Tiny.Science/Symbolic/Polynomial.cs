@@ -6,105 +6,88 @@ namespace Tiny.Science.Symbolic
 {
     public class Polynomial : Algebraic
     {
-        public Algebraic[] Coeffs;
-        public Variable _v;
+        internal static bool loopPartial;
+
+        public Algebraic[] Coeffs { get; set; }
+        public Variable Var { get; set; }
 
         public Algebraic this[ int n ]
         {
-            get
-            {
-                return Coeffs[ n ];
-            }
-            set
-            {
-                Coeffs[ n ] = value;
-            }
+            get => GetCoeff(n);
+            set => Coeffs[n] = value;
         }
 
         public Polynomial()
         {
+            Coeffs= new Algebraic[0];
         }
 
         public Polynomial( Variable v, Algebraic[] c )
         {
-            _v = v;
-            Coeffs = Poly.Reduce( c );
+            Var = v;
+            Coeffs = Poly.Reduce(c);
         }
 
         public Polynomial( Variable v, Vector vec )
         {
-            _v = v;
-            Coeffs = new Algebraic[ vec.Length() ];
+            Var = v;
 
-            for ( int i = 0; i < Coeffs.Length; i++ )
-            {
-                Coeffs[ i ] = vec[ Coeffs.Length - 1 - i ];
-            }
-
-            Coeffs = Poly.Reduce( Coeffs );
+            Coeffs = Poly.Reduce( vec.Reverse().ToArray() );
         }
 
-        public Polynomial( Variable @var )
+        public Polynomial( Variable v )
         {
             Coeffs = new Algebraic[] { Symbol.ZERO, Symbol.ONE };
 
-            this._v = @var;
-        }
-
-        public virtual Variable Var
-        {
-            get
-            {
-                return _v;
-            }
+            Var = v;
         }
 
         public virtual Vector Coeff()
         {
             var c = Poly.Clone( Coeffs );
 
-            return new Vector( c );
+            return new Vector(c);
         }
 
-        public virtual Algebraic coefficient( Variable v, int n )
+        public virtual Algebraic GetCoeff( Variable v, int n )
         {
-            if ( v.Equals( _v ) )
+            if ( v.Equals( Var ) )
             {
-                return coefficient( n );
+                return GetCoeff(n);
             }
 
             Algebraic c = Symbol.ZERO;
 
-            for ( int i = 0; i < Coeffs.Length; i++ )
+            for ( var i = 0; i < Coeffs.Length; i++ )
             {
-                var ci = Coeffs[ i ];
+                var ci = Coeffs[i];
 
                 if ( ci is Polynomial )
                 {
-                    c = c + ( ( Polynomial ) ci ).coefficient( v, n ) * ( new Polynomial( _v ) ^ i );
+                    c = c + ( ( Polynomial ) ci ).GetCoeff( v, n ) * ( new Polynomial( Var ) ^ i );
                 }
                 else if ( n == 0 )
                 {
-                    c = c + ci * ( new Polynomial( _v ) ^ i );
+                    c = c + ci * ( new Polynomial( Var ) ^ i );
                 }
             }
 
             return c;
         }
 
-        public virtual Algebraic coefficient( int i )
+        private Algebraic GetCoeff( int n )
         {
-            return i >= 0 && i < Coeffs.Length ? Coeffs[ i ] : Symbol.ZERO;
+            return n >= 0 && n < Coeffs.Length ? Coeffs[n] : Symbol.ZERO;
         }
 
         public override bool IsRat( Variable v )
         {
-            if ( v is FunctionVariable && ( ( FunctionVariable ) this._v ).Var.Depends( v ) )
+            if ( v is FunctionVariable && ( ( FunctionVariable ) Var ).Var.Depends(v) )
             {
                 return false;
             }
 
-            return Coeffs.All( t => t.IsRat( v ) );
+            return Coeffs.All( t => t.IsRat(v) );
         }
 
         public virtual int Degree()
@@ -114,16 +97,16 @@ namespace Tiny.Science.Symbolic
 
         public virtual int Degree( Variable v )
         {
-            if ( this._v == v )
+            if ( Var == v )
             {
                 return Coeffs.Length - 1;
             }
 
-            int degree = 0;
+            var degree = 0;
 
             foreach ( var t in Coeffs )
             {
-                int d = Poly.Degree( t, v );
+                var d = Poly.Degree( t, v );
 
                 if ( d > degree )
                 {
@@ -145,20 +128,21 @@ namespace Tiny.Science.Symbolic
             {
                 var p = ( Polynomial ) a;
 
-                if ( _v.Equals( p._v ) )
+                if ( Var.Equals( p.Var ) )
                 {
-                    int len = Math.Max( Coeffs.Length, p.Coeffs.Length );
+                    var len = Math.Max( Coeffs.Length, p.Coeffs.Length );
 
                     var csum = new Algebraic[ len ];
 
-                    for ( int i = 0; i < len; i++ )
+                    for ( var i = 0; i < len; i++ )
                     {
-                        csum[ i ] = coefficient( i ) + p.coefficient( i );
+                        csum[i] = GetCoeff(i) + p.GetCoeff(i);
                     }
 
-                    return ( new Polynomial( _v, csum ) ).Reduce();
+                    return ( new Polynomial( Var, csum ) ).Reduce();
                 }
-                else if ( _v.Smaller( p._v ) )
+
+                if ( Var.Smaller( p.Var ) )
                 {
                     return a + this;
                 }
@@ -166,9 +150,9 @@ namespace Tiny.Science.Symbolic
 
             var _csum = Poly.Clone( Coeffs );
 
-            _csum[ 0 ] = Coeffs[ 0 ] + a;
+            _csum[0] = Coeffs[0] + a;
 
-            return ( new Polynomial( _v, _csum ) ).Reduce();
+            return ( new Polynomial( Var, _csum ) ).Reduce();
         }
 
         protected override Algebraic Mul( Algebraic p )
@@ -177,60 +161,50 @@ namespace Tiny.Science.Symbolic
             {
                 return p * this;
             }
+
             if ( p is Polynomial )
             {
-                if ( _v.Equals( ( ( Polynomial ) p )._v ) )
+                var poly = ( Polynomial ) p;
+
+                if ( Var.Equals( poly.Var ) )
                 {
-                    int len = Coeffs.Length + ( ( Polynomial ) p ).Coeffs.Length - 1;
+                    var len = Coeffs.Length + poly.Coeffs.Length - 1;
 
                     var cprod = new Algebraic[ len ];
 
-                    for ( int i = 0; i < len; i++ )
+                    for ( var i = 0; i < len; i++ )
                     {
-                        cprod[ i ] = Symbol.ZERO;
+                        cprod[i] = Symbol.ZERO;
                     }
 
-                    for ( int i = 0; i < Coeffs.Length; i++ )
+                    for ( var n = 0; n < Coeffs.Length; n++ )
                     {
-                        for ( int k = 0; k < ( ( Polynomial ) p ).Coeffs.Length; k++ )
+                        for ( var k = 0; k < poly.Coeffs.Length; k++ )
                         {
-                            cprod[ i + k ] = cprod[ i + k ] + Coeffs[ i ] * ( ( Polynomial ) p )[ k ];
+                            cprod[ n + k ] = cprod[ n + k ] + Coeffs[n] * poly[k];
                         }
                     }
 
-                    return ( new Polynomial( _v, cprod ) ).Reduce();
+                    return ( new Polynomial( Var, cprod ) ).Reduce();
                 }
-                else if ( _v.Smaller( ( ( Polynomial ) p )._v ) )
+
+                if ( Var.Smaller( poly.Var ) )
                 {
                     return p * this;
                 }
             }
 
-            var _cprod = new Algebraic[ Coeffs.Length ];
-
-            for ( int i = 0; i < Coeffs.Length; i++ )
-            {
-                _cprod[ i ] = Coeffs[ i ] * p;
-            }
-
-            return ( new Polynomial( _v, _cprod ) ).Reduce();
+            return ( new Polynomial( Var, Coeffs.Select( c => c * p ).ToArray() ) ).Reduce();
         }
 
         protected override Algebraic Div( Algebraic q )
         {
             if ( q is Symbol )
             {
-                var c = new Algebraic[ Coeffs.Length ];
-
-                for ( int i = 0; i < Coeffs.Length; i++ )
-                {
-                    c[ i ] = Coeffs[ i ] / q;
-                }
-
-                return new Polynomial( _v, c );
+                return new Polynomial( Var, Coeffs.Select( c => c / q ).ToArray() );
             }
 
-            return base.Div( q );
+            return base.Div(q);
         }
 
         public override Algebraic Reduce()
@@ -242,7 +216,7 @@ namespace Tiny.Science.Symbolic
 
             if ( Coeffs.Length == 1 )
             {
-                return Coeffs[ 0 ].Reduce();
+                return Coeffs[0].Reduce();
             }
 
             return this;
@@ -252,23 +226,22 @@ namespace Tiny.Science.Symbolic
         {
             var x = new ArrayList();
 
-            for ( int i = Coeffs.Length - 1; i > 0; i-- )
+            for ( var i = Coeffs.Length - 1; i > 0; i-- )
             {
-                if ( Equals( Coeffs[ i ], Symbol.ZERO ) )
-                    continue;
+                if ( Equals( Coeffs[i], Symbol.ZERO ) ) continue;
 
                 var s = "";
 
-                if ( Equals( Coeffs[ i ], Symbol.MINUS ) )
+                if ( Equals( Coeffs[i], Symbol.MINUS ) )
                 {
                     s += "-";
                 }
-                else if ( !Equals( Coeffs[ i ], Symbol.ONE ) )
+                else if ( !Equals( Coeffs[i], Symbol.ONE ) )
                 {
-                    s += Coeffs[ i ] + "*";
+                    s += Coeffs[i] + "*";
                 }
 
-                s += _v.ToString();
+                s += Var.ToString();
 
                 if ( i > 1 )
                 {
@@ -278,9 +251,9 @@ namespace Tiny.Science.Symbolic
                 x.Add( s );
             }
 
-            if ( !Equals( Coeffs[ 0 ], Symbol.ZERO ) )
+            if ( !Equals( Coeffs[0], Symbol.ZERO ) )
             {
-                x.Add( Coeffs[ 0 ].ToString() );
+                x.Add( Coeffs[0].ToString() );
             }
 
             var _s = "";
@@ -290,12 +263,11 @@ namespace Tiny.Science.Symbolic
                 _s += "(";
             }
 
-            for ( int i = 0; i < x.Count; i++ )
+            for ( var i = 0; i < x.Count; i++ )
             {
-                _s += ( string ) x[ i ];
+                _s += ( string ) x[i];
 
-                if ( i >= x.Count - 1 || ( ( string ) x[ i + 1 ] )[ 0 ] == '-' )
-                    continue;
+                if ( i >= x.Count - 1 || ( ( string ) x[ i + 1 ] )[0] == '-' ) continue;
 
                 _s += "+";
             }
@@ -315,41 +287,43 @@ namespace Tiny.Science.Symbolic
                 return false;
             }
 
-            if ( !( _v.Equals( ( ( Polynomial ) x )._v ) ) || Coeffs.Length != ( ( Polynomial ) x ).Coeffs.Length )
+            var poly = ( Polynomial ) x;
+
+            if ( !( Var.Equals( poly.Var ) ) || Coeffs.Length != poly.Coeffs.Length )
             {
                 return false;
             }
 
-            return !Coeffs.Where( ( t, i ) => !t.Equals( ( ( Polynomial ) x )[ i ] ) ).Any();
+            return !Coeffs.Where( ( t, n ) => !t.Equals( poly[n] ) ).Any();
         }
 
         public override Algebraic Derive( Variable v )
         {
             Algebraic r1 = Symbol.ZERO, r2 = Symbol.ZERO;
 
-            var x = new Polynomial( this._v );
+            var x = new Polynomial( Var );
 
-            for ( int i = Coeffs.Length - 1; i > 1; i-- )
+            for ( var n = Coeffs.Length - 1; n > 1; n-- )
             {
-                r1 = ( r1 + Coeffs[ i ] * new Complex( i ) ) * x;
+                r1 = ( r1 + Coeffs[n] * new Complex(n) ) * x;
             }
 
             if ( Coeffs.Length > 1 )
             {
-                r1 = r1 + Coeffs[ 1 ];
+                r1 = r1 + Coeffs[1];
             }
 
-            for ( int i = Coeffs.Length - 1; i > 0; i-- )
+            for ( var n = Coeffs.Length - 1; n > 0; n-- )
             {
-                r2 = ( r2 + Coeffs[ i ].Derive( v ) ) * x;
+                r2 = ( r2 + Coeffs[n].Derive(v) ) * x;
             }
 
             if ( Coeffs.Length > 0 )
             {
-                r2 = r2 + Coeffs[ 0 ].Derive( v );
+                r2 = r2 + Coeffs[0].Derive(v);
             }
 
-            return ( r1 * _v.Derive( v ) + r2 ).Reduce();
+            return ( r1 * Var.Derive(v) + r2 ).Reduce();
         }
 
         public override bool Depends( Variable v )
@@ -359,38 +333,38 @@ namespace Tiny.Science.Symbolic
                 return false;
             }
 
-            if ( _v == v )
+            if ( Var == v )
             {
                 return true;
             }
 
-            if ( _v is FunctionVariable && ( ( FunctionVariable ) _v ).Var.Depends( v ) )
+            if ( Var is FunctionVariable && ( ( FunctionVariable ) Var ).Var.Depends(v) )
             {
                 return true;
             }
 
-            return Coeffs.Any( t => t.Depends( v ) );
+            return Coeffs.Any( t => t.Depends(v) );
         }
 
-        internal static bool loopPartial = false;
+        
 
         public override Algebraic Integrate( Variable v )
         {
             Algebraic tmp = Symbol.ZERO;
 
-            for ( int i = 1; i < Coeffs.Length; i++ )
+            for ( var n = 1; n < Coeffs.Length; n++ )
             {
-                if ( !Coeffs[ i ].Depends( v ) )
+                if ( !Coeffs[n].Depends(v) )
                 {
-                    if ( v.Equals( _v ) )
+                    if ( v.Equals( Var ) )
                     {
-                        tmp = tmp + Coeffs[ i ] * ( new Polynomial( v ) ^ ( i + 1 ) ) / new Complex( i + 1 );
+                        tmp = tmp + Coeffs[n] * ( new Polynomial( v ) ^ ( n + 1 ) ) / new Complex( n + 1 );
                     }
-                    else if ( _v is FunctionVariable && ( ( FunctionVariable ) _v ).Var.Depends( v ) )
+                    else if ( Var is FunctionVariable && ( ( FunctionVariable ) Var ).Var.Depends(v) )
                     {
-                        if ( i == 1 )
+                        if ( n == 1 )
                         {
-                            tmp = tmp + ( ( FunctionVariable ) _v ).Integrate( v ) * Coeffs[ 1 ];
+                            tmp = tmp + ( ( FunctionVariable ) Var ).Integrate(v) * Coeffs[1];
                         }
                         else
                         {
@@ -399,28 +373,30 @@ namespace Tiny.Science.Symbolic
                     }
                     else
                     {
-                        tmp = tmp + Coeffs[ i ] * ( new Polynomial( v ) * new Polynomial( _v ) ^ i );
+                        tmp = tmp + Coeffs[n] * ( new Polynomial(v) * new Polynomial( Var ) ^ n );
                     }
                 }
-                else if ( v.Equals( this._v ) )
+
+                else if ( v.Equals( Var ) )
                 {
                     throw new SymbolicException( "Integral not supported." );
                 }
-                else if ( this._v is FunctionVariable && ( ( FunctionVariable ) this._v ).Var.Depends( v ) )
+
+                else if ( Var is FunctionVariable && ( ( FunctionVariable ) Var ).Var.Depends(v) )
                 {
-                    if ( i == 1 && Coeffs[ i ] is Polynomial && ( ( Polynomial ) Coeffs[ i ] )._v.Equals( v ) )
+                    if ( n == 1 && Coeffs[n] is Polynomial && ( ( Polynomial ) Coeffs[n] ).Var.Equals(v) )
                     {
                         Debug( "Trying to isolate inner derivative " + this );
 
                         try
                         {
-                            var f = ( FunctionVariable ) _v;
+                            var f = ( FunctionVariable ) Var;
 
                             var w = f.Var;
 
-                            var q = Coeffs[ i ] / w.Derive( v );
+                            var q = Coeffs[n] / w.Derive(v);
 
-                            if ( Equals( q.Derive( v ), Symbol.ZERO ) )
+                            if ( Equals( q.Derive(v), Symbol.ZERO ) )
                             {
                                 var sv = new SimpleVariable( "v" );
 
@@ -439,7 +415,7 @@ namespace Tiny.Science.Symbolic
 
                         Debug( "Failed." );
 
-                        if ( ( ( Polynomial ) Coeffs[ i ] ).Coeffs.Any( t => t.Depends( v ) ) )
+                        if ( ( ( Polynomial ) Coeffs[n] ).Coeffs.Any( t => t.Depends(v) ) )
                         {
                             throw new SymbolicException( "Function not supported by this method" );
                         }
@@ -453,21 +429,21 @@ namespace Tiny.Science.Symbolic
                             throw new SymbolicException( "Partial Integration Loop: " + this );
                         }
 
-                        Debug( "Trying partial integration: x^n*f(x) , n-times diff " + this );
+                        Debug( "Trying partial integration: x^n*f(x), n-times diff " + this );
 
                         try
                         {
                             loopPartial = true;
 
-                            var c = Coeffs[ i ];
+                            var c = Coeffs[n];
 
-                            var fv = ( ( FunctionVariable ) _v ).Integrate( v );
+                            var fv = ( ( FunctionVariable ) Var ).Integrate(v);
 
                             var r = fv * c;
 
-                            while ( ( c = c.Derive( v ) ) != Symbol.ZERO )
+                            while ( ( c = c.Derive(v) ) != Symbol.ZERO )
                             {
-                                r = r - fv.Integrate( v ) * c;
+                                r = r - fv.Integrate(v) * c;
                             }
 
                             loopPartial = false;
@@ -481,17 +457,17 @@ namespace Tiny.Science.Symbolic
                         }
 
                         Debug( "Failed." );
-                        Debug( "Trying partial integration: x^n*f(x) , 1-times int " + this );
+                        Debug( "Trying partial integration: x^n*f(x), 1-times int " + this );
 
                         try
                         {
                             loopPartial = true;
 
-                            var p1 = Coeffs[ i ].Integrate( v );
+                            var p1 = Coeffs[n].Integrate(v);
 
-                            Algebraic f = new Polynomial( ( FunctionVariable ) _v );
+                            Algebraic f = new Polynomial( ( FunctionVariable ) Var );
 
-                            var r = p1 * f - ( p1 * f.Derive( v ) ).Integrate( v );
+                            var r = p1 * f - ( p1 * f.Derive(v) ).Integrate(v);
 
                             loopPartial = false;
 
@@ -508,20 +484,18 @@ namespace Tiny.Science.Symbolic
 
                         throw new SymbolicException( "Function not supported by this method" );
                     }
-                    else
-                    {
-                        throw new SymbolicException( "Integral not supported." );
-                    }
+
+                    throw new SymbolicException( "Integral not supported." );
                 }
                 else
                 {
-                    tmp = tmp + Coeffs[ i ].Integrate( v ) * new Polynomial( _v ) ^ i;
+                    tmp = tmp + Coeffs[n].Integrate(v) * new Polynomial( Var ) ^ n;
                 }
             }
 
             if ( Coeffs.Length > 0 )
             {
-                tmp = tmp + Coeffs[ 0 ].Integrate( v );
+                tmp = tmp + Coeffs[0].Integrate(v);
             }
 
             return tmp;
@@ -529,18 +503,18 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Conj()
         {
-            var xn = new Polynomial( _v.Conj() );
+            var xn = new Polynomial( Var.Conj() );
 
             Algebraic r = Symbol.ZERO;
 
-            for ( int i = Coeffs.Length - 1; i > 0; i-- )
+            for ( var n = Coeffs.Length - 1; n > 0; n-- )
             {
-                r = ( r + Coeffs[ i ].Conj() ) * xn;
+                r = ( r + Coeffs[n].Conj() ) * xn;
             }
 
             if ( Coeffs.Length > 0 )
             {
-                r = r + Coeffs[ 0 ].Conj();
+                r = r + Coeffs[0].Conj();
             }
 
             return r;
@@ -550,16 +524,16 @@ namespace Tiny.Science.Symbolic
         {
             Algebraic r = Symbol.ZERO;
 
-            var b = _v.Value( v, a );
+            var b = Var.Value( v, a );
 
-            for ( int i = Coeffs.Length - 1; i > 0; i-- )
+            for ( var n = Coeffs.Length - 1; n > 0; n-- )
             {
-                r = ( r + Coeffs[ i ].Value( v, a ) ) * b;
+                r = ( r + Coeffs[n].Value( v, a ) ) * b;
             }
 
             if ( Coeffs.Length > 0 )
             {
-                r = r + Coeffs[ 0 ].Value( v, a );
+                r = r + Coeffs[0].Value( v, a );
             }
 
             return r;
@@ -567,19 +541,12 @@ namespace Tiny.Science.Symbolic
 
         public virtual Algebraic value( Algebraic x )
         {
-            return Value( _v, x );
+            return Value( Var, x );
         }
 
         public override bool IsNumber()
         {
-            var exakt = Coeffs[ 0 ].IsNumber();
-
-            for ( int i = 1; i < Coeffs.Length; i++ )
-            {
-                exakt = exakt && Coeffs[ i ].IsNumber();
-            }
-
-            return exakt;
+            return Coeffs.All( x => x.IsNumber() );
         }
 
         public override double Norm()
@@ -589,18 +556,18 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Map( LambdaAlgebraic f )
         {
-            var x = _v is SimpleVariable ? new Polynomial( _v ) : FunctionVariable.Create( ( ( FunctionVariable ) _v ).Name, f.SymEval( ( ( FunctionVariable ) _v ).Var ) );
+            var x = Var is SimpleVariable ? new Polynomial( Var ) : FunctionVariable.Create( ( ( FunctionVariable ) Var ).Name, f.SymEval( ( ( FunctionVariable ) Var ).Var ) );
 
             Algebraic r = Symbol.ZERO;
 
-            for ( int i = Coeffs.Length - 1; i > 0; i-- )
+            for ( var n = Coeffs.Length - 1; n > 0; n-- )
             {
-                r = ( r + f.SymEval( Coeffs[ i ] ) ) * x;
+                r = ( r + f.SymEval( Coeffs[n] ) ) * x;
             }
 
             if ( Coeffs.Length > 0 )
             {
-                r = r + f.SymEval( Coeffs[ 0 ] );
+                r = r + f.SymEval( Coeffs[0] );
             }
 
             return r;
@@ -615,7 +582,7 @@ namespace Tiny.Science.Symbolic
                 return this;
             }
 
-            if ( Equals( cm, Symbol.ZERO ) || cm.Depends( _v ) )
+            if ( Equals( cm, Symbol.ZERO ) || cm.Depends( Var ) )
             {
                 throw new SymbolicException( "Ill conditioned polynomial: main coefficient Zero or not number" );
             }
@@ -624,22 +591,22 @@ namespace Tiny.Science.Symbolic
 
             b[ Coeffs.Length - 1 ] = Symbol.ONE;
 
-            for ( int i = 0; i < Coeffs.Length - 1; i++ )
+            for ( var n = 0; n < Coeffs.Length - 1; n++ )
             {
-                b[ i ] = Coeffs[ i ] / cm;
+                b[n] = Coeffs[n] / cm;
             }
 
-            return new Polynomial( _v, b );
+            return new Polynomial( Var, b );
         }
 
         public virtual Algebraic[] square_free_dec( Variable v )
         {
-            if ( !IsRat( v ) )
+            if ( !IsRat(v) )
             {
                 return null;
             }
 
-            var dp = Derive( v );
+            var dp = Derive(v);
 
             var gcd_pdp = Poly.poly_gcd( this, dp );
 
@@ -647,17 +614,17 @@ namespace Tiny.Science.Symbolic
 
             var p1 = Poly.polydiv( q, Poly.poly_gcd( q, gcd_pdp ) );
 
-            if ( gcd_pdp is Polynomial && gcd_pdp.Depends( v ) && ( ( Polynomial ) gcd_pdp ).IsRat( v ) )
+            if ( gcd_pdp is Polynomial && gcd_pdp.Depends(v) && ( ( Polynomial ) gcd_pdp ).IsRat(v) )
             {
-                var sq = ( ( Polynomial ) gcd_pdp ).square_free_dec( v );
+                var sq = ( ( Polynomial ) gcd_pdp ).square_free_dec(v);
 
                 var result = new Algebraic[ sq.Length + 1 ];
 
-                result[ 0 ] = p1;
+                result[0] = p1;
 
-                for ( int i = 0; i < sq.Length; i++ )
+                for ( var n = 0; n < sq.Length; n++ )
                 {
-                    result[ i + 1 ] = sq[ i ];
+                    result[ n + 1 ] = sq[n];
                 }
 
                 return result;
@@ -673,51 +640,60 @@ namespace Tiny.Science.Symbolic
         public virtual Symbol gcd_coeff()
         {
             Symbol gcd;
-            if ( Coeffs[ 0 ] is Symbol )
+
+            if ( Coeffs[0] is Symbol )
             {
-                gcd = ( Symbol ) Coeffs[ 0 ];
+                gcd = ( Symbol ) Coeffs[0];
             }
-            else if ( Coeffs[ 0 ] is Polynomial )
+            else if ( Coeffs[0] is Polynomial )
             {
-                gcd = ( ( Polynomial ) Coeffs[ 0 ] ).gcd_coeff();
+                gcd = ( ( Polynomial ) Coeffs[0] ).gcd_coeff();
             }
             else
             {
                 throw new SymbolicException( "Cannot calculate gcd from " + this );
             }
-            for ( int i = 1; i < Coeffs.Length; i++ )
+
+            for ( var n = 1; n < Coeffs.Length; n++ )
             {
-                if ( Coeffs[ i ] is Symbol )
+                if ( Coeffs[n] is Symbol )
                 {
-                    gcd = gcd.gcd( ( Symbol ) Coeffs[ i ] );
+                    gcd = gcd.gcd( ( Symbol ) Coeffs[n] );
                 }
-                else if ( Coeffs[ i ] is Polynomial )
+                else if ( Coeffs[n] is Polynomial )
                 {
-                    gcd = gcd.gcd( ( ( Polynomial ) Coeffs[ i ] ).gcd_coeff() );
+                    gcd = gcd.gcd( ( ( Polynomial ) Coeffs[n] ).gcd_coeff() );
                 }
                 else
                 {
                     throw new SymbolicException( "Cannot calculate gcd from " + this );
                 }
             }
+
             return gcd;
         }
 
-        public virtual Vector solve( Variable @var )
+        public virtual Vector solve( Variable v )
         {
-            if ( !@var.Equals( this._v ) )
+            if ( !v.Equals( Var ) )
             {
-                return ( ( Polynomial ) Value( @var, Poly.top ) ).solve( SimpleVariable.top );
+                return ( ( Polynomial ) Value( v, Poly.top ) ).solve( SimpleVariable.top );
             }
-            var factors = square_free_dec( @var );
+
+            var factors = square_free_dec(v);
+
             var s = new ArrayList();
-            int n = factors == null ? 0 : factors.Length;
-            for ( int i = 0; i < n; i++ )
+
+            var len = factors?.Length ?? 0;
+
+            for ( var n = 0; n < len; n++ )
             {
-                if ( factors[ i ] is Polynomial )
+                if ( factors[n] is Polynomial )
                 {
-                    Vector sol = null;
-                    var equ = factors[ i ];
+                    Vector sol;
+
+                    var equ = factors[n];
+
                     try
                     {
                         sol = ( ( Polynomial ) equ ).solvepoly();
@@ -726,18 +702,19 @@ namespace Tiny.Science.Symbolic
                     {
                         sol = ( ( Polynomial ) equ ).Monic().roots();
                     }
-                    for ( int k = 0; k < sol.Length(); k++ )
+
+                    for ( var k = 0; k < sol.Length(); k++ )
                     {
-                        s.Add( sol[ k ] );
+                        s.Add( sol[k] );
                     }
                 }
             }
 
             var cn = new Algebraic[ s.Count ];
 
-            for ( int i = 0; i < cn.Length; i++ )
+            for ( var n = 0; n < cn.Length; n++ )
             {
-                cn[ i ] = ( Algebraic ) s[ i ];
+                cn[n] = ( Algebraic ) s[n];
             }
 
             return new Vector( cn );
@@ -753,12 +730,12 @@ namespace Tiny.Science.Symbolic
                     break;
 
                 case 1:
-                    s.Add( -Coeffs[ 0 ] / Coeffs[ 1 ] );
+                    s.Add( -Coeffs[0] / Coeffs[1] );
                     break;
 
                 case 2:
-                    var p = Coeffs[ 1 ] / Coeffs[ 2 ];
-                    var q = Coeffs[ 0 ] / Coeffs[ 2 ];
+                    var p = Coeffs[1] / Coeffs[2];
+                    var q = Coeffs[0] / Coeffs[2];
 
                     p = -p / Symbol.TWO;
 
@@ -766,7 +743,7 @@ namespace Tiny.Science.Symbolic
 
                     if ( Equals( q, Symbol.ZERO ) )
                     {
-                        s.Add( p );
+                        s.Add(p);
                         break;
                     }
 
@@ -781,7 +758,7 @@ namespace Tiny.Science.Symbolic
 
                     for ( int i = 1; i < Coeffs.Length; i++ )
                     {
-                        if ( Coeffs[ i ] != Symbol.ZERO )
+                        if ( Coeffs[i] != Symbol.ZERO )
                         {
                             gcd = gcd < 0 ? i : Poly.gcd( i, gcd );
                         }
@@ -793,12 +770,12 @@ namespace Tiny.Science.Symbolic
                     {
                         var cn = new Algebraic[ deg + 1 ];
 
-                        for ( int i = 0; i < cn.Length; i++ )
+                        for ( var i = 0; i < cn.Length; i++ )
                         {
-                            cn[ i ] = Coeffs[ i * gcd ];
+                            cn[i] = Coeffs[ i * gcd ];
                         }
 
-                        var pr = new Polynomial( _v, cn );
+                        var pr = new Polynomial( Var, cn );
 
                         var sn = pr.solvepoly();
 
@@ -806,9 +783,9 @@ namespace Tiny.Science.Symbolic
                         {
                             cn = new Algebraic[ sn.Length() * 2 ];
 
-                            for ( int i = 0; i < sn.Length(); i++ )
+                            for ( var i = 0; i < sn.Length(); i++ )
                             {
-                                cn[ 2 * i ] = FunctionVariable.Create( "sqrt", sn[ i ] );
+                                cn[ 2 * i ] = FunctionVariable.Create( "sqrt", sn[i] );
 
                                 cn[ 2 * i + 1 ] = -cn[ 2 * i ];
                             }
@@ -819,30 +796,33 @@ namespace Tiny.Science.Symbolic
 
                             Symbol wx = new Complex( 1.0 / gcd );
 
-                            for ( int i = 0; i < sn.Length(); i++ )
+                            for ( var i = 0; i < sn.Length(); i++ )
                             {
-                                var exp = FunctionVariable.Create( "log", sn[ i ] );
+                                var exp = FunctionVariable.Create( "log", sn[i] );
 
-                                cn[ i ] = FunctionVariable.Create( "exp", exp * wx );
+                                cn[i] = FunctionVariable.Create( "exp", exp * wx );
                             }
                         }
+
                         return new Vector( cn );
                     }
+
                     throw new SymbolicException( "Can't solve expression " + this );
             }
 
-            return Vector.Create( s );
+            return Vector.Create(s);
         }
 
         public virtual Vector roots()
         {
             if ( Coeffs.Length == 2 )
             {
-                return new Vector( new[] { -Coeffs[ 0 ] / Coeffs[ 1 ] } );
+                return new Vector( new[] { -Coeffs[0] / Coeffs[1] } );
             }
-            else if ( Coeffs.Length == 3 )
+
+            if ( Coeffs.Length == 3 )
             {
-                return new Vector( Poly.pqsolve( Coeffs[ 1 ] / Coeffs[ 2 ], Coeffs[ 0 ] / Coeffs[ 2 ] ) );
+                return new Vector( Poly.pqsolve( Coeffs[1] / Coeffs[2], Coeffs[0] / Coeffs[2] ) );
             }
 
             var ar = new double[ Coeffs.Length ];
@@ -851,19 +831,19 @@ namespace Tiny.Science.Symbolic
             var err = new bool[ Coeffs.Length ];
             var komplex = false;
 
-            for ( int i = 0; i < Coeffs.Length; i++ )
+            for ( var n = 0; n < Coeffs.Length; n++ )
             {
-                var cf = Coeffs[ i ];
+                var cf = Coeffs[n];
 
                 if ( !( cf is Symbol ) )
                 {
                     throw new SymbolicException( "Roots requires constant coefficients." );
                 }
 
-                ar[ i ] = ( ( Symbol ) cf ).ToComplex().Re;
-                ai[ i ] = ( ( Symbol ) cf ).ToComplex().Im;
+                ar[n] = ( ( Symbol ) cf ).ToComplex().Re;
+                ai[n] = ( ( Symbol ) cf ).ToComplex().Im;
 
-                if ( ai[ i ] != 0.0 )
+                if ( ai[n] != 0.0 )
                 {
                     komplex = true;
                 }
@@ -877,11 +857,11 @@ namespace Tiny.Science.Symbolic
             {
                 Pzeros.bairstow( ar, ai, err );
 
-                bool ok = true;
+                var ok = true;
 
-                for ( int i = 0; i < err.Length - 1; i++ )
+                for ( var n = 0; n < err.Length - 1; n++ )
                 {
-                    if ( err[ i ] )
+                    if ( err[n] )
                     {
                         ok = false;
                     }
@@ -889,12 +869,12 @@ namespace Tiny.Science.Symbolic
 
                 if ( !ok )
                 {
-                    for ( int i = 0; i < Coeffs.Length; i++ )
+                    for ( var n = 0; n < Coeffs.Length; n++ )
                     {
-                        Algebraic cf = Coeffs[ i ];
+                        var cf = Coeffs[n];
 
-                        ar[ i ] = ( ( Symbol ) cf ).ToComplex().Re;
-                        ai[ i ] = ( ( Symbol ) cf ).ToComplex().Im;
+                        ar[n] = ( ( Symbol ) cf ).ToComplex().Re;
+                        ai[n] = ( ( Symbol ) cf ).ToComplex().Im;
                     }
 
                     Pzeros.aberth( ar, ai, err );
@@ -903,21 +883,21 @@ namespace Tiny.Science.Symbolic
 
             var r = new Algebraic[ Coeffs.Length - 1 ];
 
-            for ( int i = 0; i < r.Length; i++ )
+            for ( var n = 0; n < r.Length; n++ )
             {
-                if ( !err[ i ] )
+                if ( !err[n] )
                 {
-                    var x0 = new Complex( ar[ i ], ai[ i ] );
+                    var x0 = new Complex( ar[n], ai[n] );
 
-                    r[ i ] = x0;
+                    r[n] = x0;
                 }
                 else
                 {
-                    throw new SymbolicException( "Could not calculate root " + i );
+                    throw new SymbolicException( "Could not calculate root " + n );
                 }
             }
 
-            return new Vector( r );
+            return new Vector(r);
         }
     }
 }

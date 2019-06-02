@@ -19,7 +19,7 @@ namespace Tiny.Science.Symbolic
 
             for ( var j = i; j < k; j++ )
             {
-                list.Add( this[ j ] );
+                list.Add( this[j] );
             }
 
             return list;

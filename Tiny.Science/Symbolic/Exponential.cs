@@ -9,17 +9,9 @@ namespace Tiny.Science.Symbolic
         public Variable expvar;
         public Algebraic exp_b;
 
-        public Exponential( Algebraic a, Algebraic c, Variable x, Algebraic b )
+        public Exponential( Algebraic a, Algebraic c, Variable x, Algebraic b ) : base()
         {
-            this.Coeffs = new Algebraic[ 2 ];
-
-            this[ 0 ] = c;
-            this[ 1 ] = a;
-
-            var z = new Algebraic[ 2 ];
-
-            z[ 0 ] = Symbol.ZERO;
-            z[ 1 ] = b;
+            Coeffs = new[] { c, a };            
 
             var la = Session.Store.GetValue( "exp" );
 
@@ -28,16 +20,19 @@ namespace Tiny.Science.Symbolic
                 la = new LambdaEXP();
             }
 
-            this._v = new FunctionVariable( "exp", new Polynomial( x, z ), ( LambdaAlgebraic ) la );
+            var z = new[] { Symbol.ZERO, b };
 
-            this.expvar = x;
-            this.exp_b = b;
+            Var = new FunctionVariable( "exp", new Polynomial( x, z ), ( LambdaAlgebraic ) la );
+
+            expvar = x;
+            exp_b = b;
         }
 
-        public Exponential( Polynomial x ) : base( x._v, x.Coeffs )
+        public Exponential( Polynomial x ) : base( x.Var, x.Coeffs )
         {
-            this.expvar = ( ( Polynomial ) ( ( FunctionVariable ) this._v ).Var )._v;
-            this.exp_b = ( ( Polynomial ) ( ( FunctionVariable ) this._v ).Var )[ 1 ];
+            expvar = ( ( Polynomial ) ( ( FunctionVariable ) Var ).Var ).Var;
+
+            exp_b = ( ( Polynomial ) ( ( FunctionVariable ) Var ).Var )[1];
         }
 
         public static Algebraic poly2exp( Algebraic x )
@@ -46,20 +41,23 @@ namespace Tiny.Science.Symbolic
             {
                 return x;
             }
-            if ( x is Polynomial && ( ( Polynomial ) x ).Degree() == 1 && ( ( Polynomial ) x )._v is FunctionVariable && ( ( FunctionVariable ) ( ( ( Polynomial ) x )._v ) ).Name.Equals( "exp" ) )
+
+            if ( x is Polynomial && ( ( Polynomial ) x ).Degree() == 1 && ( ( Polynomial ) x ).Var is FunctionVariable && ( ( FunctionVariable ) ( ( ( Polynomial ) x ).Var ) ).Name.Equals( "exp" ) )
             {
-                Algebraic arg = ( ( FunctionVariable ) ( ( ( Polynomial ) x )._v ) ).Var;
-                if ( arg is Polynomial && ( ( Polynomial ) arg ).Degree() == 1 && ( ( Polynomial ) arg )[ 0 ].Equals( Symbol.ZERO ) )
+                var arg = ( ( FunctionVariable ) ( ( ( Polynomial ) x ).Var ) ).Var;
+
+                if ( arg is Polynomial && ( ( Polynomial ) arg ).Degree() == 1 && ( ( Polynomial ) arg )[0].Equals( Symbol.ZERO ) )
                 {
                     return new Exponential( ( Polynomial ) x );
                 }
             }
+
             return x;
         }
 
         public override Algebraic Conj()
         {
-            return new Exponential( this[ 1 ].Conj(), this[ 0 ].Conj(), expvar, exp_b.Conj() );
+            return new Exponential( this[1].Conj(), this[0].Conj(), expvar, exp_b.Conj() );
         }
 
         internal static bool containsexp( Algebraic x )
@@ -68,68 +66,86 @@ namespace Tiny.Science.Symbolic
             {
                 return false;
             }
+
             if ( x is Exponential )
             {
                 return true;
             }
+
             if ( x is Polynomial )
             {
-                for ( int i = 0; i < ( ( Polynomial ) x ).Coeffs.Length; i++ )
+                var poly = ( Polynomial ) x;
+
+                for ( var n = 0; n < poly.Coeffs.Length; n++ )
                 {
-                    if ( containsexp( ( ( Polynomial ) x )[ i ] ) )
+                    if ( containsexp( poly[n] ) )
                     {
                         return true;
                     }
                 }
-                if ( ( ( Polynomial ) x )._v is FunctionVariable )
+
+                if ( poly.Var is FunctionVariable )
                 {
-                    return containsexp( ( ( FunctionVariable ) ( ( Polynomial ) x )._v ).Var );
+                    return containsexp( ( ( FunctionVariable ) poly.Var ).Var );
                 }
+
                 return false;
             }
+
             if ( x is Rational )
             {
-                return containsexp( ( ( Rational ) x ).nom ) || containsexp( ( ( Rational ) x ).den );
+                var rat = ( Rational ) x;
+
+                return containsexp( rat.nom ) || containsexp( rat.den );
             }
+
             if ( x is Vector )
             {
-                for ( int i = 0; i < ( ( Vector ) x ).Length(); i++ )
+                var vec = ( Vector ) x;
+
+                for ( var n = 0; n < vec.Length(); n++ )
                 {
-                    if ( containsexp( ( ( Vector ) x )[ i ] ) )
+                    if ( containsexp( vec[n] ) )
                     {
                         return true;
                     }
                 }
+
                 return false;
             }
+
             throw new SymbolicException( "containsexp not suitable for x" );
         }
 
         public override bool Equals( object x )
         {
-            return base.Equals( x );
+            return base.Equals(x);
         }
 
         protected override Algebraic Add( Algebraic x )
         {
             if ( x is Symbol )
             {
-                return new Exponential( this[ 1 ], x + this[ 0 ], expvar, exp_b );
+                return new Exponential( this[1], x + this[0], expvar, exp_b );
             }
 
             if ( x is Exponential )
             {
-                if ( _v.Equals( ( ( Exponential ) x )._v ) )
+                var exp = ( Exponential ) x;
+
+                if ( Var.Equals( exp.Var ) )
                 {
                     return poly2exp( this + x );
                 }
 
-                if ( _v.Smaller( ( ( Exponential ) x )._v ) )
+                if ( Var.Smaller( exp.Var ) )
                 {
                     return x + this;
                 }
-                return new Exponential( this[ 1 ], x + this[ 0 ], expvar, exp_b );
+
+                return new Exponential( this[1], x + this[0], expvar, exp_b );
             }
+
             return poly2exp( this + x );
         }
 
@@ -142,7 +158,7 @@ namespace Tiny.Science.Symbolic
 
             if ( x is Symbol )
             {
-                return new Exponential( this[ 1 ] * x, this[ 0 ] * x, expvar, exp_b );
+                return new Exponential( this[1] * x, this[0] * x, expvar, exp_b );
             }
 
             if ( x is Exponential && expvar.Equals( ( ( Exponential ) x ).expvar ) )
@@ -155,16 +171,16 @@ namespace Tiny.Science.Symbolic
 
                 if ( Equals( nex, Symbol.ZERO ) )
                 {
-                    r = this[ 1 ] * xp[ 1 ];
+                    r = this[1] * xp[1];
                 }
                 else
                 {
-                    r = new Exponential( this[ 1 ] * xp[ 1 ], Symbol.ZERO, expvar, nex );
+                    r = new Exponential( this[1] * xp[1], Symbol.ZERO, expvar, nex );
                 }
 
-                r = r + this[ 0 ] * xp;
+                r = r + this[0] * xp;
 
-                r = r + this * xp[ 0 ];
+                r = r + this * xp[0];
 
                 r = r.Reduce();
 
@@ -176,14 +192,14 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Reduce()
         {
-            if ( Equals( this[ 1 ].Reduce(), Symbol.ZERO ) )
+            if ( Equals( this[1].Reduce(), Symbol.ZERO ) )
             {
-                return this[ 0 ].Reduce();
+                return this[0].Reduce();
             }
 
             if ( Equals( exp_b, Symbol.ZERO ) )
             {
-                return ( this[ 0 ] + this[ 1 ] ).Reduce();
+                return ( this[0] + this[1] ).Reduce();
             }
 
             return this;
@@ -201,7 +217,7 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Map( LambdaAlgebraic f )
         {
-            return poly2exp( base.Map( f ) );
+            return poly2exp( base.Map(f) );
         }
 
         public static Symbol exp_gcd( ArrayList v, Variable x )
@@ -230,9 +246,9 @@ namespace Tiny.Science.Symbolic
         {
             var a = new[] { p };
 
-            a = reduce_exp( a );
+            a = reduce_exp(a);
 
-            return a[ 0 ];
+            return a[0];
         }
 
         public static Algebraic[] reduce_exp( Algebraic[] p )
@@ -240,36 +256,34 @@ namespace Tiny.Science.Symbolic
             var v = new ArrayList();
             var vars = new ArrayList();
 
-            var g = new GetExpVars2( v );
+            var g = new GetExpVars2(v);
 
             foreach ( var t in p )
             {
-                g.SymEval( t );
+                g.SymEval(t);
             }
 
             foreach ( var t in v )
             {
                 var a = ( Algebraic ) t;
 
-                Variable x = null;
+                Variable x;
 
                 if ( a is Polynomial )
                 {
-                    x = ( ( Polynomial ) a )._v;
+                    x = ( ( Polynomial ) a ).Var;
                 }
                 else
                 {
                     continue;
                 }
 
-                if ( vars.Contains( x ) )
+                if ( vars.Contains(x) )
                 {
                     continue;
                 }
-                else
-                {
-                    vars.Add( x );
-                }
+
+                vars.Add(x);
 
                 var gcd = exp_gcd( v, x );
 
@@ -279,7 +293,7 @@ namespace Tiny.Science.Symbolic
 
                     for ( int k = 0; k < p.Length; k++ )
                     {
-                        p[ k ] = sb.SymEval( p[ k ] );
+                        p[k] = sb.SymEval( p[k] );
                     }
                 }
             }
@@ -291,24 +305,28 @@ namespace Tiny.Science.Symbolic
     internal class SubstExp : LambdaAlgebraic
     {
         internal Symbol gcd;
-        internal Variable @var;
+        internal Variable vr;
         internal Variable t = new SimpleVariable( "t_exponential" );
 
-        public SubstExp( Symbol gcd, Variable @var )
+        public SubstExp( Symbol gcd, Variable vr )
         {
             this.gcd = gcd;
-            this.@var = @var;
+            this.vr = vr;
         }
 
-        public SubstExp( Variable @var, Algebraic expr )
+        public SubstExp( Variable vr, Algebraic expr )
         {
-            this.@var = @var;
-            ArrayList v = new ArrayList();
-            ( new GetExpVars2( v ) ).SymEval( expr );
-            this.gcd = Exponential.exp_gcd( v, @var );
+            this.vr = vr;
+
+            var list = new ArrayList();
+
+            ( new GetExpVars2( list ) ).SymEval( expr );
+
+            gcd = Exponential.exp_gcd( list, vr );
+
             if ( gcd.Equals( Symbol.ZERO ) )
             {
-                t = @var;
+                t = vr;
             }
         }
 
@@ -318,42 +336,53 @@ namespace Tiny.Science.Symbolic
             {
                 return expr;
             }
-            if ( !expr.Depends( @var ) )
+
+            if ( !expr.Depends( vr ) )
             {
                 return expr;
             }
+
             if ( expr is Rational )
             {
                 return ratsubst( ( ( Rational ) expr ).nom ) / ratsubst( ( ( Rational ) expr ).den );
             }
 
-            if ( expr is Polynomial && ( ( Polynomial ) expr )._v is FunctionVariable
-                && ( ( FunctionVariable ) ( ( Polynomial ) expr )._v ).Name.Equals( "exp" )
-                && ( ( FunctionVariable ) ( ( Polynomial ) expr )._v ).Var is Polynomial
-                && ( ( Polynomial ) ( ( FunctionVariable ) ( ( Polynomial ) expr )._v ).Var )._v.Equals( @var )
-                && ( ( Polynomial ) ( ( FunctionVariable ) ( ( Polynomial ) expr )._v ).Var ).Degree() == 1
-                && ( ( Polynomial ) ( ( FunctionVariable ) ( ( Polynomial ) expr )._v ).Var )[ 0 ].Equals( Symbol.ZERO ) )
+            if ( expr is Polynomial && ( ( Polynomial ) expr ).Var is FunctionVariable )
             {
-                Polynomial pexpr = ( Polynomial ) expr;
-                int degree = pexpr.Degree();
-                Algebraic[] a = new Algebraic[ degree + 1 ];
-                for ( int i = 0; i <= degree; i++ )
+                var pex = ( Polynomial ) expr;
+                var vex = ( FunctionVariable ) pex.Var;
+
+                if ( vex.Name.Equals( "exp" ) && vex.Var is Polynomial 
+                    && ( ( Polynomial ) vex.Var ).Var.Equals( vr )
+                    && ( ( Polynomial ) vex.Var ).Degree() == 1 
+                    && ( ( Polynomial ) vex.Var )[0].Equals( Symbol.ZERO ) )
                 {
-                    Algebraic cf = pexpr[ i ];
-                    if ( cf.Depends( @var ) )
+                    int degree = pex.Degree();
+
+                    var a = new Algebraic[ degree + 1 ];
+
+                    for ( var n = 0; n <= degree; n++ )
                     {
-                        throw new SymbolicException( "Rationalize failed: 2" );
+                        var cf = pex[n];
+
+                        if ( cf.Depends( vr ) )
+                        {
+                            throw new SymbolicException( "Rationalize failed: 2" );
+                        }
+
+                        a[n] = cf;
                     }
-                    a[ i ] = cf;
+
+                    return new Polynomial( t, a );
                 }
-                return new Polynomial( t, a );
             }
+
             throw new SymbolicException( "Could not rationalize " + expr );
         }
 
         public virtual Algebraic rational( Algebraic expr )
         {
-            return ( ratsubst( expr ) / gcd / new Polynomial( t ) ).Reduce();
+            return ( ratsubst( expr ) / gcd / new Polynomial(t) ).Reduce();
         }
 
         public virtual Algebraic rat_reverse( Algebraic expr )
@@ -362,8 +391,11 @@ namespace Tiny.Science.Symbolic
             {
                 return expr;
             }
-            Symbol gc = gcd;
-            Algebraic s = new Exponential( Symbol.ONE, Symbol.ZERO, @var, Symbol.ONE * gc );
+
+            var gc = gcd;
+
+            Algebraic s = new Exponential( Symbol.ONE, Symbol.ZERO, vr, Symbol.ONE * gc );
+
             return expr.Value( t, s );
         }
 
@@ -376,19 +408,20 @@ namespace Tiny.Science.Symbolic
             if ( f is Polynomial )
             {
                 Polynomial p = ( Polynomial ) f;
-                if ( p._v is FunctionVariable && ( ( FunctionVariable ) p._v ).Name.Equals( "exp" ) && Poly.Degree( ( ( FunctionVariable ) p._v ).Var, @var ) == 1 )
+
+                if ( p.Var is FunctionVariable && ( ( FunctionVariable ) p.Var ).Name.Equals( "exp" ) && Poly.Degree( ( ( FunctionVariable ) p.Var ).Var, vr ) == 1 )
                 {
-                    Algebraic arg = ( ( FunctionVariable ) p._v ).Var;
+                    var arg = ( ( FunctionVariable ) p.Var ).Var;
 
-                    Algebraic[] new_coef = new Algebraic[ 2 ];
+                    var new_coef = new Algebraic[2];
 
-                    new_coef[ 1 ] = gcd.ToComplex();
-                    new_coef[ 0 ] = Symbol.ZERO;
+                    new_coef[1] = gcd.ToComplex();
+                    new_coef[0] = Symbol.ZERO;
 
-                    Algebraic new_arg = new Polynomial( @var, new_coef );
+                    Algebraic new_arg = new Polynomial( vr, new_coef );
 
-                    Algebraic subst = FunctionVariable.Create( "exp", new_arg );
-                    Algebraic exp = Poly.Coefficient( arg, @var, 1 ) / gcd;
+                    var subst = FunctionVariable.Create( "exp", new_arg );
+                    var exp = Poly.Coefficient( arg, vr, 1 ) / gcd;
 
                     if ( !( exp is Symbol ) && !( ( Symbol ) exp ).IsInteger() )
                     {
@@ -397,15 +430,15 @@ namespace Tiny.Science.Symbolic
 
                     subst = subst ^ ( ( Symbol ) exp ).ToInt();
 
-                    subst = subst * FunctionVariable.Create( "exp", Poly.Coefficient( arg, @var, 0 ) );
+                    subst = subst * FunctionVariable.Create( "exp", Poly.Coefficient( arg, vr, 0 ) );
 
-                    int n = p.Coeffs.Length;
+                    var len = p.Coeffs.Length;
 
-                    Algebraic r = SymEval( p[ n - 1 ] );
+                    var r = SymEval( p[ len - 1 ] );
 
-                    for ( int i = n - 2; i >= 0; i-- )
+                    for ( var n = len - 2; n >= 0; n-- )
                     {
-                        r = r * subst + SymEval( p[ i ] );
+                        r = r * subst + SymEval( p[n] );
                     }
 
                     return r;
@@ -432,13 +465,13 @@ namespace Tiny.Science.Symbolic
                     return SymEval( nom / den );
                 }
 
-                if ( den is Exponential && ( ( Polynomial ) den )[ 0 ].Equals( Symbol.ZERO ) && ( ( Polynomial ) den )[ 1 ] is Symbol )
+                if ( den is Exponential && ( ( Polynomial ) den )[0].Equals( Symbol.ZERO ) && ( ( Polynomial ) den )[1] is Symbol )
                 {
                     if ( nom is Symbol || nom is Polynomial )
                     {
                         var denx = ( Exponential ) den;
 
-                        var den_inv = new Exponential( Symbol.ONE / denx[ 1 ], Symbol.ZERO, denx.expvar, -denx.exp_b );
+                        var den_inv = new Exponential( Symbol.ONE / denx[1], Symbol.ZERO, denx.expvar, -denx.exp_b );
 
                         return nom * den_inv;
                     }
@@ -461,12 +494,12 @@ namespace Tiny.Science.Symbolic
 
             var fp = ( Polynomial ) f;
 
-            if ( !( fp._v is FunctionVariable ) || !( ( FunctionVariable ) fp._v ).Name.Equals( "exp" ) )
+            if ( !( fp.Var is FunctionVariable ) || !( ( FunctionVariable ) fp.Var ).Name.Equals( "exp" ) )
             {
                 return f.Map( this );
             }
 
-            var arg = ( ( FunctionVariable ) fp._v ).Var.Reduce();
+            var arg = ( ( FunctionVariable ) fp.Var ).Var.Reduce();
 
             if ( arg is Symbol )
             {
@@ -480,11 +513,11 @@ namespace Tiny.Science.Symbolic
 
             Algebraic z = Symbol.ZERO;
 
-            var a = ( ( Polynomial ) arg )[ 1 ];
+            var a = ( ( Polynomial ) arg )[1];
 
             for ( int i = 1; i < fp.Coeffs.Length; i++ )
             {
-                var b = ( ( Polynomial ) arg )[ 0 ];
+                var b = ( ( Polynomial ) arg )[0];
 
                 Symbol I = new Complex( ( double ) i );
 
@@ -494,20 +527,20 @@ namespace Tiny.Science.Symbolic
                 {
                     var p = ( Polynomial ) b;
 
-                    var f1 = FunctionVariable.Create( "exp", new Polynomial( p._v ) * p[ 1 ] * I );
+                    var f1 = FunctionVariable.Create( "exp", new Polynomial( p.Var ) * p[1] * I );
 
                     f1 = Exponential.poly2exp( f1 );
 
                     ebi = ebi * f1;
 
-                    b = ( ( Polynomial ) b )[ 0 ];
+                    b = ( ( Polynomial ) b )[0];
                 }
 
                 ebi = ebi * FunctionVariable.Create( "exp", b * I );
 
                 var cf = SymEval( fp[ i ] * ebi );
 
-                var f2 = FunctionVariable.Create( "exp", new Polynomial( ( ( Polynomial ) arg )._v ) * a * I );
+                var f2 = FunctionVariable.Create( "exp", new Polynomial( ( ( Polynomial ) arg ).Var ) * a * I );
 
                 f2 = Exponential.poly2exp( f2 );
 
@@ -516,10 +549,10 @@ namespace Tiny.Science.Symbolic
 
             if ( fp.Coeffs.Length > 0 )
             {
-                z = z + SymEval( fp[ 0 ] );
+                z = z + SymEval( fp[0] );
             }
 
-            return Exponential.poly2exp( z );
+            return Exponential.poly2exp(z);
         }
     }
 
@@ -531,7 +564,7 @@ namespace Tiny.Science.Symbolic
         {
             v = new ArrayList();
 
-            ( new GetExpVars( v ) ).SymEval( f );
+            new GetExpVars(v).SymEval(f);
         }
 
         internal override Algebraic SymEval( Algebraic x1 )
@@ -546,27 +579,25 @@ namespace Tiny.Science.Symbolic
                 return x1.Map( this );
             }
 
-            Exponential e = ( Exponential ) x1;
+            var e = ( Exponential ) x1;
 
             int exp = 1;
 
-            Algebraic exp_b = e.exp_b;
+            var exp_b = e.exp_b;
 
-            if ( exp_b is Symbol && ( ( Symbol ) exp_b ) < Symbol.ZERO )
+            if ( exp_b is Symbol && ( Symbol ) exp_b < Symbol.ZERO )
             {
                 exp *= -1;
                 exp_b = -exp_b;
             }
 
-            Variable x = e.expvar;
+            var x = e.expvar;
 
-            for ( int i = 0; i < v.Count; i++ )
+            foreach ( Polynomial y in v )
             {
-                Polynomial y = ( Polynomial ) v[ i ];
-
-                if ( y._v.Equals( x ) )
+                if ( y.Var.Equals(x) )
                 {
-                    Algebraic rat = exp_b / y[ 1 ];
+                    var rat = exp_b / y[1];
 
                     if ( rat is Symbol && !( ( Symbol ) rat ).IsComplex() )
                     {
@@ -575,17 +606,17 @@ namespace Tiny.Science.Symbolic
                         if ( _cfs != 0 && _cfs != 1 )
                         {
                             exp *= _cfs;
-                            exp_b = exp_b / new Complex( ( double ) _cfs );
+                            exp_b = exp_b / new Complex( _cfs );
                         }
                     }
                 }
             }
 
-            var p = ( new Polynomial( x ) ) * exp_b;
+            var p = new Polynomial(x) * exp_b;
 
             p = FunctionVariable.Create( "exp", p ).Pow( exp );
 
-            return p * SymEval( e[ 1 ] ) + SymEval( e[ 0 ] );
+            return p * SymEval( e[1] ) + SymEval( e[0] );
         }
 
         internal virtual int cfs( double x )
@@ -635,8 +666,8 @@ namespace Tiny.Science.Symbolic
                 v.Add( x );
 
                 // TODO: Check this
-                SymEval( ( ( Exponential ) f )[ 1 ] );
-                SymEval( ( ( Exponential ) f )[ 0 ] );
+                SymEval( ( ( Exponential ) f )[1] );
+                SymEval( ( ( Exponential ) f )[0] );
 
                 return Symbol.ONE;
             }
@@ -658,17 +689,21 @@ namespace Tiny.Science.Symbolic
         {
             if ( f is Polynomial )
             {
-                Polynomial p = ( Polynomial ) f;
-                if ( p._v is FunctionVariable && ( ( FunctionVariable ) p._v ).Name.Equals( "exp" ) )
+                var p = ( Polynomial ) f;
+
+                if ( p.Var is FunctionVariable && ( ( FunctionVariable ) p.Var ).Name.Equals( "exp" ) )
                 {
-                    v.Add( ( ( FunctionVariable ) p._v ).Var );
+                    v.Add( ( ( FunctionVariable ) p.Var ).Var );
                 }
-                for ( int i = 0; i < p.Coeffs.Length; i++ )
+
+                for ( var n = 0; n < p.Coeffs.Length; n++ )
                 {
-                    SymEval( p[ i ] );
+                    SymEval( p[n] );
                 }
+
                 return Symbol.ONE;
             }
+
             return f.Map( this );
         }
     }
@@ -679,11 +714,13 @@ namespace Tiny.Science.Symbolic
         {
             if ( f is Exponential )
             {
-                Exponential x = ( Exponential ) f;
-                Algebraic[] cn = new Algebraic[ 2 ];
-                cn[ 0 ] = SymEval( x[ 0 ] );
-                cn[ 1 ] = SymEval( x[ 1 ] );
-                return new Polynomial( x._v, cn );
+                var x = ( Exponential ) f;
+                var cn = new Algebraic[2];
+
+                cn[0] = SymEval( x[0] );
+                cn[1] = SymEval( x[1] );
+
+                return new Polynomial( x.Var, cn );
             }
 
             return f.Map( this );
@@ -700,16 +737,16 @@ namespace Tiny.Science.Symbolic
 
         internal override Symbol PreEval( Symbol x )
         {
-            Complex z = x.ToComplex();
+            var z = x.ToComplex();
 
-            double r = Math.exp( z.Re );
+            var r = Math.exp( z.Re );
 
             if ( z.Im != 0.0 )
             {
                 return new Complex( r * Math.cos( z.Im ), r * Math.sin( z.Im ) );
             }
 
-            return new Complex( r );
+            return new Complex(r);
         }
 
         internal override Algebraic SymEval( Algebraic x )
@@ -721,31 +758,33 @@ namespace Tiny.Science.Symbolic
 
             if ( x is Polynomial
                 && ( ( Polynomial ) x ).Degree() == 1
-                && ( ( Polynomial ) x )[ 0 ].Equals( Symbol.ZERO ) )
+                && ( ( Polynomial ) x )[0].Equals( Symbol.ZERO ) )
             {
-                Polynomial xp = ( Polynomial ) x;
+                var xp = ( Polynomial ) x;
 
-                if ( xp._v is SimpleVariable && ( ( SimpleVariable ) xp._v ).name.Equals( "pi" ) )
+                if ( xp.Var is SimpleVariable && ( ( SimpleVariable ) xp.Var ).name.Equals( "pi" ) )
                 {
-                    Algebraic q = xp[ 1 ] / Symbol.IONE;
+                    var q = xp[1] / Symbol.IONE;
 
                     if ( q is Symbol )
                     {
                         return fzexakt( ( Symbol ) q );
                     }
                 }
-                if ( xp[ 1 ] is Symbol
-                    && xp._v is FunctionVariable
-                    && ( ( FunctionVariable ) xp._v ).Name.Equals( "log" ) )
-                {
-                    if ( ( ( Symbol ) xp[ 1 ] ).IsInteger() )
-                    {
-                        int n = ( ( Symbol ) xp[ 1 ] ).ToInt();
 
-                        return ( ( FunctionVariable ) xp._v ).Var.Pow( n );
+                if ( xp[1] is Symbol
+                    && xp.Var is FunctionVariable
+                    && ( ( FunctionVariable ) xp.Var ).Name.Equals( "log" ) )
+                {
+                    if ( ( ( Symbol ) xp[1] ).IsInteger() )
+                    {
+                        int n = ( ( Symbol ) xp[1] ).ToInt();
+
+                        return ( ( FunctionVariable ) xp.Var ).Var.Pow(n);
                     }
                 }
             }
+
             return null;
         }
 
@@ -759,6 +798,7 @@ namespace Tiny.Science.Symbolic
                 {
                     return r.Conj();
                 }
+
                 return r;
             }
 
@@ -788,48 +828,48 @@ namespace Tiny.Science.Symbolic
                 }
             }
 
-            qs = x * new Complex( 4 );
+            qs = x * new Complex(4);
 
             if ( ( ( Symbol ) qs ).IsInteger() )
             {
-                Algebraic sq2 = FunctionVariable.Create( "sqrt", new Complex( 0.5 ) );
+                var sq2 = FunctionVariable.Create( "sqrt", new Complex( 0.5 ) );
+
                 switch ( ( ( Symbol ) qs ).ToInt() % 8 )
                 {
-                    case 1:
-                        return ( Symbol.ONE + Symbol.IONE ) / Symbol.SQRT2;
-                    case 3:
-                        return ( Symbol.MINUS + Symbol.IONE ) / Symbol.SQRT2;
-                    case 5:
-                        return ( Symbol.MINUS + Symbol.IMINUS ) / Symbol.SQRT2;
-                    case 7:
-                        return ( Symbol.ONE + Symbol.IMINUS ) / Symbol.SQRT2;
+                    case 1: return ( Symbol.ONE + Symbol.IONE ) / Symbol.SQRT2;
+
+                    case 3: return ( Symbol.MINUS + Symbol.IONE ) / Symbol.SQRT2;
+
+                    case 5: return ( Symbol.MINUS + Symbol.IMINUS ) / Symbol.SQRT2;
+
+                    case 7: return ( Symbol.ONE + Symbol.IMINUS ) / Symbol.SQRT2;
                 }
             }
 
-            qs = x * new Complex( 6 );
+            qs = x * new Complex(6);
 
             if ( ( ( Symbol ) qs ).IsInteger() )
             {
                 switch ( ( ( Symbol ) qs ).ToInt() % 12 )
                 {
-                    case 1:
-                        return ( Symbol.SQRT3 + Symbol.IONE ) / Symbol.TWO;
-                    case 2:
-                        return ( Symbol.ONE + Symbol.SQRT3 ) * Symbol.IONE / Symbol.TWO;
-                    case 4:
-                        return ( Symbol.SQRT3 * Symbol.IONE + Symbol.MINUS ) / Symbol.TWO;
-                    case 5:
-                        return ( Symbol.IONE - Symbol.SQRT3 ) / Symbol.TWO;
-                    case 7:
-                        return ( Symbol.IMINUS - Symbol.SQRT3 ) / Symbol.TWO;
-                    case 8:
-                        return ( Symbol.SQRT3 * Symbol.IMINUS - Symbol.ONE ) / Symbol.TWO;
-                    case 10:
-                        return ( Symbol.SQRT3 * Symbol.IMINUS + Symbol.ONE ) / Symbol.TWO;
-                    case 11:
-                        return ( Symbol.IMINUS + Symbol.SQRT3 ) / Symbol.TWO;
+                    case 1: return ( Symbol.SQRT3 + Symbol.IONE ) / Symbol.TWO;
+
+                    case 2: return ( Symbol.ONE + Symbol.SQRT3 ) * Symbol.IONE / Symbol.TWO;
+
+                    case 4: return ( Symbol.SQRT3 * Symbol.IONE + Symbol.MINUS ) / Symbol.TWO;
+
+                    case 5: return ( Symbol.IONE - Symbol.SQRT3 ) / Symbol.TWO;
+
+                    case 7: return ( Symbol.IMINUS - Symbol.SQRT3 ) / Symbol.TWO;
+
+                    case 8: return ( Symbol.SQRT3 * Symbol.IMINUS - Symbol.ONE ) / Symbol.TWO;
+
+                    case 10: return ( Symbol.SQRT3 * Symbol.IMINUS + Symbol.ONE ) / Symbol.TWO;
+
+                    case 11: return ( Symbol.IMINUS + Symbol.SQRT3 ) / Symbol.TWO;
                 }
             }
+
             return null;
         }
     }
@@ -844,11 +884,13 @@ namespace Tiny.Science.Symbolic
 
         internal override Symbol PreEval( Symbol x )
         {
-            Complex z = x.ToComplex();
+            var z = x.ToComplex();
+
             if ( z.Re < 0 || z.Im != 0.0 )
             {
                 return new Complex( Math.log( z.Re * z.Re + z.Im * z.Im ) / 2, Math.atan2( z.Im, z.Re ) );
             }
+
             return new Complex( Math.log( z.Re ) );
         }
 
@@ -858,18 +900,21 @@ namespace Tiny.Science.Symbolic
             {
                 return Symbol.ZERO;
             }
+
             if ( x.Equals( Symbol.MINUS ) )
             {
                 return Symbol.PI * Symbol.IONE;
             }
+
             if ( x is Polynomial
                 && ( ( Polynomial ) x ).Degree() == 1
-                && ( ( Polynomial ) x )[ 0 ].Equals( Symbol.ZERO )
-                && ( ( Polynomial ) x )._v is FunctionVariable
-                && ( ( FunctionVariable ) ( ( Polynomial ) x )._v ).Name.Equals( "exp" ) )
+                && ( ( Polynomial ) x )[0].Equals( Symbol.ZERO )
+                && ( ( Polynomial ) x ).Var is FunctionVariable
+                && ( ( FunctionVariable ) ( ( Polynomial ) x ).Var ).Name.Equals( "exp" ) )
             {
-                return ( ( FunctionVariable ) ( ( Polynomial ) x )._v ).Var + FunctionVariable.Create( "log", ( ( Polynomial ) x )[ 1 ] );
+                return ( ( FunctionVariable ) ( ( Polynomial ) x ).Var ).Var + FunctionVariable.Create( "log", ( ( Polynomial ) x )[1] );
             }
+
             return null;
         }
     }

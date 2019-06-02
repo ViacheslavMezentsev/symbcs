@@ -46,40 +46,40 @@ namespace Tiny.Science.Engine
 
             Operator.OPS = new[]
             {
-                new Operator( "POW", ".**", 1, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "PPR", "++", 1, Flags.RIGHT_LEFT, Flags.UNARY | Flags.LVALUE ),
-                new Operator( "MMR", "--", 1, Flags.RIGHT_LEFT, Flags.UNARY | Flags.LVALUE ),
-                new Operator( "PPL", "++", 1, Flags.LEFT_RIGHT, Flags.UNARY | Flags.LVALUE ),
-                new Operator( "MML", "--", 1, Flags.LEFT_RIGHT, Flags.UNARY | Flags.LVALUE ),
-                new Operator( "ADE", "+=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ),
-                new Operator( "SUE", "-=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ),
-                new Operator( "MUE", "*=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ),
-                new Operator( "DIE", "/=", 10, Flags.RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ),
-                new Operator( "MPW", "**", 1, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "MUL", ".*", 3, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "DIV", "./", 3, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "POW", ".^", 1, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "EQU", "==", 6, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "NEQ", "~=", 6, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "GEQ", ">=", 6, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "LEQ", "<=", 6, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "TRN", ".'", 1, Flags.RIGHT_LEFT, Flags.UNARY ),
-                new Operator( "GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "LES", "<", 6, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "OR", "|", 9, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "NOT", "~", 8, Flags.LEFT_RIGHT, Flags.UNARY ),
-                new Operator( "AND", "&", 7, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "GRE", ">", 6, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "ASS", "=", 10,Flags. RIGHT_LEFT, Flags.BINARY | Flags.LVALUE ),
-                new Operator( "CR1", ":", 5, Flags.LEFT_RIGHT, Flags.BINARY | Flags.TERNARY ),
-                new Operator( "ADD", "+", 4, Flags.LEFT_RIGHT, Flags.UNARY | Flags.BINARY ),
-                new Operator( "SUB", "-", 4, Flags.LEFT_RIGHT, Flags.UNARY | Flags.BINARY ),
-                new Operator( "MMU", "*", 3, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "MDR", "/", 3, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "MDL", "\\", 3, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "MPW", "^", 1, Flags.LEFT_RIGHT, Flags.BINARY ),
-                new Operator( "ADJ", "'", 1, Flags.RIGHT_LEFT, Flags.UNARY )
+                new Operator( "POW", ".**", 1, Flags.LeftRight, Flags.Binary ),
+                new Operator( "PPR", "++", 1, Flags.RightLeft, Flags.Unary | Flags.LValue ),
+                new Operator( "MMR", "--", 1, Flags.RightLeft, Flags.Unary | Flags.LValue ),
+                new Operator( "PPL", "++", 1, Flags.LeftRight, Flags.Unary | Flags.LValue ),
+                new Operator( "MML", "--", 1, Flags.LeftRight, Flags.Unary | Flags.LValue ),
+                new Operator( "ADE", "+=", 10, Flags.RightLeft, Flags.Binary | Flags.LValue ),
+                new Operator( "SUE", "-=", 10, Flags.RightLeft, Flags.Binary | Flags.LValue ),
+                new Operator( "MUE", "*=", 10, Flags.RightLeft, Flags.Binary | Flags.LValue ),
+                new Operator( "DIE", "/=", 10, Flags.RightLeft, Flags.Binary | Flags.LValue ),
+                new Operator( "MPW", "**", 1, Flags.LeftRight, Flags.Binary ),
+                new Operator( "MUL", ".*", 3, Flags.LeftRight, Flags.Binary ),
+                new Operator( "DIV", "./", 3, Flags.LeftRight, Flags.Binary ),
+                new Operator( "POW", ".^", 1, Flags.LeftRight, Flags.Binary ),
+                new Operator( "EQU", "==", 6, Flags.LeftRight, Flags.Binary ),
+                new Operator( "NEQ", "~=", 6, Flags.LeftRight, Flags.Binary ),
+                new Operator( "GEQ", ">=", 6, Flags.LeftRight, Flags.Binary ),
+                new Operator( "LEQ", "<=", 6, Flags.LeftRight, Flags.Binary ),
+                new Operator( "TRN", ".'", 1, Flags.RightLeft, Flags.Unary ),
+                new Operator( "GRE", ">", 6, Flags.LeftRight, Flags.Binary ),
+                new Operator( "LES", "<", 6, Flags.LeftRight, Flags.Binary ),
+                new Operator( "OR", "|", 9, Flags.LeftRight, Flags.Binary ),
+                new Operator( "NOT", "~", 8, Flags.LeftRight, Flags.Unary ),
+                new Operator( "AND", "&", 7, Flags.LeftRight, Flags.Binary ),
+                new Operator( "GRE", ">", 6, Flags.LeftRight, Flags.Binary ),
+                new Operator( "GRE", ">", 6, Flags.LeftRight, Flags.Binary ),
+                new Operator( "ASS", "=", 10,Flags. RightLeft, Flags.Binary | Flags.LValue ),
+                new Operator( "CR1", ":", 5, Flags.LeftRight, Flags.Binary | Flags.Ternary ),
+                new Operator( "ADD", "+", 4, Flags.LeftRight, Flags.Unary | Flags.Binary ),
+                new Operator( "SUB", "-", 4, Flags.LeftRight, Flags.Unary | Flags.Binary ),
+                new Operator( "MMU", "*", 3, Flags.LeftRight, Flags.Binary ),
+                new Operator( "MDR", "/", 3, Flags.LeftRight, Flags.Binary ),
+                new Operator( "MDL", "\\", 3, Flags.LeftRight, Flags.Binary ),
+                new Operator( "MPW", "^", 1, Flags.LeftRight, Flags.Binary ),
+                new Operator( "ADJ", "'", 1, Flags.RightLeft, Flags.Unary )
             };
 
             nonsymbols.AddRange( Operator.OPS.Select( t => t.symbol ).ToList() );
@@ -570,7 +570,7 @@ namespace Tiny.Science.Engine
                         k = n - i - 1;
                     }
 
-                    var op = Operator.get( expr[ k ], k == 0 ? Flags.START : ( k == n - 1 ? Flags.END : Flags.MID ) );
+                    var op = Operator.get( expr[ k ], k == 0 ? Flags.Start : ( k == n - 1 ? Flags.End : Flags.Mid ) );
 
                     if ( op == null || op.precedence != pred )
                     {
@@ -1189,5 +1189,4 @@ namespace Tiny.Science.Engine
             return null;
         }
     }
-
 }

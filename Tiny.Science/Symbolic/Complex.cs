@@ -52,7 +52,7 @@ namespace Tiny.Science.Symbolic
             }
 
             temp = imag / real;
-            temp = real * Math.sqrt( 1.0 + temp * temp );
+            temp = real * Math.Sqrt( 1.0 + temp * temp );
 
             return ( temp );
         }
@@ -68,12 +68,12 @@ namespace Tiny.Science.Symbolic
             if ( Math.abs( Re ) > Math.abs( Im ) )
             {
                 r = Im / Re;
-                r = Math.abs( Re ) * Math.sqrt( 1 + r * r );
+                r = Math.abs( Re ) * Math.Sqrt( 1 + r * r );
             }
             else if ( Im != 0 )
             {
                 r = Re / Im;
-                r = Math.abs( Im ) * Math.sqrt( 1 + r * r );
+                r = Math.abs( Im ) * Math.Sqrt( 1 + r * r );
             }
             else
             {

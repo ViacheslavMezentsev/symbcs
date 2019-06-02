@@ -56,7 +56,7 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Integrate( Variable v )
         {
-            return this == ZERO ? this : new Polynomial( v ) * this;
+            return this == ZERO ? this : new Polynomial(v) * this;
         }
 
         public override Algebraic Value( Variable item, Algebraic x )
@@ -66,7 +66,7 @@ namespace Tiny.Science.Symbolic
 
         public override Algebraic Conj()
         {
-            return RealPart() - ImagPart();
+            return RealPart() + ImagPart() * IMINUS;
         }
 
         public virtual Number ToNumber()
